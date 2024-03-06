@@ -1,0 +1,32 @@
+{
+  "name": "stickerbot",
+  "version": "1.0.3",
+  "type": "module",
+  "description": "A WhatsApp bot for creating stickers and much more.",
+  "nodemonConfig": {
+    "ignore": [
+      "node_modules/",
+      "data/"
+    ]
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js --dev"
+  },
+  "author": "Juniorkrz#7721",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.5.0",
+    "compare-versions": "^6.1.0",
+    "dotenv": "^16.3.1",
+    "moment": "^2.30.1",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.0.2",
+    "qrcode-terminal": "^0.12.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "wa-sticker-formatter": "^4.4.4",
+    "winston": "^3.11.0",
+    "ytdl-core": "^4.11.5"
+  },
+  "license": "MIT"
+}
