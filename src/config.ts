@@ -23,4 +23,5 @@ export const bot = {
   admins: process.env.SB_ADMINS?.replaceAll(' ', '').split(
     ','
   ) || [],
+  prefixes: process.env.SB_PREFIXES ? process.env.SB_PREFIXES.split(';') : ['!']
 }
