@@ -1,23 +1,23 @@
-import { GroupMetadata, WAMessage } from "@whiskeysockets/baileys";
-import { getClient } from "../bot";
-import { addCount } from "./db";
-import { sendMessage } from "../utils/baileysHelper";
-import fs from 'fs';
-import path from 'path';
-import normalizeText from 'normalize-text';
+import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
+import { getClient } from '../bot'
+import { addCount } from './db'
+import { sendMessage } from '../utils/baileysHelper'
+import fs from 'fs'
+import path from 'path'
+import normalizeText from 'normalize-text'
 
 // Diretório onde estão os comandos
-const commandsDir = path.join(__dirname, '../commands');
+const commandsDir = path.join(__dirname, '../commands')
 
 // Carrega dinamicamente os comandos exportados de cada arquivo na pasta 'commands'
-const actions: { [key: string]: any } = {}; // Defina o tipo apropriado para suas ações
+const actions: { [key: string]: any } = {}// Defina o tipo apropriado para suas ações
 
 fs.readdirSync(commandsDir).forEach(file => {
     if (file.endsWith('.ts')) {
-        const commandModule = require(path.join(commandsDir, file));
-        actions[commandModule.command.name.toUpperCase()] = commandModule.command;
+        const commandModule = require(path.join(commandsDir, file))
+        actions[commandModule.command.name.toUpperCase()] = commandModule.command
     }
-});
+})
 
 
 
@@ -41,12 +41,12 @@ export const handleText = async (
 
     if (action) {
         // Add to Statistics
-        addCount(action);
+        addCount(action)
 
         // Run command
-        const command = actions[action.toUpperCase()];
+        const command = actions[action.toUpperCase()]
         if (command) {
-            await command.run(message, alias);
+            await command.run(message, alias)
         }
     }
 }

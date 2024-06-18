@@ -12,7 +12,7 @@ dotenv.config()
 } */
 
 export const baileys = {
-  phoneNumber: process.env.SB_PHONE_NUMBER || "",
+  phoneNumber: process.env.SB_PHONE_NUMBER || '',
   useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true'),
 }
 

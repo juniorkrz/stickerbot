@@ -1,16 +1,16 @@
-import { WAMessage } from "@whiskeysockets/baileys";
+import { WAMessage } from '@whiskeysockets/baileys'
 
 interface LimiterEntry {
-    lastPrompt: number;
-    alerted: boolean;
+    lastPrompt: number
+    alerted: boolean
 }
 
 interface CommandLimiter {
-    [sender: string]: LimiterEntry;
+    [sender: string]: LimiterEntry
 }
 
 export interface CommandRunFunction {
-    (message: WAMessage, alias: string): Promise<any>;
+    (message: WAMessage, alias: string): Promise<any>
 }
 
 export interface StickerBotCommand {
@@ -29,4 +29,4 @@ export interface StickerBotCommand {
     interval: number,
     limiter: CommandLimiter,
     run: CommandRunFunction
-};
+}

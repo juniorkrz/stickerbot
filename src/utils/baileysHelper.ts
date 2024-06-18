@@ -1,8 +1,8 @@
-import { AnyMessageContent, GroupMetadata, GroupMetadataParticipants, MiscMessageGenerationOptions, WAMessage, WA_DEFAULT_EPHEMERAL, areJidsSameUser, downloadMediaMessage, isJidGroup } from "@whiskeysockets/baileys"
+import { AnyMessageContent, GroupMetadata, GroupMetadataParticipants, MiscMessageGenerationOptions, WAMessage, WA_DEFAULT_EPHEMERAL, areJidsSameUser, downloadMediaMessage, isJidGroup } from '@whiskeysockets/baileys'
 import NodeCache from 'node-cache'
-import { getClient } from "../bot"
+import { getClient } from '../bot'
 /* import { Sticker, StickerTypes } from 'wa-sticker-formatter' */
-/* import { stickerMeta } from "../config" */
+/* import { stickerMeta } from '../config' */
 
 const myCache = new NodeCache()
 
@@ -140,17 +140,17 @@ export const react = async (message: WAMessage, emoji: string) => {
             react: {
                 text: emoji,
                 key: message.key
-              }
+            }
         },
         message,
         false
     )
-  }
+}
 
 export const makeSticker = async (message: WAMessage, url = '') => {
     return// TODO
     const data = url ? url
-    : <Buffer>await downloadMediaMessage(message, 'buffer', {})
+        : <Buffer>await downloadMediaMessage(message, 'buffer', {})
 
     /* const sticker = new Sticker(data, stickerMeta)
     const content = { text: await sticker.toMessage() }

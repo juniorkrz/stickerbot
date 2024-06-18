@@ -1,23 +1,23 @@
-import { bot } from '../config';
+import { bot } from '../config'
 import { Database, open } from 'sqlite'
 import sqlite3 from 'sqlite3'
-import { createDirectoryIfNotExists } from '../utils/misc';
+import { createDirectoryIfNotExists } from '../utils/misc'
 
 let db: Database<sqlite3.Database, sqlite3.Statement>
-    ; (async () => {
-        const databaseDir = `/data/${bot.sessionId}/store`
-        await createDirectoryIfNotExists(databaseDir)
-        // open the database
-        db = await open({
-            filename: `${databaseDir}/database.sqlite`,
-            driver: sqlite3.Database
-        })
-        await db.run('CREATE TABLE IF NOT EXISTS Usage (type TEXT, count NUM)')
-        await db.run(
-            'CREATE TABLE IF NOT EXISTS Donors (name TEXT, number TEXT, amount NUM)'
-        )
-        await db.run('CREATE TABLE IF NOT EXISTS Banned (user TEXT)')
-    })()
+(async () => {
+    const databaseDir = `/data/${bot.sessionId}/store`
+    await createDirectoryIfNotExists(databaseDir)
+    // open the database
+    db = await open({
+        filename: `${databaseDir}/database.sqlite`,
+        driver: sqlite3.Database
+    })
+    await db.run('CREATE TABLE IF NOT EXISTS Usage (type TEXT, count NUM)')
+    await db.run(
+        'CREATE TABLE IF NOT EXISTS Donors (name TEXT, number TEXT, amount NUM)'
+    )
+    await db.run('CREATE TABLE IF NOT EXISTS Banned (user TEXT)')
+})()
 
 export const getCount = async (type: string) => {
     return (

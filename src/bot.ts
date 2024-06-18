@@ -1,8 +1,8 @@
 import { Boom } from '@hapi/boom'
 import P from 'pino'
 import express from 'express'
-import makeWASocket, { DisconnectReason, WA_DEFAULT_EPHEMERAL, areJidsSameUser, delay, downloadMediaMessage, isJidGroup, makeInMemoryStore, useMultiFileAuthState } from "@whiskeysockets/baileys"
-import { baileys, bot } from "./config"
+import makeWASocket, { DisconnectReason, WA_DEFAULT_EPHEMERAL, areJidsSameUser, delay, downloadMediaMessage, isJidGroup, makeInMemoryStore, useMultiFileAuthState } from '@whiskeysockets/baileys'
+import { baileys, bot } from './config'
 import { createDirectoryIfNotExists, getLocalVersion } from './utils/misc'
 import moment from 'moment'
 import { imageSync } from 'qr-image'
@@ -26,7 +26,7 @@ const directories = {
 
 Object.values(directories).forEach(dir => {
     createDirectoryIfNotExists(dir)
-});
+})
 
 let client: ReturnType<typeof makeWASocket>
 let store: ReturnType<typeof makeInMemoryStore>
@@ -41,7 +41,7 @@ export const getStore = (): ReturnType<typeof makeInMemoryStore> => {
 }
 
 const connectToWhatsApp = async () => {
-    store = makeInMemoryStore({ logger: P({ level: "silent" }) })
+    store = makeInMemoryStore({ logger: P({ level: 'silent' }) })
     store.readFromFile(`${directories.creds}/baileys.json`)
 
     setInterval(async () => {
@@ -53,13 +53,13 @@ const connectToWhatsApp = async () => {
     client = makeWASocket({
         auth: state,
         printQRInTerminal: baileys.useQrCode,
-        logger: P({ level: "silent" })
+        logger: P({ level: 'silent' })
     })
 
     if (!baileys.useQrCode && !client.authState.creds.registered && baileys.phoneNumber) {
         await delay(2000)
-        const code = await client.requestPairingCode(baileys.phoneNumber.replaceAll(/[^0-9]/g, ''));
-        console.log(`Pairing code: ${code}`);
+        const code = await client.requestPairingCode(baileys.phoneNumber.replaceAll(/[^0-9]/g, ''))
+        console.log(`Pairing code: ${code}`)
     }
 
     store?.bind(client.ev)
@@ -132,8 +132,8 @@ const connectToWhatsApp = async () => {
                 if (body) {
                     handleText(message, body, group, isOwner, isAdmin, amAdmin)
                         .catch((error: Error) => {
-                            console.error('An error occurred while processing the message:', error.message);
-                        });
+                            console.error('An error occurred while processing the message:', error.message)
+                        })
                     continue
                 }
             }
