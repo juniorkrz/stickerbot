@@ -41,11 +41,11 @@ export const spinText = (text: string) => {
 }
 
 export const capitalize = (str: string): string => {
-    if (!str) return str;
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    if (!str) return str
+    return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
 // Check if message has a valid prefix
 export const validPrefix = (body: string) => {
-    return bot.prefixes.includes(body.trim()[0]);
+    return bot.prefixes.includes(body.trim()[0])
 }

@@ -72,17 +72,21 @@ export const getTextAction = async (body: string): Promise<{ alias: string | und
             for (const alias of action.aliases) {
                 const normalizedAlias = normalizeText(alias.toLowerCase())
 
-                // Checks whether the message contains the normalized alias
+                // Checks whether the message starts with the normalized alias
                 if (action.needsPrefix && !validPrefix(body)) {
                     continue
                 }
 
-                if (body.includes(normalizedAlias)) {
-                    return { alias: alias, action: action.name } // Returns the corresponding command and chosen alias
+                // Matches the whole alias exactly
+                const prefix = action.needsPrefix ? body.trim()[0] : ''
+                const messageWithoutPrefix = body.replace(prefix, '').trim()
+
+                if (messageWithoutPrefix === normalizedAlias) {
+                    return { alias: alias, action: action.name }// Returns the corresponding command and chosen alias
                 }
             }
         }
     }
 
-    return { alias: undefined, action: undefined } // Returns undefined if no match is found
+    return { alias: undefined, action: undefined }// Returns undefined if no match is found
 }
