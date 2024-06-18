@@ -28,20 +28,24 @@
   },
   "homepage": "https://github.com/juniorkrz/stickerbot#readme",
   "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.5",
     "compare-versions": "^6.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "moment": "^2.30.1",
     "normalize-text": "^2.5.0",
+    "pino": "^7.11.0",
     "qr-image": "^3.2.0",
-    "sharp": "^0.33.4",
+    "sharp": "0.32.6",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
+    "typescript": "^5.4.5",
     "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/qr-image": "^3.2.9",
-    "@types/sharp": "^0.31.1"
+    "@types/sharp": "0.29.4"
   }
 }
