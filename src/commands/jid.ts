@@ -1,11 +1,12 @@
 import { checkCommand } from '../utils/validators'
 import { StickerBotCommand } from '../types/Command'
-import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
 import path from 'path'
+import { capitalize } from '../utils/misc'
+import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
 
 // Gets the file name without the .ts extension
-const commandName = path.basename(__filename, '.ts')
+const commandName = capitalize(path.basename(__filename, '.ts'))
 
 // Command settings:
 export const command: StickerBotCommand = {
@@ -38,11 +39,8 @@ export const command: StickerBotCommand = {
             return false
         }
 
-        console.log(`Sending ${command.name}`)
-
         // Send chat JID
 
-        const jid = message.key.remoteJid
         return await sendMessage(
             { text: jid ? jid : 'Desconhecido' },
             message,

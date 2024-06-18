@@ -5,8 +5,9 @@ import { bot } from '../config'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendMessage } from '../utils/baileysHelper'
-import { spinText } from '../utils/misc'
+import { capitalize, spinText } from '../utils/misc'
 import path from 'path'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 
 /* Suas importações aqui */
 
@@ -20,7 +21,7 @@ import path from 'path'
 
 
 // Obtém o nome do arquivo sem a extensão .ts
-const commandName = path.basename(__filename, '.ts')
+const commandName = capitalize(path.basename(__filename, '.ts'))
 
 // Configurações do comando:
 export const command: StickerBotCommand = {
@@ -53,8 +54,6 @@ export const command: StickerBotCommand = {
         if (!check) {
             return false
         }
-
-        console.log(`Sending ${command.name}`)
 
         // Sinta-se livre para criar seu comando abaixo.
         // retorne um true se ele foi executado com sucesso, false se algo não saiu como esperado.

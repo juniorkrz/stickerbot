@@ -1,15 +1,14 @@
 import { checkCommand } from '../utils/validators'
 import { StickerBotCommand } from '../types/Command'
-import { WAMessageExtended } from '../types/Message'
-import { getBody, getCachedGroupMetadata, react, sendMessage } from '../utils/baileysHelper'
-import { spinText } from '../utils/misc'
+import { react, sendMessage } from '../utils/baileysHelper'
+import { capitalize, spinText } from '../utils/misc'
 import path from 'path'
 import { getClient } from '../bot'
-import { jidNormalizedUser } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessage, jidNormalizedUser } from '@whiskeysockets/baileys'
 
 
 // Gets the file name without the .ts extension
-const commandName = path.basename(__filename, '.ts')
+const commandName = capitalize(path.basename(__filename, '.ts'))
 
 
 // Command settings:
@@ -43,15 +42,10 @@ export const command: StickerBotCommand = {
             return false
         }
 
-        console.log(`Sending ${command.name}`)
-
-        // Menciona todos os membros do grupo, exceto o bot.
+        // Mentions all group members except the bot.
 
         const client = getClient()
-        const body = getBody(message)
         const alert = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
-        const jid = message.key.remoteJid
-        const group = await getCachedGroupMetadata(jid!)
 
         if(!group) {
             await react(message, '❌')
