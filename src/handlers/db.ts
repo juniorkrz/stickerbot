@@ -5,7 +5,7 @@ import { createDirectoryIfNotExists } from '../utils/misc'
 
 let db: Database<sqlite3.Database, sqlite3.Statement>
 (async () => {
-    const databaseDir = `/data/${bot.sessionId}/store`
+    const databaseDir = `/data/${bot.sessionId}/db`
     await createDirectoryIfNotExists(databaseDir)
     // open the database
     db = await open({
