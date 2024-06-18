@@ -1,15 +1,14 @@
 import dotenv from 'dotenv'
-/* import { IStickerOptions } from 'wa-sticker-formatter' */
+import { IStickerOptions } from 'wa-sticker-formatter'
 
 // Load OS Env Vars
 dotenv.config()
 
 // https://docs.wwebjs.dev/global.html#StickerMetadata
-/* export const stickerMeta: IStickerOptions = {
+export const stickerMeta: IStickerOptions = {
   author: process.env.SB_AUTHOR || '@juniorkrz.dev',
   pack: process.env.SB_PACK || 'StickerBot',
-  quality: +(process.env.SB_STICKER_QUALITY || 70)
-} */
+}
 
 export const baileys = {
   phoneNumber: process.env.SB_PHONE_NUMBER || '',
