@@ -1,11 +1,11 @@
 /* Comando base - StickerBot */
 
-import { checkCommand } from "../utils/validators";
-import { bot } from "../config";
-import { StickerBotCommand } from "../types/Command";
-import { WAMessageExtended } from "../types/Message";
+import { checkCommand } from "../utils/validators"
+import { bot } from "../config"
+import { StickerBotCommand } from "../types/Command"
+import { WAMessageExtended } from "../types/Message"
 import { react, sendMessage } from "../utils/baileysHelper"
-import { spinText } from "../utils/misc";
+import { spinText } from "../utils/misc"
 import path from "path"
 
 /* Suas importações aqui */
@@ -20,7 +20,7 @@ import path from "path"
 
 
 // Obtém o nome do arquivo sem a extensão .ts
-const commandName = path.basename(__filename, '.ts');
+const commandName = path.basename(__filename, ".ts")
 
 // Configurações do comando:
 export const command: StickerBotCommand = {
@@ -37,30 +37,31 @@ export const command: StickerBotCommand = {
     onlyAdmin: false,// O comando deve funcionar apenas para administradores do grupo?
     botMustBeAdmin: false,// O bot precisa ser administrador do grupo para executar o comando?
     interval: 5,// Intervalo para executar esse comando novamente (em segundos)
-    limiter: {}, // Não mecha nisso!
+    limiter: {},// Não mecha nisso!
     run: async (message: WAMessageExtended, alias: string) => {
         // Não modifique
-        const check = await checkCommand(message, command);
+        const check = await checkCommand(message, command)
         if (!check) {
-            return false;
+            return false
         }
 
-        console.log(`Sending ${command.name}`);
+        console.log(`Sending ${command.name}`)
 
         // Sinta-se livre para criar seu comando abaixo.
         // retorne um true se ele foi executado com sucesso, false se algo não saiu como esperado.
 
-        // Como importar o client
+        // Como importar o client:
 
         // Remova o comentário do getClient no inicio desse arquivo
         // Use:
         // const client = getClient()
 
         // Exemplos do Baileys:
+        // https://github.com/WhiskeySockets/Baileys
         // https://github.com/WhiskeySockets/Baileys/blob/master/Example/example.ts
 
 
-        // Responde 'Pong' e reage a mensagem:
+        // Responde "Pong" e reage a mensagem:
 
         const time = <number>message.messageLocalTimestamp
         const ms = Date.now() - time
@@ -68,8 +69,8 @@ export const command: StickerBotCommand = {
         await sendMessage(
             { text: spinText(`Pong! 🏓\n\n⏱ Tempo de resposta do {${bot.name}|bot} foi de *${ms}ms*.`) },
             message,
-        );
+        )
 
-        return await react(message, '🏓');
+        return await react(message, "🏓")
     }
-};
+}
