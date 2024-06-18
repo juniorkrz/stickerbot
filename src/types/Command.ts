@@ -5,7 +5,7 @@ interface LimiterEntry {
     alerted: boolean
 }
 
-interface CommandLimiter {
+export interface CommandLimiter {
     [sender: string]: LimiterEntry
 }
 

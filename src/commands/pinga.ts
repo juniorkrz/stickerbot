@@ -1,7 +1,7 @@
-import { checkCommand } from '../utils/validators'
+import { checkCommand } from '../utils/commandValidator'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { react, sendMessage } from '../utils/baileysHelper'
+import { sendMessage } from '../utils/baileysHelper'
 import { capitalize, spinText } from '../utils/misc'
 import path from 'path'
 import { GroupMetadata } from '@whiskeysockets/baileys'
@@ -35,7 +35,7 @@ export const command: StickerBotCommand = {
         isGroupAdmin: boolean,
         amAdmin: boolean
     ) => {
-        const check = await checkCommand(message, command)
+        const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
         if (!check) {
             return false
         }

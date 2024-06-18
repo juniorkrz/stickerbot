@@ -1,6 +1,6 @@
 /* Comando base - StickerBot */
 
-import { checkCommand } from '../utils/validators'
+import { checkCommand } from '../utils/commandValidator'
 import { bot } from '../config'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
@@ -50,7 +50,7 @@ export const command: StickerBotCommand = {
         amAdmin: boolean// O bot é admin no grupo?
     ) => {
         // Não modifique
-        const check = await checkCommand(message, command)
+        const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
         if (!check) {
             return false
         }
