@@ -2,11 +2,11 @@ import { Boom } from '@hapi/boom'
 import P from 'pino'
 import express from 'express'
 import makeWASocket, { DisconnectReason, WA_DEFAULT_EPHEMERAL, areJidsSameUser, delay, downloadMediaMessage, isJidGroup, makeInMemoryStore, useMultiFileAuthState } from '@whiskeysockets/baileys'
-import { baileys, bot } from './config'
+import { baileys, bot, stickerMeta } from './config'
 import { checkForUpdates, createDirectoryIfNotExists, getLocalVersion } from './utils/misc'
 import moment from 'moment'
 import { imageSync } from 'qr-image'
-import { amAdminOfGroup, getBody, getFullCachedGroupMetadata, groupFetchAllParticipating } from './utils/baileysHelper'
+import { amAdminOfGroup, getBody, getFullCachedGroupMetadata, groupFetchAllParticipating, makeSticker, sendMessage } from './utils/baileysHelper'
 import { WAMessageExtended } from './types/Message'
 import { handleText } from './handlers/text'
 import { drawArt } from './utils/art'
@@ -159,8 +159,7 @@ const connectToWhatsApp = async () => {
                 message.message.viewOnceMessageV2?.message?.imageMessage ||
                 message.message.viewOnceMessageV2?.message?.videoMessage
             ) {
-                //await makeSticker(message)
-                continue
+                await makeSticker(message)
             }
 
             // Handle sticker message
