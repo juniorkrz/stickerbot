@@ -101,7 +101,7 @@ const connectToWhatsApp = async () => {
                 ? message.key.participant
                 : message.key.remoteJid
             // Is the sender the Bot owner?
-            const isOwner = bot.admins.includes(sender.split('@')[0])
+            const isBotAdmin = bot.admins.includes(sender.split('@')[0])
             // Is this a Group?
             const isGroup = isJidGroup(message.key.remoteJid)
             // If so, get the group
@@ -109,7 +109,7 @@ const connectToWhatsApp = async () => {
                 ? await getFullCachedGroupMetadata(message.key.remoteJid)
                 : undefined
             // Is the sender an admin of the group?
-            const isAdmin = group
+            const isGroupAdmin = group
                 ? group.participants
                     .find((p) => areJidsSameUser(p.id, sender))
                     ?.admin?.endsWith('admin') !== undefined
@@ -130,7 +130,7 @@ const connectToWhatsApp = async () => {
                 const body = getBody(message)
 
                 if (body) {
-                    handleText(message, body, group, isOwner, isAdmin, amAdmin)
+                    handleText(message, body, group, isBotAdmin, isGroupAdmin, amAdmin)
                         .catch((error: Error) => {
                             console.error('An error occurred while processing the message:', error.message)
                         })

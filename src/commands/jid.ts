@@ -23,7 +23,16 @@ export const command: StickerBotCommand = {
     botMustBeAdmin: false,
     interval: 0,
     limiter: {},// do not touch this
-    run: async (message: WAMessageExtended, alias: string) => {
+    run: async (
+        jid: string,
+        message: WAMessage,
+        alias: string,
+        body: string,
+        group: GroupMetadata | undefined,
+        isBotAdmin: boolean,
+        isGroupAdmin: boolean,
+        amAdmin: boolean
+    ) => {
         const check = await checkCommand(message, command)
         if (!check) {
             return false

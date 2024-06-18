@@ -38,7 +38,16 @@ export const command: StickerBotCommand = {
     botMustBeAdmin: false,// O bot precisa ser administrador do grupo para executar o comando?
     interval: 5,// Intervalo para executar esse comando novamente (em segundos)
     limiter: {},// Não mecha nisso!
-    run: async (message: WAMessageExtended, alias: string) => {
+    run: async (
+        jid: string,// ID do chat
+        message: WAMessageExtended,// Mensagem (WAMessage)
+        alias: string,// O alias que o usuário escolheu
+        body: string,// Corpo da mensagem
+        group: GroupMetadata | undefined,// Informações do grupo | Será undefined caso não seja um grupo
+        isBotAdmin: boolean,// É um administrador do bot?
+        isGroupAdmin: boolean,// É um administrador do grupo?
+        amAdmin: boolean// O bot é admin no grupo?
+    ) => {
         // Não modifique
         const check = await checkCommand(message, command)
         if (!check) {
