@@ -3,12 +3,16 @@ import P from 'pino'
 import express from 'express'
 import makeWASocket, { DisconnectReason, WA_DEFAULT_EPHEMERAL, areJidsSameUser, delay, downloadMediaMessage, isJidGroup, makeInMemoryStore, useMultiFileAuthState } from '@whiskeysockets/baileys'
 import { baileys, bot } from './config'
-import { createDirectoryIfNotExists, getLocalVersion } from './utils/misc'
+import { checkForUpdates, createDirectoryIfNotExists, getLocalVersion } from './utils/misc'
 import moment from 'moment'
 import { imageSync } from 'qr-image'
 import { amAdminOfGroup, getBody, getFullCachedGroupMetadata, groupFetchAllParticipating } from './utils/baileysHelper'
 import { WAMessageExtended } from './types/Message'
 import { handleText } from './handlers/text'
+import { drawArt } from './utils/art'
+import { getLogger } from './handlers/logger'
+
+const logger = getLogger()
 
 // the moment the bot started
 export const startedAt: moment.Moment = moment()
@@ -31,6 +35,7 @@ Object.values(directories).forEach(dir => {
 let client: ReturnType<typeof makeWASocket>
 let store: ReturnType<typeof makeInMemoryStore>
 let qr: string | undefined
+let pairingCode: string | undefined
 
 export const getClient = (): ReturnType<typeof makeWASocket> => {
     return client
@@ -58,8 +63,8 @@ const connectToWhatsApp = async () => {
 
     if (!baileys.useQrCode && !client.authState.creds.registered && baileys.phoneNumber) {
         await delay(2000)
-        const code = await client.requestPairingCode(baileys.phoneNumber.replaceAll(/[^0-9]/g, ''))
-        console.log(`Pairing code: ${code}`)
+        pairingCode = await client.requestPairingCode(baileys.phoneNumber.replaceAll(/[^0-9]/g, ''))
+        logger.info(`Pairing code: ${pairingCode}`)
     }
 
     store?.bind(client.ev)
@@ -76,7 +81,7 @@ const connectToWhatsApp = async () => {
                 connectToWhatsApp()
             }
         } else if (connection === 'open') {
-            console.log('Opened connection')
+            logger.info('Opened WhatsApp connection')
             //setupBot()
         }
     })
@@ -132,7 +137,7 @@ const connectToWhatsApp = async () => {
                 if (body) {
                     handleText(message, body, group, isBotAdmin, isGroupAdmin, amAdmin)
                         .catch((error: Error) => {
-                            console.error('An error occurred while processing the message:', error.message)
+                            logger.error(`An error occurred while processing the message: ${error.message}`)
                         })
                     continue
                 }
@@ -180,8 +185,6 @@ const connectToWhatsApp = async () => {
     })
 }
 
-connectToWhatsApp()
-
 app.get('/', (_req, res) => {
     res.json({
         status: 'ok',
@@ -195,6 +198,13 @@ app.get('/qr', (_req, res) => {
     else res.end(client.authState.creds.me?.id)
 })
 
+app.get('/code', (_req, res) => {
+    res.json({
+        status: 'ok',
+        pairingCode: pairingCode ? pairingCode : false
+    })
+})
+
 app.get('/api/groups', async (req, res) => {
     res.json({
         status: 'ok',
@@ -203,11 +213,19 @@ app.get('/api/groups', async (req, res) => {
 })
 
 app.post('/api/webhook', (req, res) => {
-    console.log(req.body)
+    logger.info(req.body)
     res.json({
         status: 'ok',
         data: req.body
     })
 })
 
-app.listen(3000, () => console.log('Web Server Started'))
+const stickerBot = async () =>{
+    drawArt()
+    await checkForUpdates()
+    await connectToWhatsApp()
+    const port = 3000
+    app.listen(port, () => logger.info(`Web Server Started on port ${port}`))
+}
+
+stickerBot()
