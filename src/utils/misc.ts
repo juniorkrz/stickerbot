@@ -36,5 +36,7 @@ export const spinText = (text: string) => {
     })
   }
 
-  return text
+// Check if message has a valid prefix
+export const validPrefix = (body: string) => {
+    return bot.prefixes.includes(body.trim()[0]);
 }
