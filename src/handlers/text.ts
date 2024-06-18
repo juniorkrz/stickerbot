@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessage, jidDecode } from '@whiskeysockets/baileys'
 import { getClient } from '../bot'
 import { addCount } from './db'
 import fs from 'fs'
@@ -6,6 +6,9 @@ import path from 'path'
 import normalizeText from 'normalize-text'
 import { hasValidPrefix } from '../utils/misc'
 import { CommandActions } from '../types/Command'
+import { getLogger } from './logger'
+
+const logger = getLogger()
 
 // Directory where the commands are
 const commandsDir = path.join(__dirname, '../commands')
@@ -46,7 +49,10 @@ export const handleText = async (
         // Run command
         const command = actions[action.toUpperCase()]
         if (command) {
-            console.log(`Sending ${command.name}`)
+            const requester = message.pushName || 'Desconhecido'
+            const groupName = group ? group.subject : 'Desconhecido'
+            const identifier = group ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}` : `${requester} (${jidDecode(jid)?.user})`
+            logger.info(`Sending ${command.name} @ ${identifier}`)
             await command.run(
                 jid,
                 message,

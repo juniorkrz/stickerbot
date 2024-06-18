@@ -1,9 +1,11 @@
 import { GroupMetadata, WAMessage, isJidGroup } from '@whiskeysockets/baileys'
-import { getClient } from '../bot'
 import { bot } from '../config'
 import { CommandLimiter, StickerBotCommand } from '../types/Command'
 import { sendMessage } from './baileysHelper'
 import { spinText } from './misc'
+import { getLogger } from '../handlers/logger'
+
+const logger = getLogger()
 
 const getRemainingTime = (sender: string, interval: number, cmdLimiter: CommandLimiter) => {
     const limiter = cmdLimiter[sender] || {}
@@ -13,14 +15,14 @@ const getRemainingTime = (sender: string, interval: number, cmdLimiter: CommandL
         if (lastPrompt + interval < Date.now()) {
             cmdLimiter[sender].lastPrompt = Date.now()
             cmdLimiter[sender].alerted = false
-            return 0
         } else {
             return Math.floor((lastPrompt + interval - Date.now()) / 1000)
         }
     } else {
         cmdLimiter[sender] = { lastPrompt: Date.now(), alerted: false }
-        return 0
     }
+
+    return 0
 }
 
 export const checkCommand = async (
@@ -33,7 +35,6 @@ export const checkCommand = async (
     amAdmin: boolean,
     command: StickerBotCommand
 ) => {
-    const client = getClient()
     const sender = message.key.participant || jid
     const isVip = false// TODO: bot.vips.includes(sender)
     const isDonor = false// TODO: donors.includes(sender)
@@ -41,10 +42,8 @@ export const checkCommand = async (
     const isBotGroup = isGroup ? bot.groups.includes(jid) : false
     const interval = (isBotAdmin || isDonor || isVip) ? (command.interval / 2) : command.interval
 
-    //let reply
-
     // Check remaining time
-    const remainingTime = getRemainingTime(sender, interval * 1000, command.limiter)
+    const remainingTime = interval > 0 ? getRemainingTime(sender, interval * 1000, command.limiter) : 0
     if (remainingTime > 0) {
         if (!command.limiter[sender].alerted && bot.sendWarnings) {
             command.limiter[sender].alerted = true
@@ -97,7 +96,7 @@ export const checkCommand = async (
         }
 
         if (!group) {
-            console.log('[!] Failed to get groupMetadata')
+            logger.warn('Failed to get groupMetadata!')
             return false
         }
 
@@ -139,6 +138,5 @@ export const checkCommand = async (
             return false
         }
     }
-
     return true
 }
