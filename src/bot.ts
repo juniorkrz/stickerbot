@@ -23,7 +23,6 @@ app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
 const directories = {
-    base: `/data/${bot.sessionId}`,
     creds: `/data/${bot.sessionId}/creds`,
     store: `/data/${bot.sessionId}/store`
 }
