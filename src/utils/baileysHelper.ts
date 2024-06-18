@@ -1,10 +1,9 @@
 import { AnyMessageContent, GroupMetadata, GroupMetadataParticipants, MiscMessageGenerationOptions, WAMessage, WA_DEFAULT_EPHEMERAL, areJidsSameUser, downloadMediaMessage, isJidGroup } from '@whiskeysockets/baileys'
-import NodeCache from 'node-cache'
 import { getClient } from '../bot'
+import { getCache } from '../handlers/cache'
+
 /* import { Sticker, StickerTypes } from 'wa-sticker-formatter' */
 /* import { stickerMeta } from '../config' */
-
-const myCache = new NodeCache()
 
 export const groupFetchAllParticipating = async () => {
     const client = getClient()
@@ -26,7 +25,8 @@ export const getCachedGroupMetadata = async (
     const client = getClient()
 
     let metadata: GroupMetadata
-    const data = myCache.get(jid)
+    const cache = getCache()
+    const data = cache.get(jid)
 
     if (data) {
         metadata = data as GroupMetadata
@@ -41,7 +41,7 @@ export const getCachedGroupMetadata = async (
         return undefined
     }
 
-    myCache.set(jid, metadata, 30)
+    cache.set(jid, metadata, 30)
 
     return {
         participants: metadata?.participants,
@@ -58,7 +58,8 @@ export const getFullCachedGroupMetadata = async (
     const client = getClient()
 
     let metadata: GroupMetadata
-    const data = myCache.get(jid)
+    const cache = getCache()
+    const data = cache.get(jid)
 
     if (data) {
         metadata = data as GroupMetadata
@@ -71,7 +72,7 @@ export const getFullCachedGroupMetadata = async (
         return undefined
     }
 
-    myCache.set(jid, metadata, 30)
+    cache.set(jid, metadata, 30)
 
     return metadata
 }
