@@ -1,9 +1,15 @@
 import { AnyMessageContent, GroupMetadata, GroupMetadataParticipants, MiscMessageGenerationOptions, WAMessage, WA_DEFAULT_EPHEMERAL, areJidsSameUser, downloadMediaMessage, isJidGroup } from '@whiskeysockets/baileys'
 import { getClient } from '../bot'
 import { getCache } from '../handlers/cache'
+import { stickerMeta } from '../config'
+import Sticker from 'wa-sticker-formatter'
+import { spinText } from './misc'
+import { getLogger } from '../handlers/logger'
 
 /* import { Sticker, StickerTypes } from 'wa-sticker-formatter' */
 /* import { stickerMeta } from '../config' */
+
+const logger = getLogger()
 
 export const groupFetchAllParticipating = async () => {
     const client = getClient()
@@ -109,6 +115,37 @@ export const getMessage = (message: WAMessage) => {
         message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
 }
 
+
+export const getMediaMessage = (message: WAMessage) => {
+    return (
+        message?.message?.imageMessage ||// image
+        message?.message?.videoMessage ||// video
+        message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
+        message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
+        message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
+        message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
+        message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
+        message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
+}
+
+export const getImageMessage = (message: WAMessage) => {
+    return (
+        message.message?.imageMessage ||
+        message.message?.ephemeralMessage?.message?.imageMessage ||
+        message.message?.viewOnceMessage?.message?.imageMessage ||
+        message.message?.viewOnceMessageV2?.message?.imageMessage
+    )
+}
+
+export const getVideoMessage = (message: WAMessage) => {
+    return (
+        message.message?.videoMessage ||
+        message.message?.ephemeralMessage?.message?.videoMessage ||
+        message.message?.viewOnceMessage?.message?.videoMessage ||
+        message.message?.viewOnceMessageV2?.message?.videoMessage
+    )
+}
+
 export const getMessageExpiration = (message: WAMessage) => {
     return getMessage(message)?.contextInfo?.expiration
 }
@@ -149,11 +186,23 @@ export const react = async (message: WAMessage, emoji: string) => {
 }
 
 export const makeSticker = async (message: WAMessage, url = '') => {
-    return// TODO
+    const isVideo = !url && getVideoMessage(message)
+    if (isVideo){
+        logger.info("Sending Animated Sticker")
+        await react(message, spinText('{⏱|⏳|🕓|⏰}'))
+    } else {
+        logger.info("Sending Static Sticker")
+    }
+
     const data = url ? url
         : <Buffer>await downloadMediaMessage(message, 'buffer', {})
 
-    /* const sticker = new Sticker(data, stickerMeta)
-    const content = { text: await sticker.toMessage() }
-    return await sendMessage(content, message, true) */
+    const sticker = new Sticker(data, stickerMeta)
+    const result = await sendMessage(await sticker.toMessage(), message, true)
+
+    if (isVideo){
+        await react(message, spinText('{🤖|✅}'))
+    }
+
+    return result
 }
