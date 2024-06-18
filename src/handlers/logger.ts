@@ -1,0 +1,34 @@
+import { colors } from '../utils/colors'
+import { bot } from '../config'
+
+class Logger {
+    private readonly prefix: string
+
+    constructor(prefix: string) {
+        this.prefix = prefix
+    }
+
+    private log(message: string, level: string, colorCode: string): void {
+        const timestamp = new Date().toISOString()
+        const msgColor = colorCode == colors.blue ? colors.reset : colorCode
+        console.log(`[${timestamp}] ${colorCode}[${level.toUpperCase()}]${colors.reset} ${this.prefix}: ${msgColor}${message}${colors.reset}`)
+    }
+
+    public info(message: string): void {
+        this.log(message, 'info', colors.blue) // 34m is blue
+    }
+
+    public warn(message: string): void {
+        this.log(message, 'warn', colors.yellow) // 33m is yellow
+    }
+
+    public error(message: string): void {
+        this.log(message, 'error', colors.red) // 31m is red
+    }
+}
+
+const logger = new Logger(bot.name)
+
+export const getLogger = () => {
+    return logger
+}
