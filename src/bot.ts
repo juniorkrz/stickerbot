@@ -223,6 +223,7 @@ const stickerBot = async () => {
     await checkForUpdates()
     printTotalLoadedCommands()
     await connectToWhatsApp()
+    logger.info(`${bot.admins.length} admins loaded!`)
     const port = 3000
     app.listen(port, () => logger.info(`Web Server Started on port ${port}`))
 }
