@@ -6,9 +6,6 @@ import Sticker from 'wa-sticker-formatter'
 import { spinText } from './misc'
 import { getLogger } from '../handlers/logger'
 
-/* import { Sticker, StickerTypes } from 'wa-sticker-formatter' */
-/* import { stickerMeta } from '../config' */
-
 const logger = getLogger()
 
 export const groupFetchAllParticipating = async () => {
@@ -188,10 +185,10 @@ export const react = async (message: WAMessage, emoji: string) => {
 export const makeSticker = async (message: WAMessage, url = '') => {
     const isVideo = !url && getVideoMessage(message)
     if (isVideo){
-        logger.info("Sending Animated Sticker")
+        logger.info('Sending Animated Sticker')
         await react(message, spinText('{⏱|⏳|🕓|⏰}'))
     } else {
-        logger.info("Sending Static Sticker")
+        logger.info('Sending Static Sticker')
     }
 
     const data = url ? url
@@ -205,4 +202,13 @@ export const makeSticker = async (message: WAMessage, url = '') => {
     }
 
     return result
+}
+
+export async function sendAudio(message: WAMessage, path: string) {
+    // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
+    // https://github.com/WhiskeySockets/Baileys/issues/768
+    return await sendMessage(
+        { audio: { url: path }, ptt: true, mimetype: 'audio/mpeg' },
+        message
+    )
 }

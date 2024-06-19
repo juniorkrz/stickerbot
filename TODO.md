@@ -14,7 +14,7 @@
     - [ ] kick
     - [ ] link
     - [ ] menu
-    - [ ] mp3
+    - [x] mp3
     - [x] ping
     - [x] pinga
     - [ ] pix

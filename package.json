@@ -41,7 +41,9 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "typescript": "^5.4.5",
-    "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter"
+    "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter",
+    "ytdl-core": "^4.11.5",
+    "ytsr": "^3.8.4"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

@@ -3,6 +3,8 @@ import { bot } from '../config'
 import fs from 'fs'
 import { compare } from 'compare-versions'
 import { colors } from './colors'
+import os from 'os'
+import path from 'path'
 
 const logger = getLogger()
 
@@ -38,7 +40,7 @@ export const getLocalVersion = () => {
 
 export const getHomepage = () => {
     const info = getPackageInfo()
-    return info ? info.homepage.replace('#readme', '') : "https://github.com/juniorkrz"
+    return info ? info.homepage.replace('#readme', '') : 'https://github.com/juniorkrz'
 }
 
 export const spinText = (text: string) => {
@@ -72,45 +74,54 @@ const getJsonFromUrl = async (url: string) => {
             logger.error(`Failed to fetch ${url}: ${response.statusText}`)
             return false
         }
-        const json = await response.json();
+        const json = await response.json()
         return json
     } catch (error: unknown) {
         if (error instanceof Error) {
-            logger.error(`Error fetching json from url: ${error.message}`);
+            logger.error(`Error fetching json from url: ${error.message}`)
         } else {
-            logger.error('Error fetching json from url: An unexpected error occurred');
+            logger.error('Error fetching json from url: An unexpected error occurred')
         }
     }
-    return false;
-};
+    return false
+}
 
 
-const fetchVersionFromJson = async() => {
+const fetchVersionFromJson = async () => {
     try {
         const versionUrl = 'https://raw.githubusercontent.com/juniorkrz/stickerbot/main/package.json'// don't change it
-        const json = await getJsonFromUrl(versionUrl);
-        return json;
+        const json = await getJsonFromUrl(versionUrl)
+        return json
     } catch (error: unknown) {
         if (error instanceof Error) {
-            logger.error(`Error fetching version from json: ${error.message}`);
+            logger.error(`Error fetching version from json: ${error.message}`)
         } else {
-            logger.error('Error fetching version from json: An unexpected error occurred');
+            logger.error('Error fetching version from json: An unexpected error occurred')
         }
     }
 }
 
 export const checkForUpdates = async () => {
-    logger.info('Checking for updates...');
-    const latestVersion = await fetchVersionFromJson();
-    const localVersion = await getLocalVersion();
-    if(!latestVersion || !localVersion) {
-        logger.error('Failed to check for updates [!]');
+    logger.info('Checking for updates...')
+    const latestVersion = await fetchVersionFromJson()
+    const localVersion = await getLocalVersion()
+    if (!latestVersion || !localVersion) {
+        logger.error('Failed to check for updates [!]')
     } else {
-        const isUpdated = compare(localVersion, latestVersion.version, '=');
+        const isUpdated = compare(localVersion, latestVersion.version, '=')
         const versionMessage = isUpdated ? `You're up to date! ${bot.name} running on v${localVersion}. Have fun! :)` : `New version available! => ${latestVersion.version} - You are running ${bot.name} on v${localVersion}! :(`
-        const messageColor = isUpdated ? colors.green : colors.red;
+        const messageColor = isUpdated ? colors.green : colors.red
         logger.info(`${messageColor}${versionMessage}${colors.reset}`)
     }
 
     logger.info(`Starting ${bot.name} on ${bot.sessionId} session...`)
+}
+
+export const getRandomItemFromArray = <T>(array: T[]): T => {
+    return array[Math.floor(Math.random() * array.length)]
+}
+
+export const getTempFilePath = (filename: string): string => {
+    const tempDir = os.tmpdir()
+    return path.join(tempDir, filename)
 }
