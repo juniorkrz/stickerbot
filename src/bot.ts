@@ -223,7 +223,14 @@ const stickerBot = async () => {
     await checkForUpdates()
     printTotalLoadedCommands()
     await connectToWhatsApp()
-    logger.info(`${bot.admins.length} admins loaded!`)
+
+    const totalAdmins = bot.admins.length
+    if(totalAdmins == 0) {
+        logger.warn(`No admins were loaded!`)
+    } else {
+        logger.info(`${totalAdmins} admin${totalAdmins > 1 ? 's' : ''} loaded!`)
+    }
+
     const port = 3000
     app.listen(port, () => logger.info(`Web Server Started on port ${port}`))
 }
