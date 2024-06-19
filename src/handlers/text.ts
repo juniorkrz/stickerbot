@@ -16,12 +16,18 @@ const commandsDir = path.join(__dirname, '../commands')
 // Dynamically load exported commands from each file in the 'commands' folder
 const actions: CommandActions = {}
 
+let totalCommandsLoaded = 0
 fs.readdirSync(commandsDir).forEach(file => {
     if (file.endsWith('.ts')) {
         const commandModule = require(path.join(commandsDir, file))
         actions[commandModule.command.name.toUpperCase()] = commandModule.command
+        totalCommandsLoaded++
     }
 })
+
+export const printTotalLoadedCommands = () => {
+    logger.info(`${totalCommandsLoaded} commands loaded!`)
+}
 
 export const handleText = async (
     message: WAMessage,

@@ -8,7 +8,7 @@ import moment from 'moment'
 import { imageSync } from 'qr-image'
 import { amAdminOfGroup, getBody, getFullCachedGroupMetadata, groupFetchAllParticipating, makeSticker, sendMessage } from './utils/baileysHelper'
 import { WAMessageExtended } from './types/Message'
-import { handleText } from './handlers/text'
+import { handleText, printTotalLoadedCommands } from './handlers/text'
 import { drawArt } from './utils/art'
 import { getLogger } from './handlers/logger'
 
@@ -218,9 +218,10 @@ app.post('/api/webhook', (req, res) => {
     })
 })
 
-const stickerBot = async () =>{
+const stickerBot = async () => {
     drawArt()
     await checkForUpdates()
+    printTotalLoadedCommands()
     await connectToWhatsApp()
     const port = 3000
     app.listen(port, () => logger.info(`Web Server Started on port ${port}`))
