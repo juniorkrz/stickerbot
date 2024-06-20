@@ -1,14 +1,15 @@
-import { capitalize, getRandomItemFromArray, getTempFilePath, spinText } from '../utils/misc'
-import { downloadYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
-import { react, sendAudio, sendMessage } from '../utils/baileysHelper'
 import { GroupMetadata } from '@whiskeysockets/baileys'
-import { StickerBotCommand } from '../types/Command'
-import { WAMessageExtended } from '../types/Message'
-import { checkCommand } from '../utils/commandValidator'
 import fs from 'fs'
+import path from 'path'
+
 import { getClient } from '../bot'
 import { getLogger } from '../handlers/logger'
-import path from 'path'
+import { downloadYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
+import { StickerBotCommand } from '../types/Command'
+import { WAMessageExtended } from '../types/Message'
+import { react, sendAudio, sendMessage } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize, getRandomItemFromArray, getTempFilePath, spinText } from '../utils/misc'
 
 // Gets the file name without the .ts extension
 const commandName = capitalize(path.basename(__filename, '.ts'))
@@ -52,7 +53,7 @@ export const command: StickerBotCommand = {
       command
     )
     if (!check) {
-      return false
+      return
     }
 
     // Baixa música do YouTube
@@ -63,29 +64,29 @@ export const command: StickerBotCommand = {
 
     if (!url) {
       const reply =
-                '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o nome da música ou o link após o comando!'
+        '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o nome da música ou o link após o comando!'
       await sendMessage({ text: spinText(reply) }, message)
       await react(message, '❌')
-      return false
+      return
     }
 
     if (!isYouTubeUrl(url)) {
       url = await getUrlByQuery(url)
     }
 
-    if (!url) return false
+    if (!url) return
 
     const videoResult = await getYoutubeVideo(url)
     if (!videoResult) {
       const reply = '❌ {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!'
       await sendMessage({ text: spinText(reply) }, message)
       await react(message, '❌')
-      return false
+      return
     }
 
     const audio = videoResult.audio
     if (!audio.approxDurationMs) {
-      return false
+      return
     }
 
     const duration = audio ? parseInt(audio.approxDurationMs!) : 0
@@ -95,7 +96,7 @@ export const command: StickerBotCommand = {
       const reply = '❌ {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!'
       await sendMessage({ text: spinText(reply) }, message)
       await react(message, '❌')
-      return false
+      return
     }
 
     // test duration
@@ -103,7 +104,7 @@ export const command: StickerBotCommand = {
       const reply = '{Foi mal|Ops|Eita|Ei|Opa}, eu {posso|consigo} baixar músicas, não CDs completos {🫤|🫠|🥲|🙃|🤨|🤯|🤗|😑}'
       await sendMessage({ text: spinText(reply) }, message)
       await react(message, '❌')
-      return false
+      return
     }
 
     // send wait message
@@ -145,17 +146,16 @@ export const command: StickerBotCommand = {
     fs.unlink(filePath, (err) => {
       if (err) {
         logger.error(`An error occurred while deleting the file: ${err}`)
-        return false
+        return
       }
       logger.info(`File deleted successfully: ${filePath}`)
     })
 
     if (result?.status == 1) {
-      await react(message, spinText('{🎧|📻|🎶|🎹|🎸|🎤|🎺|🎼|🎙|🎚|🔈|🔊|🎵|🪗}'))
-      return true
+      return await react(message, spinText('{🎧|📻|🎶|🎹|🎸|🎤|🎺|🎼|🎙|🎚|🔈|🔊|🎵|🪗}'))
     } else {
       await react(message, '❌')
     }
-    return false
+    return
   }
 }

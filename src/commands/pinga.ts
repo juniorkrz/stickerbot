@@ -1,10 +1,11 @@
-import { capitalize, spinText } from '../utils/misc'
 import { GroupMetadata } from '@whiskeysockets/baileys'
+import path from 'path'
+
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { checkCommand } from '../utils/commandValidator'
-import path from 'path'
 import { sendMessage } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize, spinText } from '../utils/misc'
 
 // Gets the file name without the .ts extension
 const commandName = capitalize(path.basename(__filename, '.ts'))
@@ -37,7 +38,7 @@ export const command: StickerBotCommand = {
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) {
-      return false
+      return
     }
 
     // Envia uma bebida aleatória

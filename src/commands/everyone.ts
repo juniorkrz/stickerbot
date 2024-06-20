@@ -1,10 +1,11 @@
-import { GroupMetadata, WAMessage, jidNormalizedUser } from '@whiskeysockets/baileys'
-import { capitalize, spinText } from '../utils/misc'
-import { react, sendMessage } from '../utils/baileysHelper'
-import { StickerBotCommand } from '../types/Command'
-import { checkCommand } from '../utils/commandValidator'
-import { getClient } from '../bot'
+import { GroupMetadata, jidNormalizedUser, WAMessage } from '@whiskeysockets/baileys'
 import path from 'path'
+
+import { getClient } from '../bot'
+import { StickerBotCommand } from '../types/Command'
+import { react, sendMessage } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize, spinText } from '../utils/misc'
 
 
 // Gets the file name without the .ts extension
@@ -39,7 +40,7 @@ export const command: StickerBotCommand = {
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) {
-      return false
+      return
     }
 
     // Mentions all group members except the bot.
@@ -47,9 +48,9 @@ export const command: StickerBotCommand = {
     const client = getClient()
     const alert = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
 
-    if(!group) {
+    if (!group) {
       await react(message, '❌')
-      return false
+      return
     }
 
     const botJid = jidNormalizedUser(client.user?.id)
@@ -62,7 +63,10 @@ export const command: StickerBotCommand = {
       '{📢|📣|⚠|❗|‼️} - {Atenção|Olhem isso|Prestem atenção|Ei}!'
 
     return await sendMessage(
-      { text: spinText(phrase), mentions: participants },
+      {
+        text: spinText(phrase),
+        mentions: participants
+      },
       message
     )
   }

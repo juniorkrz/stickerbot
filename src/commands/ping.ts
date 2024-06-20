@@ -52,11 +52,11 @@ export const command: StickerBotCommand = {
     // Não modifique
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) {
-      return false
+      return
     }
 
     // Sinta-se livre para criar seu comando abaixo.
-    // retorne um true se ele foi executado com sucesso, false se algo não saiu como esperado.
+    // Tipo de retorno: Promise<proto.WebMessageInfo | undefined
 
     // Como importar o client:
 
@@ -74,7 +74,7 @@ export const command: StickerBotCommand = {
     const time = <number>message.messageLocalTimestamp
     const ms = Date.now() - time
 
-    // mensagem a ser enviada
+    // Mensagem a ser enviada
     const responseMsg = `Pong! 🏓\n\n⏱ Tempo de resposta do {${bot.name}|bot} foi de *${ms}ms*.`
 
     const quote = true// true: envia a mensagem como resposta | false: envia a mensagem normal

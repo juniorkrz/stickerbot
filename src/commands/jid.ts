@@ -1,9 +1,10 @@
 import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
-import { StickerBotCommand } from '../types/Command'
-import { capitalize } from '../utils/misc'
-import { checkCommand } from '../utils/commandValidator'
 import path from 'path'
+
+import { StickerBotCommand } from '../types/Command'
 import { sendMessage } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize } from '../utils/misc'
 
 // Gets the file name without the .ts extension
 const commandName = capitalize(path.basename(__filename, '.ts'))
@@ -36,7 +37,7 @@ export const command: StickerBotCommand = {
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) {
-      return false
+      return
     }
 
     // Send chat JID
