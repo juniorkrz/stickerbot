@@ -1,8 +1,9 @@
 import fs from 'fs'
-import { getLogger } from './logger'
 import ytdl from 'ytdl-core'
 import ytsr from 'ytsr'
+
 import { ytsrItem } from '../types/Youtube'
+import { getLogger } from './logger'
 
 const logger = getLogger()
 
@@ -47,7 +48,8 @@ export const getYoutubeVideo = async (url: string) => {
     }
 
     const audioFormat = ytdl.chooseFormat(audioFormats, { quality: 'highestaudio' })
-    return { info: info, audio: audioFormat }
+    return { info: info,
+      audio: audioFormat }
   } catch (error) {
     logger.error(`An error occurred while getting information from the video: ${error}`)
     return

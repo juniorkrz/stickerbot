@@ -1,7 +1,8 @@
 import { Database, open } from 'sqlite'
+import sqlite3 from 'sqlite3'
+
 import { bot } from '../config'
 import { createDirectoryIfNotExists } from '../utils/misc'
-import sqlite3 from 'sqlite3'
 
 let db: Database<sqlite3.Database, sqlite3.Statement>;
 (async () => {

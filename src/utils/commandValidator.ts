@@ -1,7 +1,8 @@
-import { CommandLimiter, StickerBotCommand } from '../types/Command'
-import { GroupMetadata, WAMessage, isJidGroup } from '@whiskeysockets/baileys'
+import { GroupMetadata, isJidGroup,WAMessage } from '@whiskeysockets/baileys'
+
 import { bot } from '../config'
 import { getLogger } from '../handlers/logger'
+import { CommandLimiter, StickerBotCommand } from '../types/Command'
 import { sendMessage } from './baileysHelper'
 import { spinText } from './misc'
 
@@ -19,7 +20,8 @@ const getRemainingTime = (sender: string, interval: number, cmdLimiter: CommandL
       return Math.floor((lastPrompt + interval - Date.now()) / 1000)
     }
   } else {
-    cmdLimiter[sender] = { lastPrompt: Date.now(), alerted: false }
+    cmdLimiter[sender] = { lastPrompt: Date.now(),
+      alerted: false }
   }
 
   return 0

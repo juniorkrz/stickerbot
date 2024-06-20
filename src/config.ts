@@ -1,5 +1,5 @@
-import { IStickerOptions } from 'wa-sticker-formatter'
 import dotenv from 'dotenv'
+import { IStickerOptions } from 'wa-sticker-formatter'
 
 // Load OS Env Vars
 dotenv.config()

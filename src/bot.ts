@@ -1,3 +1,23 @@
+import { Boom } from '@hapi/boom'
+import makeWASocket, {
+  areJidsSameUser,
+  delay,
+  DisconnectReason,
+  downloadMediaMessage,
+  isJidGroup,
+  makeInMemoryStore,
+  useMultiFileAuthState
+} from '@whiskeysockets/baileys'
+import express from 'express'
+import moment from 'moment'
+import Pino from 'pino'
+import { imageSync } from 'qr-image'
+
+import { baileys, bot } from './config'
+import { getLogger } from './handlers/logger'
+import { handleText, printTotalLoadedCommands } from './handlers/text'
+import { WAMessageExtended } from './types/Message'
+import { drawArt } from './utils/art'
 import {
   amAdminOfGroup,
   extractPhrasesFromCaption,
@@ -10,30 +30,11 @@ import {
   makeSticker,
   sendMessage
 } from './utils/baileysHelper'
-import { baileys, bot } from './config'
 import {
   checkForUpdates,
   createDirectoryIfNotExists,
   getLocalVersion
 } from './utils/misc'
-import { handleText, printTotalLoadedCommands } from './handlers/text'
-import makeWASocket, {
-  DisconnectReason,
-  areJidsSameUser,
-  delay,
-  downloadMediaMessage,
-  isJidGroup,
-  makeInMemoryStore,
-  useMultiFileAuthState
-} from '@whiskeysockets/baileys'
-import { Boom } from '@hapi/boom'
-import P from 'pino'
-import { WAMessageExtended } from './types/Message'
-import { drawArt } from './utils/art'
-import express from 'express'
-import { getLogger } from './handlers/logger'
-import { imageSync } from 'qr-image'
-import moment from 'moment'
 
 const logger = getLogger()
 
@@ -68,7 +69,7 @@ export const getStore = (): ReturnType<typeof makeInMemoryStore> => {
 }
 
 const connectToWhatsApp = async () => {
-  store = makeInMemoryStore({ logger: P({ level: 'silent' }) })
+  store = makeInMemoryStore({ logger: Pino({ level: 'silent' }) as any })
   store.readFromFile(`${directories.creds}/baileys.json`)
 
   setInterval(async () => {
@@ -80,7 +81,7 @@ const connectToWhatsApp = async () => {
   client = makeWASocket({
     auth: state,
     printQRInTerminal: baileys.useQrCode,
-    logger: P({ level: 'silent' })
+    logger: Pino({ level: 'silent' }) as any
   })
 
   if (!baileys.useQrCode && !client.authState.creds.registered && baileys.phoneNumber) {

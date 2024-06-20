@@ -1,5 +1,5 @@
-import { getHomepage, getLocalVersion } from './misc'
 import { colors } from './colors'
+import { getHomepage, getLocalVersion } from './misc'
 
 const stickerBotArt: string = `
 ███████╗████████╗██╗ ██████╗██╗  ██╗███████╗██████╗ ██████╗  ██████╗ ████████╗
@@ -10,7 +10,16 @@ const stickerBotArt: string = `
 ╚══════╝   ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝  ╚═════╝    ╚═╝   
 `
 
-const drawText = (text: string, alignment: 'left' | 'center' | 'right' = 'left', options: { padLeft?: number, padRight?: number, marginTop?: number, marginBottom?: number } = {}) => {
+const drawText = (
+  text: string,
+  alignment: 'left' | 'center' | 'right' = 'left',
+  options: {
+    padLeft?: number,
+    padRight?: number,
+    marginTop?: number,
+    marginBottom?: number
+  } = {}
+) => {
   // Opções padrão
   const {
     padLeft = 0,
@@ -76,6 +85,6 @@ export const drawArt = () => {
   drawText(`${getHomepage()}`, 'center')
   drawText(`v${getLocalVersion()}`, 'center')
   drawLine()
-  drawText('Developed by Krz', 'right', {padRight: 5})
+  drawText('Developed by Krz', 'right', { padRight: 5 })
 }
 

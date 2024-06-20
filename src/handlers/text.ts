@@ -1,13 +1,14 @@
 import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
-import { CommandActions } from '../types/Command'
-import { addCount } from './db'
 import fs from 'fs'
-import { getClient } from '../bot'
-import { getLogger } from './logger'
-import { hasValidPrefix } from '../utils/misc'
-import { logCommandExecution } from '../utils/baileysHelper'
 import { normalizeText } from 'normalize-text'
 import path from 'path'
+
+import { getClient } from '../bot'
+import { CommandActions } from '../types/Command'
+import { logCommandExecution } from '../utils/baileysHelper'
+import { hasValidPrefix } from '../utils/misc'
+import { addCount } from './db'
+import { getLogger } from './logger'
 
 const logger = getLogger()
 
@@ -73,7 +74,9 @@ export const handleText = async (
 }
 
 // Attempt to match a message body with an action
-export const getTextAction = async (body: string): Promise<{ alias: string | undefined, action: string | undefined }> => {
+export const getTextAction = async (
+  body: string
+): Promise<{ alias: string | undefined, action: string | undefined }> => {
   if (body) {
     body = normalizeText(body.toLowerCase()).trim()
 
@@ -97,11 +100,17 @@ export const getTextAction = async (body: string): Promise<{ alias: string | und
 
         // Checks if the message starts with the alias followed by a space or end of string
         if (messageWithoutPrefix === normalizedAlias || messageWithoutPrefix.startsWith(`${normalizedAlias} `)) {
-          return { alias: alias, action: action.name }// Returns the corresponding command and chosen alias
+          return {
+            alias: alias,
+            action: action.name
+          }// Returns the corresponding command and chosen alias
         }
       }
     }
   }
 
-  return { alias: undefined, action: undefined }// Returns undefined if no match is found
+  return {
+    alias: undefined,
+    action: undefined
+  }// Returns undefined if no match is found
 }

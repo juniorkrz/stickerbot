@@ -1,30 +1,31 @@
 import {
   AnyMessageContent,
-  GroupMetadata,
-  GroupMetadataParticipants,
-  MiscMessageGenerationOptions,
-  WAMessage,
-  WA_DEFAULT_EPHEMERAL,
   areJidsSameUser,
   downloadMediaMessage,
+  GroupMetadata,
+  GroupMetadataParticipants,
   isJidGroup,
-  jidDecode
+  jidDecode,
+  MiscMessageGenerationOptions,
+  WA_DEFAULT_EPHEMERAL,
+  WAMessage
 } from '@whiskeysockets/baileys'
 import { Sticker } from 'wa-sticker-formatter'
-import { addTextOnImage } from '../handlers/image'
-import { getCache } from '../handlers/cache'
+
 import { getClient } from '../bot'
+import { stickerMeta } from '../config'
+import { getCache } from '../handlers/cache'
+import { addTextOnImage } from '../handlers/image'
 import { getLogger } from '../handlers/logger'
 import { spinText } from './misc'
-import { stickerMeta } from '../config'
 
 const logger = getLogger()
 
 export const groupFetchAllParticipatingJids = async (): Promise<{
-    [_: string]: string;
+  [_: string]: string;
 }> => {
   const client = getClient()
-  const result: {[_: string]: string;} = {}
+  const result: { [_: string]: string; } = {}
   const groups = await client.groupFetchAllParticipating()
   for (const group in groups) {
     result[group] = groups[group].subject
@@ -105,10 +106,10 @@ export const amAdminOfGroup = (group: GroupMetadata | undefined) => {
 export const getBody = (message: WAMessage) => {
   return (
     message.message?.extendedTextMessage?.text ||
-        message.message?.conversation ||
-        message.message?.ephemeralMessage?.message?.extendedTextMessage?.text ||
-        message.message?.ephemeralMessage?.message?.conversation ||
-        ''
+    message.message?.conversation ||
+    message.message?.ephemeralMessage?.message?.extendedTextMessage?.text ||
+    message.message?.ephemeralMessage?.message?.conversation ||
+    ''
   )
 }
 
@@ -119,45 +120,45 @@ export const getCaption = (message: WAMessage) => {
 export const getMessage = (message: WAMessage) => {
   return (
     message?.message?.extendedTextMessage ||// text
-        message?.message?.ephemeralMessage?.message?.extendedTextMessage ||// ephemeral text
-        message?.message?.imageMessage ||// image
-        message?.message?.videoMessage ||// video
-        message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
-        message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
-        message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
-        message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
-        message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-        message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
+    message?.message?.ephemeralMessage?.message?.extendedTextMessage ||// ephemeral text
+    message?.message?.imageMessage ||// image
+    message?.message?.videoMessage ||// video
+    message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
+    message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
+    message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
+    message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
+    message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
+    message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
 }
 
 
 export const getMediaMessage = (message: WAMessage) => {
   return (
     message?.message?.imageMessage ||// image
-        message?.message?.videoMessage ||// video
-        message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
-        message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
-        message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
-        message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
-        message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-        message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
+    message?.message?.videoMessage ||// video
+    message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
+    message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
+    message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
+    message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
+    message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
+    message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
 }
 
 export const getImageMessage = (message: WAMessage) => {
   return (
     message.message?.imageMessage ||
-        message.message?.ephemeralMessage?.message?.imageMessage ||
-        message.message?.viewOnceMessage?.message?.imageMessage ||
-        message.message?.viewOnceMessageV2?.message?.imageMessage
+    message.message?.ephemeralMessage?.message?.imageMessage ||
+    message.message?.viewOnceMessage?.message?.imageMessage ||
+    message.message?.viewOnceMessageV2?.message?.imageMessage
   )
 }
 
 export const getVideoMessage = (message: WAMessage) => {
   return (
     message.message?.videoMessage ||
-        message.message?.ephemeralMessage?.message?.videoMessage ||
-        message.message?.viewOnceMessage?.message?.videoMessage ||
-        message.message?.viewOnceMessageV2?.message?.videoMessage
+    message.message?.ephemeralMessage?.message?.videoMessage ||
+    message.message?.viewOnceMessage?.message?.videoMessage ||
+    message.message?.viewOnceMessageV2?.message?.videoMessage
   )
 }
 
@@ -242,12 +243,21 @@ export async function sendAudio(message: WAMessage, path: string) {
   // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
   // https://github.com/WhiskeySockets/Baileys/issues/768
   return await sendMessage(
-    { audio: { url: path }, ptt: true, mimetype: 'audio/mpeg' },
+    {
+      audio: { url: path },
+      ptt: true,
+      mimetype: 'audio/mpeg'
+    },
     message
   )
 }
 
-export const logCommandExecution = (message: WAMessage, jid: string, group: GroupMetadata | undefined, commandName: string) => {
+export const logCommandExecution = (
+  message: WAMessage,
+  jid: string,
+  group: GroupMetadata | undefined,
+  commandName: string
+) => {
   const requester = message.pushName || 'Desconhecido'
   const groupName = group ? group.subject : 'Desconhecido'
   const identifier = group ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
