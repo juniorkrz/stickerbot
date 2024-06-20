@@ -43,8 +43,11 @@ export const command: StickerBotCommand = {
 
     // Envia uma bebida aleatória
 
+    // TODO: Load texts from JSON
     const pingas = {
-      'text': '{Vamos lá!|Um brinde!|Alegria!|Bebida gelada!|Pinga na veia!|Chama a cerveja!|Hora do happy hour!|Cheers!|Opa!|Bora!}',
+      'text': '{Vamos lá!|Um brinde!|Alegria!|Bebida gelada!|Pinga na veia!|' +
+        'Chama a cerveja!|Hora do happy hour!|Cheers!|Opa!|Bora!}',
+
       'emojis': '{🍺|🥃|🍻|🧊|🥃}'
     }
 

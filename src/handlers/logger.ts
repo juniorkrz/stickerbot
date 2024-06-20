@@ -11,7 +11,8 @@ class Logger {
   private log(message: string, level: string, colorCode: string): void {
     const timestamp = new Date().toISOString()
     const msgColor = colorCode == colors.blue ? colors.reset : colorCode
-    console.log(`[${timestamp}] ${colorCode}[${level.toUpperCase()}]${colors.reset} ${this.prefix}: ${msgColor}${message}${colors.reset}`)
+    console.log(`[${timestamp}] ${colorCode}[${level.toUpperCase()}]` +
+      `${colors.reset} ${this.prefix}: ${msgColor}${message}${colors.reset}`)
   }
 
   public info(message: string): void {

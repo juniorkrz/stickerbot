@@ -37,21 +37,24 @@ const drawText = (
     lines.forEach((line, index) => {
       const padding = Math.max(0, Math.floor((terminalWidth - line.length) / 2))
       const marginRight = index === lines.length - 1 ? marginBottom : marginTop
-      alignedText += `${colors.purpleLight}${' '.repeat(padLeft)}${' '.repeat(padding)}${line}${' '.repeat(padding)}${' '.repeat(padRight)}${' '.repeat(marginRight)}${colors.reset}\n`
+      alignedText += `${colors.purpleLight}${' '.repeat(padLeft)}${' '.repeat(padding)}${line}` +
+          `${' '.repeat(padding)}${' '.repeat(padRight)}${' '.repeat(marginRight)}${colors.reset}\n`
     })
     break
   case 'right':
     lines.forEach((line, index) => {
       const padding = Math.max(0, terminalWidth - line.length - padLeft - padRight)
       const marginRight = index === lines.length - 1 ? marginBottom : marginTop
-      alignedText += `${colors.purpleLight}${' '.repeat(padLeft)}${' '.repeat(padding)}${line}${' '.repeat(padRight)}${' '.repeat(marginRight)}${colors.reset}\n`
+      alignedText += `${colors.purpleLight}${' '.repeat(padLeft)}${' '.repeat(padding)}${line}` +
+          `${' '.repeat(padRight)}${' '.repeat(marginRight)}${colors.reset}\n`
     })
     break
   case 'left':
   default:
     lines.forEach((line, index) => {
       const marginRight = index === lines.length - 1 ? marginBottom : marginTop
-      alignedText += `${colors.purpleLight}${' '.repeat(padLeft)}${line}${' '.repeat(padRight)}${' '.repeat(marginRight)}${colors.reset}\n`
+      alignedText += `${colors.purpleLight}${' '.repeat(padLeft)}${line}` +
+          `${' '.repeat(padRight)}${' '.repeat(marginRight)}${colors.reset}\n`
     })
     break
   }

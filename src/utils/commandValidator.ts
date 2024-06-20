@@ -51,9 +51,12 @@ export const checkCommand = async (
   if (remainingTime > 0) {
     if (!command.limiter[sender].alerted && bot.sendWarnings) {
       command.limiter[sender].alerted = true
-      const reply = `⚠ {Aguarde|Espere|Não seja tão rápido, {espere|aguarde}} *{seconds}* segundo{plural} antes de {executar|enviar} comando *${alias}* {novamente|mais uma vez}! {⏱|⏳|🕓|⏰}`
-        .replaceAll('seconds', remainingTime.toString())
-        .replaceAll('plural', remainingTime > 1 ? 's' : '')
+      // TODO: Load texts from JSON
+      const reply = '⚠ {Aguarde|Espere|Não seja tão rápido,' +
+        '{espere|aguarde}} *{seconds}* segundo{plural} antes de' +
+        `{executar|enviar} comando *${alias}* {novamente|mais uma vez}! {⏱|⏳|🕓|⏰}`
+          .replaceAll('seconds', remainingTime.toString())
+          .replaceAll('plural', remainingTime > 1 ? 's' : '')
       await sendMessage(
         { text: spintax(reply) },
         message
