@@ -1,6 +1,6 @@
-import ytdl from "ytdl-core"
+import ytdl from 'ytdl-core'
 
-export interface VideoSearch {
+export interface ytsrItem {
   url: string
 }
 
