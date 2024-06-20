@@ -2,7 +2,7 @@
 
 - [ ] Adicionar thumbnail nas imagens do sendStickerAsImage
 - [ ] Renomear spinText para spintax
-- [ ] Add Dependabot
+- [x] Add Dependabot
 - [x] Add ESLint
 - [ ] Limpeza automática de histórico/conversas
 - [x] Implementar makeSticker
