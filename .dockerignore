@@ -1,0 +1,5 @@
+#Ignoring all the markdown files
+*.md
+
+#Ignoring dot files and folders
+.*
