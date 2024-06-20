@@ -8,100 +8,101 @@ import {
   jidDecode,
   MiscMessageGenerationOptions,
   WA_DEFAULT_EPHEMERAL,
-  WAMessage
-} from '@whiskeysockets/baileys'
-import { Sticker } from 'wa-sticker-formatter'
+  WAMessage,
+} from "@whiskeysockets/baileys";
+import { Sticker } from "wa-sticker-formatter";
 
-import { getClient } from '../bot'
-import { stickerMeta } from '../config'
-import { getCache } from '../handlers/cache'
-import { addTextOnImage } from '../handlers/image'
-import { getLogger } from '../handlers/logger'
-import { spintax } from './misc'
+import { getClient } from "../bot";
+import { stickerMeta } from "../config";
+import { getCache } from "../handlers/cache";
+import { addTextOnImage } from "../handlers/image";
+import { getLogger } from "../handlers/logger";
+import { spintax } from "./misc";
 
-const logger = getLogger()
+const logger = getLogger();
 
 export const groupFetchAllParticipatingJids = async (): Promise<{
   [_: string]: string;
 }> => {
-  const client = getClient()
-  const result: { [_: string]: string; } = {}
-  const groups = await client.groupFetchAllParticipating()
+  const client = getClient();
+  const result: { [_: string]: string } = {};
+  const groups = await client.groupFetchAllParticipating();
   for (const group in groups) {
-    result[group] = groups[group].subject
+    result[group] = groups[group].subject;
   }
-  return result
-}
+  return result;
+};
 
 export const getCachedGroupMetadata = async (
-  jid: string,
+  jid: string
 ): Promise<GroupMetadataParticipants | undefined> => {
   if (!isJidGroup(jid)) {
-    return undefined
+    return undefined;
   }
 
-  const client = getClient()
+  const client = getClient();
 
-  let metadata: GroupMetadata
-  const cache = getCache()
-  const data = cache.get(jid)
+  let metadata: GroupMetadata;
+  const cache = getCache();
+  const data = cache.get(jid);
 
   if (data) {
-    metadata = data as GroupMetadata
+    metadata = data as GroupMetadata;
     return {
       participants: metadata.participants,
-    } as GroupMetadataParticipants
+    } as GroupMetadataParticipants;
   }
 
   try {
-    metadata = await client.groupMetadata(jid)
+    metadata = await client.groupMetadata(jid);
   } catch {
-    return undefined
+    return undefined;
   }
 
-  cache.set(jid, metadata, 30)
+  cache.set(jid, metadata, 30);
 
   return {
     participants: metadata?.participants,
-  } as GroupMetadataParticipants
-}
+  } as GroupMetadataParticipants;
+};
 
 export const getFullCachedGroupMetadata = async (
-  jid: string,
+  jid: string
 ): Promise<GroupMetadata | undefined> => {
   if (!isJidGroup(jid)) {
-    return undefined
+    return undefined;
   }
 
-  const client = getClient()
+  const client = getClient();
 
-  let metadata: GroupMetadata
-  const cache = getCache()
-  const data = cache.get(jid)
+  let metadata: GroupMetadata;
+  const cache = getCache();
+  const data = cache.get(jid);
 
   if (data) {
-    metadata = data as GroupMetadata
-    return metadata
+    metadata = data as GroupMetadata;
+    return metadata;
   }
 
   try {
-    metadata = await client.groupMetadata(jid)
+    metadata = await client.groupMetadata(jid);
   } catch {
-    return undefined
+    return undefined;
   }
 
-  cache.set(jid, metadata, 30)
+  cache.set(jid, metadata, 30);
 
-  return metadata
-}
+  return metadata;
+};
 
 export const amAdminOfGroup = (group: GroupMetadata | undefined) => {
-  const client = getClient()
-  return group ? group.participants
-    .find((p) => areJidsSameUser(p.id, client.user?.id))
-    ?.admin?.endsWith('admin') !== undefined
-    : false
-}
+  const client = getClient();
+  return group
+    ? group.participants
+        .find((p) => areJidsSameUser(p.id, client.user?.id))
+        ?.admin?.endsWith("admin") !== undefined
+    : false;
+};
 
 export const getBody = (message: WAMessage) => {
   return (
@@ -109,40 +110,41 @@ export const getBody = (message: WAMessage) => {
     message.message?.conversation ||
     message.message?.ephemeralMessage?.message?.extendedTextMessage?.text ||
     message.message?.ephemeralMessage?.message?.conversation ||
-    ''
-  )
-}
+    ""
+  );
+};
 
 export const getCaption = (message: WAMessage) => {
-  return getMediaMessage(message)?.caption
-}
+  return getMediaMessage(message)?.caption;
+};
 
 export const getMessage = (message: WAMessage) => {
   return (
-    message?.message?.extendedTextMessage ||// text
-    message?.message?.ephemeralMessage?.message?.extendedTextMessage ||// ephemeral text
-    message?.message?.imageMessage ||// image
-    message?.message?.videoMessage ||// video
-    message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
-    message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
-    message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
-    message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
-    message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-    message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
-}
-
+    message?.message?.extendedTextMessage || // text
+    message?.message?.ephemeralMessage?.message?.extendedTextMessage || // ephemeral text
+    message?.message?.imageMessage || // image
+    message?.message?.videoMessage || // video
+    message?.message?.ephemeralMessage?.message?.imageMessage || // ephemeral image
+    message?.message?.ephemeralMessage?.message?.videoMessage || // ephemeral video
+    message?.message?.viewOnceMessage?.message?.imageMessage || // viewonce image
+    message?.message?.viewOnceMessage?.message?.videoMessage || // viewonce video
+    message?.message?.viewOnceMessageV2?.message?.imageMessage || // viewonce v2 image
+    message?.message?.viewOnceMessageV2?.message?.videoMessage
+  ); // viewonce v2 video
+};
 
 export const getMediaMessage = (message: WAMessage) => {
   return (
-    message?.message?.imageMessage ||// image
-    message?.message?.videoMessage ||// video
-    message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
-    message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
-    message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
-    message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
-    message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-    message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
-}
+    message?.message?.imageMessage || // image
+    message?.message?.videoMessage || // video
+    message?.message?.ephemeralMessage?.message?.imageMessage || // ephemeral image
+    message?.message?.ephemeralMessage?.message?.videoMessage || // ephemeral video
+    message?.message?.viewOnceMessage?.message?.imageMessage || // viewonce image
+    message?.message?.viewOnceMessage?.message?.videoMessage || // viewonce video
+    message?.message?.viewOnceMessageV2?.message?.imageMessage || // viewonce v2 image
+    message?.message?.viewOnceMessageV2?.message?.videoMessage
+  ); // viewonce v2 video
+};
 
 export const getImageMessage = (message: WAMessage) => {
   return (
@@ -150,8 +152,8 @@ export const getImageMessage = (message: WAMessage) => {
     message.message?.ephemeralMessage?.message?.imageMessage ||
     message.message?.viewOnceMessage?.message?.imageMessage ||
     message.message?.viewOnceMessageV2?.message?.imageMessage
-  )
-}
+  );
+};
 
 export const getVideoMessage = (message: WAMessage) => {
   return (
@@ -159,47 +161,50 @@ export const getVideoMessage = (message: WAMessage) => {
     message.message?.ephemeralMessage?.message?.videoMessage ||
     message.message?.viewOnceMessage?.message?.videoMessage ||
     message.message?.viewOnceMessageV2?.message?.videoMessage
-  )
-}
+  );
+};
 
 export const getMessageExpiration = (message: WAMessage) => {
-  return getMessage(message)?.contextInfo?.expiration
-}
+  return getMessage(message)?.contextInfo?.expiration;
+};
 
-export const getMessageOptions = (message: WAMessage, quote: boolean): MiscMessageGenerationOptions => {
+export const getMessageOptions = (
+  message: WAMessage,
+  quote: boolean
+): MiscMessageGenerationOptions => {
   return {
     cachedGroupMetadata: getCachedGroupMetadata,
     quoted: quote ? message : undefined,
-    ephemeralExpiration: getMessageExpiration(message) || WA_DEFAULT_EPHEMERAL
-  }
-}
+    ephemeralExpiration: getMessageExpiration(message) || WA_DEFAULT_EPHEMERAL,
+  };
+};
 
 export const sendMessage = async (
   content: AnyMessageContent,
   message: WAMessage,
   quote: boolean = true
 ) => {
-  if (!message.key.remoteJid) return
-  const client = getClient()
+  if (!message.key.remoteJid) return;
+  const client = getClient();
   return await client.sendMessage(
     message.key.remoteJid,
     content,
     getMessageOptions(message, quote)
-  )
-}
+  );
+};
 
 export const react = async (message: WAMessage, emoji: string) => {
   return await sendMessage(
     {
       react: {
         text: emoji,
-        key: message.key
-      }
+        key: message.key,
+      },
     },
     message,
     false
-  )
-}
+  );
+};
 
 export const makeSticker = async (
   message: WAMessage,
@@ -208,39 +213,38 @@ export const makeSticker = async (
   url: string | undefined = undefined
 ) => {
   if (isAnimated) {
-    await react(message, spintax('{⏱|⏳|🕓|⏰}'))
+    await react(message, spintax("{⏱|⏳|🕓|⏰}"));
   }
 
-  let data = url ? url
-    : <Buffer>await downloadMediaMessage(message, 'buffer', {})
+  let data = url
+    ? url
+    : <Buffer>await downloadMediaMessage(message, "buffer", {});
 
   if (!url) {
-    const mimeType = getMediaMessage(message)?.mimetype
+    const mimeType = getMediaMessage(message)?.mimetype;
     if (phrases) {
-      data = await addTextOnImage(data as Buffer, mimeType!, phrases)
+      data = await addTextOnImage(data as Buffer, mimeType!, phrases);
       if (!data) {
-        logger.warn('API: textOnImage is down!')
+        logger.warn("API: textOnImage is down!");
         // TODO: Load texts from JSON
-        const reply = '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
-          'Por favor, tente novamente mais tarde.'
-        await sendMessage(
-          { text: reply },
-          message
-        )
-        return
+        const reply =
+          '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
+          "Por favor, tente novamente mais tarde.";
+        await sendMessage({ text: reply }, message);
+        return;
       }
     }
   }
 
-  const sticker = new Sticker(data, stickerMeta)
-  const result = await sendMessage(await sticker.toMessage(), message, true)
+  const sticker = new Sticker(data, stickerMeta);
+  const result = await sendMessage(await sticker.toMessage(), message, true);
 
   if (isAnimated) {
-    await react(message, spintax('{🤖|✅}'))
+    await react(message, spintax("{🤖|✅}"));
   }
 
-  return result
-}
+  return result;
+};
 
 export async function sendAudio(message: WAMessage, path: string) {
   // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
@@ -249,10 +253,10 @@ export async function sendAudio(message: WAMessage, path: string) {
     {
       audio: { url: path },
       ptt: true,
-      mimetype: 'audio/mpeg'
+      mimetype: "audio/mpeg",
     },
     message
-  )
+  );
 }
 
 export const logCommandExecution = (
@@ -261,13 +265,17 @@ export const logCommandExecution = (
   group: GroupMetadata | undefined,
   commandName: string
 ) => {
-  const requester = message.pushName || 'Desconhecido'
-  const groupName = group ? group.subject : 'Desconhecido'
-  const identifier = group ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
-    : `${requester} (${jidDecode(jid)?.user})`
-  logger.info(`Sending ${commandName} @ ${identifier}`)
-}
+  const requester = message.pushName || "Desconhecido";
+  const groupName = group ? group.subject : "Desconhecido";
+  const identifier = group
+    ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
+    : `${requester} (${jidDecode(jid)?.user})`;
+  logger.info(`Sending ${commandName} @ ${identifier}`);
+};
 
 export const extractPhrasesFromCaption = (caption: string) => {
-  return caption.split(';').filter(phrase => phrase.trim().replaceAll('\n', '')).slice(0, 2)
-}
+  return caption
+    .split(";")
+    .filter((phrase) => phrase.trim().replaceAll("\n", ""))
+    .slice(0, 2);
+};
