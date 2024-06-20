@@ -199,6 +199,7 @@ const connectToWhatsApp = async () => {
 
       // Handle sticker message
       if (message.message.stickerMessage) {
+        // send sticker as image
         logCommandExecution(message, message.key.remoteJid, group, 'Sticker as Image')
         const image = (await downloadMediaMessage(
           message,

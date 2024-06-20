@@ -15,8 +15,8 @@ StickerBot é um bot de figurinhas com uma vasta gama de comandos. Ele pode:
 
 ## 🚀 Funcionalidades Principais
 - **Administração de Grupo:** Comandos para gerenciar e moderar grupos.
-- **Diversão:** Jogos, memes e outras funcionalidades interativas.
 - **Criação de Figurinhas:** Transforme imagens, vídeos e textos em figurinhas personalizadas.
+- **Diversão:** Baixe músicas do YouTube diretamente pelo WhatsApp.
 
 ## 📦 Instalação
 

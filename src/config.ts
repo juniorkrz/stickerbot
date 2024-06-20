@@ -16,7 +16,7 @@ export const baileys = {
   useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true'),
 }
 
-// Custom Instructions
+// Bot config
 export const bot = {
   name: process.env.SB_NAME || 'StickerBot',
   sessionId: process.env.WA_SESSION_ID || 'wa-stickerbot',
