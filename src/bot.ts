@@ -180,7 +180,25 @@ const connectToWhatsApp = async () => {
                 continue
             }
         }
-    })
+      }
+
+      // Handle sticker message
+      if (message.message.stickerMessage) {
+        logCommandExecution(message, message.key.remoteJid, group, 'Sticker as Image')
+        const image = (await downloadMediaMessage(
+          message,
+          'buffer',
+          {}
+        )) as Buffer
+
+        await sendMessage(
+          { image },
+          message
+        )
+        continue
+      }
+    }
+  })
 }
 
 app.get('/', (_req, res) => {
