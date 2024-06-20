@@ -7,6 +7,11 @@
 - [ ] Limpeza automática de histórico/conversas
 - [x] Implementar makeSticker
 - [ ] Implementar botSetup
+- [ ] Validações para criar sticker
+    - [ ] Chat privado
+    - [ ] Grupos
+        - [ ] Criar se for mencionado
+        - [ ] Criar se for um grupo ofical
 - [ ] Criar sticker com texto
     - [x] Texto em imagem
     - [ ] Texto em vídeo
