@@ -5,7 +5,7 @@ import { bot } from "../config";
 import { StickerBotCommand } from "../types/Command";
 import { WAMessageExtended } from "../types/Message";
 import { react, sendMessage } from "../utils/baileysHelper";
-import { capitalize, spinText } from "../utils/misc";
+import { capitalize, spintax } from "../utils/misc";
 import path from "path";
 import { GroupMetadata } from "@whiskeysockets/baileys";
 
@@ -60,7 +60,7 @@ export const command: StickerBotCommand = {
       command
     );
     if (!check) {
-      return false;
+      return;
     }
 
     // Sinta-se livre para criar seu comando abaixo.
@@ -84,7 +84,7 @@ export const command: StickerBotCommand = {
     if (link) {
       return await sendMessage(
         {
-          text: spinText(
+          text: spintax(
             "{Participe da|Entre na|Tire suas dúvidas na} comunidade oficial do *StickerBot*! 💜\n\n" +
               link
           ),
@@ -94,7 +94,7 @@ export const command: StickerBotCommand = {
     } else {
       return await sendMessage(
         {
-          text: spinText(
+          text: spintax(
             "⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o link da comunidade está indisponível no momento!"
           ),
         },

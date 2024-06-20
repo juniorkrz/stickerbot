@@ -47,7 +47,7 @@ export const command: StickerBotCommand = {
       command
     );
     if (!check) {
-      return false;
+      return;
     }
 
     // Fecha um grupo
