@@ -1,24 +1,14 @@
 /* Comando base - StickerBot */
-
-import { capitalize, spinText } from '../utils/misc'
-import { react, sendMessage } from '../utils/baileysHelper'
 import { GroupMetadata } from '@whiskeysockets/baileys'
-import { StickerBotCommand } from '../types/Command'
-import { WAMessageExtended } from '../types/Message'
-import { bot } from '../config'
-import { checkCommand } from '../utils/commandValidator'
 import path from 'path'
 
-/* Suas importações aqui */
-
-// Faça suas importações aqui, caso você necessite.
-// Exemplo:
-// import { getClient } from '../bot'
-
-// Esse comando não usa o client diretamente, então vamos manter comentado.
-
-/* Fim das suas importações */
-
+import { bot } from '../config'
+import { StickerBotCommand } from '../types/Command'
+import { WAMessageExtended } from '../types/Message'
+import { react, sendMessage } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize, spinText } from '../utils/misc'
+//import { getClient } from '../bot'
 
 // Obtém o nome do arquivo sem a extensão .ts
 const commandName = capitalize(path.basename(__filename, '.ts'))
