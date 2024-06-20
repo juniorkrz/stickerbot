@@ -17,7 +17,7 @@ import { stickerMeta } from '../config'
 import { getCache } from '../handlers/cache'
 import { addTextOnImage } from '../handlers/image'
 import { getLogger } from '../handlers/logger'
-import { spinText } from './misc'
+import { spintax } from './misc'
 
 const logger = getLogger()
 
@@ -208,7 +208,7 @@ export const makeSticker = async (
   url: string | undefined = undefined
 ) => {
   if (isAnimated) {
-    await react(message, spinText('{⏱|⏳|🕓|⏰}'))
+    await react(message, spintax('{⏱|⏳|🕓|⏰}'))
   }
 
   let data = url ? url
@@ -233,7 +233,7 @@ export const makeSticker = async (
   const result = await sendMessage(await sticker.toMessage(), message, true)
 
   if (isAnimated) {
-    await react(message, spinText('{🤖|✅}'))
+    await react(message, spintax('{🤖|✅}'))
   }
 
   return result

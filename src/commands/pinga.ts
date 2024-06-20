@@ -5,7 +5,7 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spinText } from '../utils/misc'
+import { capitalize, spintax } from '../utils/misc'
 
 // Gets the file name without the .ts extension
 const commandName = capitalize(path.basename(__filename, '.ts'))
@@ -62,7 +62,7 @@ export const command: StickerBotCommand = {
     const response = `${bebida.text} ${bebida.emojis}`
 
     return await sendMessage(
-      { text: spinText(response) },
+      { text: spintax(response) },
       message
     )
   }

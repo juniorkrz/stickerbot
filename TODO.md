@@ -1,7 +1,7 @@
 # TO DO
 
 - [ ] Adicionar thumbnail nas imagens do sendStickerAsImage
-- [ ] Renomear spinText para spintax
+- [x] Renomear spinText para spintax
 - [x] Add Dependabot
 - [x] Add ESLint
 - [ ] Limpeza automática de histórico/conversas

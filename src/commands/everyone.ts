@@ -5,7 +5,7 @@ import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
 import { react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spinText } from '../utils/misc'
+import { capitalize, spintax } from '../utils/misc'
 
 
 // Gets the file name without the .ts extension
@@ -64,7 +64,7 @@ export const command: StickerBotCommand = {
 
     return await sendMessage(
       {
-        text: spinText(phrase),
+        text: spintax(phrase),
         mentions: participants
       },
       message

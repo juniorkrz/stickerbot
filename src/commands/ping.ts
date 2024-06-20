@@ -7,7 +7,7 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spinText } from '../utils/misc'
+import { capitalize, spintax } from '../utils/misc'
 //import { getClient } from '../bot'
 
 // Obtém o nome do arquivo sem a extensão .ts
@@ -70,7 +70,7 @@ export const command: StickerBotCommand = {
     const quote = true// true: envia a mensagem como resposta | false: envia a mensagem normal
 
     await sendMessage(
-      { text: spinText(responseMsg) },
+      { text: spintax(responseMsg) },
       message,
       quote
     )

@@ -44,7 +44,7 @@ export const getHomepage = () => {
   return info ? info.homepage.replace('#readme', '') : 'https://github.com/juniorkrz'
 }
 
-export const spinText = (text: string) => {
+export const spintax = (text: string) => {
   const pattern = /\{([^{}]+)\}/g
 
   while (pattern.test(text)) {

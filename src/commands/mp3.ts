@@ -9,7 +9,7 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendAudio, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, getRandomItemFromArray, getTempFilePath, spinText } from '../utils/misc'
+import { capitalize, getRandomItemFromArray, getTempFilePath, spintax } from '../utils/misc'
 
 // Gets the file name without the .ts extension
 const commandName = capitalize(path.basename(__filename, '.ts'))
@@ -65,7 +65,7 @@ export const command: StickerBotCommand = {
     if (!url) {
       const reply =
         '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o nome da música ou o link após o comando!'
-      await sendMessage({ text: spinText(reply) }, message)
+      await sendMessage({ text: spintax(reply) }, message)
       await react(message, '❌')
       return
     }
@@ -79,7 +79,7 @@ export const command: StickerBotCommand = {
     const videoResult = await getYoutubeVideo(url)
     if (!videoResult) {
       const reply = '❌ {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!'
-      await sendMessage({ text: spinText(reply) }, message)
+      await sendMessage({ text: spintax(reply) }, message)
       await react(message, '❌')
       return
     }
@@ -94,7 +94,7 @@ export const command: StickerBotCommand = {
 
     if (!audio || !duration) {
       const reply = '❌ {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!'
-      await sendMessage({ text: spinText(reply) }, message)
+      await sendMessage({ text: spintax(reply) }, message)
       await react(message, '❌')
       return
     }
@@ -102,7 +102,7 @@ export const command: StickerBotCommand = {
     // test duration
     if (duration > (10 * 60000)) { // maximum video duration is 10 minutes
       const reply = '{Foi mal|Ops|Eita|Ei|Opa}, eu {posso|consigo} baixar músicas, não CDs completos {🫤|🫠|🥲|🙃|🤨|🤯|🤗|😑}'
-      await sendMessage({ text: spinText(reply) }, message)
+      await sendMessage({ text: spintax(reply) }, message)
       await react(message, '❌')
       return
     }
@@ -124,10 +124,10 @@ export const command: StickerBotCommand = {
     ]
 
     await sendMessage(
-      { text: spinText(getRandomItemFromArray(replies)) },
+      { text: spintax(getRandomItemFromArray(replies)) },
       message
     )
-    await react(message, spinText('{⏱|⏳|🕓|⏰}'))
+    await react(message, spintax('{⏱|⏳|🕓|⏰}'))
 
     // set presence recording
     const client = getClient()
@@ -152,7 +152,7 @@ export const command: StickerBotCommand = {
     })
 
     if (result?.status == 1) {
-      return await react(message, spinText('{🎧|📻|🎶|🎹|🎸|🎤|🎺|🎼|🎙|🎚|🔈|🔊|🎵|🪗}'))
+      return await react(message, spintax('{🎧|📻|🎶|🎹|🎸|🎤|🎺|🎼|🎙|🎚|🔈|🔊|🎵|🪗}'))
     } else {
       await react(message, '❌')
     }

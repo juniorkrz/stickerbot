@@ -1,10 +1,10 @@
-import { GroupMetadata, isJidGroup,WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata, isJidGroup, WAMessage } from '@whiskeysockets/baileys'
 
 import { bot } from '../config'
 import { getLogger } from '../handlers/logger'
 import { CommandLimiter, StickerBotCommand } from '../types/Command'
 import { sendMessage } from './baileysHelper'
-import { spinText } from './misc'
+import { spintax } from './misc'
 
 const logger = getLogger()
 
@@ -20,8 +20,10 @@ const getRemainingTime = (sender: string, interval: number, cmdLimiter: CommandL
       return Math.floor((lastPrompt + interval - Date.now()) / 1000)
     }
   } else {
-    cmdLimiter[sender] = { lastPrompt: Date.now(),
-      alerted: false }
+    cmdLimiter[sender] = {
+      lastPrompt: Date.now(),
+      alerted: false
+    }
   }
 
   return 0
@@ -53,7 +55,7 @@ export const checkCommand = async (
         .replaceAll('seconds', remainingTime.toString())
         .replaceAll('plural', remainingTime > 1 ? 's' : '')
       await sendMessage(
-        { text: spinText(reply) },
+        { text: spintax(reply) },
         message
       )
     }
@@ -64,7 +66,7 @@ export const checkCommand = async (
   if (command.inMaintenance) {
     const reply = `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o comando *${alias}* {está|tá} em *manutenção*!`
     await sendMessage(
-      { text: spinText(reply) },
+      { text: spintax(reply) },
       message
     )
     return false
@@ -79,7 +81,7 @@ export const checkCommand = async (
   if (command.onlyInBotGroup && !isBotGroup) {
     const reply = `⚠ O comando *${alias}* só funciona no *grupo oficial do bot*!`
     await sendMessage(
-      { text: spinText(reply) },
+      { text: spintax(reply) },
       message
     )
     return false
@@ -91,7 +93,7 @@ export const checkCommand = async (
     if (!command.runInGroups) {
       const reply = `⚠ O comando *${alias}* não funciona *em grupos*!`
       await sendMessage(
-        { text: spinText(reply) },
+        { text: spintax(reply) },
         message
       )
       return false
@@ -114,7 +116,7 @@ export const checkCommand = async (
     if (command.onlyAdmin && !isGroupAdmin) {
       const reply = `⚠ O comando *${alias}* só funciona para *administradores do grupo*!`
       await sendMessage(
-        { text: spinText(reply) },
+        { text: spintax(reply) },
         message
       )
       return false
@@ -124,7 +126,7 @@ export const checkCommand = async (
     if (command.botMustBeAdmin && !amAdmin) {
       const reply = '⚠ Eu preciso ser *um administrador* do grupo para fazer isso!'
       await sendMessage(
-        { text: spinText(reply) },
+        { text: spintax(reply) },
         message
       )
       return false
@@ -134,7 +136,7 @@ export const checkCommand = async (
     if (!command.runInPrivate) {
       const reply = `⚠ O comando *${alias}* só funciona *em grupos*!`
       await sendMessage(
-        { text: spinText(reply) },
+        { text: spintax(reply) },
         message
       )
       return false
