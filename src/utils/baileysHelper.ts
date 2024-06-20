@@ -1,30 +1,31 @@
 import {
   AnyMessageContent,
-  GroupMetadata,
-  GroupMetadataParticipants,
-  MiscMessageGenerationOptions,
-  WAMessage,
-  WA_DEFAULT_EPHEMERAL,
   areJidsSameUser,
   downloadMediaMessage,
+  GroupMetadata,
+  GroupMetadataParticipants,
   isJidGroup,
+  jidDecode,
+  MiscMessageGenerationOptions,
+  WA_DEFAULT_EPHEMERAL,
+  WAMessage,
 } from "@whiskeysockets/baileys";
-import { getClient } from "../bot";
-import { getCache } from "../handlers/cache";
-import { stickerMeta } from "../config";
-import Sticker from "wa-sticker-formatter";
-import { spinText } from "./misc";
-import { getLogger } from "../handlers/logger";
-import sendreply from "@whiskeysockets/baileys";
+import { Sticker } from "wa-sticker-formatter";
 
-/* import { Sticker, StickerTypes } from 'wa-sticker-formatter' */
-/* import { stickerMeta } from '../config' */
+import { getClient } from "../bot";
+import { stickerMeta } from "../config";
+import { getCache } from "../handlers/cache";
+import { addTextOnImage } from "../handlers/image";
+import { getLogger } from "../handlers/logger";
+import { spintax } from "./misc";
 
 const logger = getLogger();
 
-export const groupFetchAllParticipating = async () => {
+export const groupFetchAllParticipatingJids = async (): Promise<{
+  [_: string]: string;
+}> => {
   const client = getClient();
-  const result: any = {};
+  const result: { [_: string]: string } = {};
   const groups = await client.groupFetchAllParticipating();
   for (const group in groups) {
     result[group] = groups[group].subject;
@@ -111,6 +112,10 @@ export const getBody = (message: WAMessage) => {
     message.message?.ephemeralMessage?.message?.conversation ||
     ""
   );
+};
+
+export const getCaption = (message: WAMessage) => {
+  return getMediaMessage(message)?.caption;
 };
 
 export const getMessage = (message: WAMessage) => {
@@ -201,25 +206,76 @@ export const react = async (message: WAMessage, emoji: string) => {
   );
 };
 
-export const makeSticker = async (message: WAMessage, url = "") => {
-  const isVideo = !url && getVideoMessage(message);
-  if (isVideo) {
-    logger.info("Sending Animated Sticker");
-    await react(message, spinText("{⏱|⏳|🕓|⏰}"));
-  } else {
-    logger.info("Sending Static Sticker");
+export const makeSticker = async (
+  message: WAMessage,
+  isAnimated: boolean,
+  phrases: string[] | undefined = undefined,
+  url: string | undefined = undefined
+) => {
+  if (isAnimated) {
+    await react(message, spintax("{⏱|⏳|🕓|⏰}"));
   }
 
-  const data = url
+  let data = url
     ? url
     : <Buffer>await downloadMediaMessage(message, "buffer", {});
+
+  if (!url) {
+    const mimeType = getMediaMessage(message)?.mimetype;
+    if (phrases) {
+      data = await addTextOnImage(data as Buffer, mimeType!, phrases);
+      if (!data) {
+        logger.warn("API: textOnImage is down!");
+        // TODO: Load texts from JSON
+        const reply =
+          '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
+          "Por favor, tente novamente mais tarde.";
+        await sendMessage({ text: reply }, message);
+        return;
+      }
+    }
+  }
 
   const sticker = new Sticker(data, stickerMeta);
   const result = await sendMessage(await sticker.toMessage(), message, true);
 
-  if (isVideo) {
-    await react(message, spinText("{🤖|✅}"));
+  if (isAnimated) {
+    await react(message, spintax("{🤖|✅}"));
   }
 
   return result;
+};
+
+export async function sendAudio(message: WAMessage, path: string) {
+  // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
+  // https://github.com/WhiskeySockets/Baileys/issues/768
+  return await sendMessage(
+    {
+      audio: { url: path },
+      ptt: true,
+      mimetype: "audio/mpeg",
+    },
+    message
+  );
+}
+
+export const logCommandExecution = (
+  message: WAMessage,
+  jid: string,
+  group: GroupMetadata | undefined,
+  commandName: string
+) => {
+  const requester = message.pushName || "Desconhecido";
+  const groupName = group ? group.subject : "Desconhecido";
+  const identifier = group
+    ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
+    : `${requester} (${jidDecode(jid)?.user})`;
+  logger.info(`Sending ${commandName} @ ${identifier}`);
+};
+
+export const extractPhrasesFromCaption = (caption: string) => {
+  return caption
+    .split(";")
+    .filter((phrase) => phrase.trim().replaceAll("\n", ""))
+    .slice(0, 2);
 };

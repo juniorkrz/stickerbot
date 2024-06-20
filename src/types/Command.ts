@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata, proto, WAMessage } from '@whiskeysockets/baileys'
 
 interface LimiterEntry {
     lastPrompt: number
@@ -19,7 +19,7 @@ export interface CommandRunFunction {
         isBotAdmin: boolean,
         isGroupAdmin: boolean,
         amAdmin: boolean
-    ): Promise<any>
+    ): Promise<proto.WebMessageInfo | undefined>
 }
 
 export interface StickerBotCommand {
