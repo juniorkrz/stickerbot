@@ -60,7 +60,7 @@ export const command: StickerBotCommand = {
       command
     );
     if (!check) {
-      return;
+      return; //original "return false"
     }
 
     // Sinta-se livre para criar seu comando abaixo.
