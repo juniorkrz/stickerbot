@@ -1,8 +1,16 @@
 # TO DO
 
+- [ ] Adicionar thumbnail nas imagens do sendStickerAsImage
+- [ ] Renomear spinText para spintax
+- [ ] Add Dependabot
+- [x] Add ESLint
 - [ ] Limpeza automática de histórico/conversas
 - [x] Implementar makeSticker
 - [ ] Implementar botSetup
+- [ ] Criar sticker com texto
+    - [x] Texto em imagem
+    - [ ] Texto em vídeo
+    - [ ] Texto em sticker
 - [ ] Migrar comandos antigos pro novo bot
     - [ ] ttp/attp
     - [ ] ban/banneds/unban
@@ -26,7 +34,3 @@
     - [ ] uptime
     - [ ] vcard
     - [ ] version
-
-# Features
-
-- Criar sticker com texto?
