@@ -221,7 +221,7 @@ export const makeSticker = async (
       if (!data) {
         logger.warn('API: textOnImage is down!')
         await sendMessage(
-          { text: '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.' },
+          { text: '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. Por favor, tente novamente mais tarde.' },
           message
         )
         return
