@@ -69,6 +69,7 @@ export const getStore = (): ReturnType<typeof makeInMemoryStore> => {
 }
 
 const connectToWhatsApp = async () => {
+  /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
   store = makeInMemoryStore({ logger: Pino({ level: 'silent' }) as any })
   store.readFromFile(`${directories.creds}/baileys.json`)
 
@@ -81,6 +82,7 @@ const connectToWhatsApp = async () => {
   client = makeWASocket({
     auth: state,
     printQRInTerminal: baileys.useQrCode,
+    /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     logger: Pino({ level: 'silent' }) as any
   })
 
