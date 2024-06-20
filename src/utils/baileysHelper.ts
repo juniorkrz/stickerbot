@@ -1,106 +1,124 @@
-import { AnyMessageContent, GroupMetadata, GroupMetadataParticipants, MiscMessageGenerationOptions, WAMessage, WA_DEFAULT_EPHEMERAL, areJidsSameUser, downloadMediaMessage, isJidGroup } from '@whiskeysockets/baileys'
-import { getClient } from '../bot'
+import {
+  AnyMessageContent,
+  GroupMetadata,
+  GroupMetadataParticipants,
+  MiscMessageGenerationOptions,
+  WAMessage,
+  WA_DEFAULT_EPHEMERAL,
+  areJidsSameUser,
+  downloadMediaMessage,
+  isJidGroup,
+  jidDecode
+} from '@whiskeysockets/baileys'
+import { Sticker } from 'wa-sticker-formatter'
+import { addTextOnImage } from '../handlers/image'
 import { getCache } from '../handlers/cache'
-import { stickerMeta } from '../config'
-import Sticker from 'wa-sticker-formatter'
-import { spinText } from './misc'
+import { getClient } from '../bot'
 import { getLogger } from '../handlers/logger'
+import { spinText } from './misc'
+import { stickerMeta } from '../config'
 
 const logger = getLogger()
 
-export const groupFetchAllParticipating = async () => {
-    const client = getClient()
-    const result: any = {}
-    const groups = await client.groupFetchAllParticipating()
-    for (const group in groups) {
-        result[group] = groups[group].subject
-    }
-    return result
+export const groupFetchAllParticipatingJids = async (): Promise<{
+    [_: string]: string;
+}> => {
+  const client = getClient()
+  const result: {[_: string]: string;} = {}
+  const groups = await client.groupFetchAllParticipating()
+  for (const group in groups) {
+    result[group] = groups[group].subject
+  }
+  return result
 }
 
 export const getCachedGroupMetadata = async (
-    jid: string,
+  jid: string,
 ): Promise<GroupMetadataParticipants | undefined> => {
-    if (!isJidGroup(jid)) {
-        return undefined
-    }
+  if (!isJidGroup(jid)) {
+    return undefined
+  }
 
-    const client = getClient()
+  const client = getClient()
 
-    let metadata: GroupMetadata
-    const cache = getCache()
-    const data = cache.get(jid)
+  let metadata: GroupMetadata
+  const cache = getCache()
+  const data = cache.get(jid)
 
-    if (data) {
-        metadata = data as GroupMetadata
-        return {
-            participants: metadata.participants,
-        } as GroupMetadataParticipants
-    }
-
-    try {
-        metadata = await client.groupMetadata(jid)
-    } catch {
-        return undefined
-    }
-
-    cache.set(jid, metadata, 30)
-
+  if (data) {
+    metadata = data as GroupMetadata
     return {
-        participants: metadata?.participants,
+      participants: metadata.participants,
     } as GroupMetadataParticipants
+  }
+
+  try {
+    metadata = await client.groupMetadata(jid)
+  } catch {
+    return undefined
+  }
+
+  cache.set(jid, metadata, 30)
+
+  return {
+    participants: metadata?.participants,
+  } as GroupMetadataParticipants
 }
 
 export const getFullCachedGroupMetadata = async (
-    jid: string,
+  jid: string,
 ): Promise<GroupMetadata | undefined> => {
-    if (!isJidGroup(jid)) {
-        return undefined
-    }
+  if (!isJidGroup(jid)) {
+    return undefined
+  }
 
-    const client = getClient()
+  const client = getClient()
 
-    let metadata: GroupMetadata
-    const cache = getCache()
-    const data = cache.get(jid)
+  let metadata: GroupMetadata
+  const cache = getCache()
+  const data = cache.get(jid)
 
-    if (data) {
-        metadata = data as GroupMetadata
-        return metadata
-    }
-
-    try {
-        metadata = await client.groupMetadata(jid)
-    } catch {
-        return undefined
-    }
-
-    cache.set(jid, metadata, 30)
-
+  if (data) {
+    metadata = data as GroupMetadata
     return metadata
+  }
+
+  try {
+    metadata = await client.groupMetadata(jid)
+  } catch {
+    return undefined
+  }
+
+  cache.set(jid, metadata, 30)
+
+  return metadata
 }
 
 export const amAdminOfGroup = (group: GroupMetadata | undefined) => {
-    const client = getClient()
-    return group ? group.participants
-        .find((p) => areJidsSameUser(p.id, client.user?.id))
-        ?.admin?.endsWith('admin') !== undefined
-        : false
+  const client = getClient()
+  return group ? group.participants
+    .find((p) => areJidsSameUser(p.id, client.user?.id))
+    ?.admin?.endsWith('admin') !== undefined
+    : false
 }
 
 export const getBody = (message: WAMessage) => {
-    return (
-        message.message?.extendedTextMessage?.text ||
+  return (
+    message.message?.extendedTextMessage?.text ||
         message.message?.conversation ||
         message.message?.ephemeralMessage?.message?.extendedTextMessage?.text ||
         message.message?.ephemeralMessage?.message?.conversation ||
         ''
-    )
+  )
+}
+
+export const getCaption = (message: WAMessage) => {
+  return getMediaMessage(message)?.caption
 }
 
 export const getMessage = (message: WAMessage) => {
-    return (
-        message?.message?.extendedTextMessage ||// text
+  return (
+    message?.message?.extendedTextMessage ||// text
         message?.message?.ephemeralMessage?.message?.extendedTextMessage ||// ephemeral text
         message?.message?.imageMessage ||// image
         message?.message?.videoMessage ||// video
@@ -114,8 +132,8 @@ export const getMessage = (message: WAMessage) => {
 
 
 export const getMediaMessage = (message: WAMessage) => {
-    return (
-        message?.message?.imageMessage ||// image
+  return (
+    message?.message?.imageMessage ||// image
         message?.message?.videoMessage ||// video
         message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
         message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
@@ -126,89 +144,117 @@ export const getMediaMessage = (message: WAMessage) => {
 }
 
 export const getImageMessage = (message: WAMessage) => {
-    return (
-        message.message?.imageMessage ||
+  return (
+    message.message?.imageMessage ||
         message.message?.ephemeralMessage?.message?.imageMessage ||
         message.message?.viewOnceMessage?.message?.imageMessage ||
         message.message?.viewOnceMessageV2?.message?.imageMessage
-    )
+  )
 }
 
 export const getVideoMessage = (message: WAMessage) => {
-    return (
-        message.message?.videoMessage ||
+  return (
+    message.message?.videoMessage ||
         message.message?.ephemeralMessage?.message?.videoMessage ||
         message.message?.viewOnceMessage?.message?.videoMessage ||
         message.message?.viewOnceMessageV2?.message?.videoMessage
-    )
+  )
 }
 
 export const getMessageExpiration = (message: WAMessage) => {
-    return getMessage(message)?.contextInfo?.expiration
+  return getMessage(message)?.contextInfo?.expiration
 }
 
 export const getMessageOptions = (message: WAMessage, quote: boolean): MiscMessageGenerationOptions => {
-    return {
-        cachedGroupMetadata: getCachedGroupMetadata,
-        quoted: quote ? message : undefined,
-        ephemeralExpiration: getMessageExpiration(message) || WA_DEFAULT_EPHEMERAL
-    }
+  return {
+    cachedGroupMetadata: getCachedGroupMetadata,
+    quoted: quote ? message : undefined,
+    ephemeralExpiration: getMessageExpiration(message) || WA_DEFAULT_EPHEMERAL
+  }
 }
 
 export const sendMessage = async (
-    content: AnyMessageContent,
-    message: WAMessage,
-    quote: boolean = true
+  content: AnyMessageContent,
+  message: WAMessage,
+  quote: boolean = true
 ) => {
-    if (!message.key.remoteJid) return
-    const client = getClient()
-    return await client.sendMessage(
-        message.key.remoteJid,
-        content,
-        getMessageOptions(message, quote)
-    )
+  if (!message.key.remoteJid) return
+  const client = getClient()
+  return await client.sendMessage(
+    message.key.remoteJid,
+    content,
+    getMessageOptions(message, quote)
+  )
 }
 
 export const react = async (message: WAMessage, emoji: string) => {
-    return await sendMessage(
-        {
-            react: {
-                text: emoji,
-                key: message.key
-            }
-        },
-        message,
-        false
-    )
+  return await sendMessage(
+    {
+      react: {
+        text: emoji,
+        key: message.key
+      }
+    },
+    message,
+    false
+  )
 }
 
-export const makeSticker = async (message: WAMessage, url = '') => {
-    const isVideo = !url && getVideoMessage(message)
-    if (isVideo){
-        logger.info('Sending Animated Sticker')
-        await react(message, spinText('{⏱|⏳|🕓|⏰}'))
-    } else {
-        logger.info('Sending Static Sticker')
+export const makeSticker = async (
+  message: WAMessage,
+  isAnimated: boolean,
+  phrases: string[] | undefined = undefined,
+  url: string | undefined = undefined
+) => {
+  if (isAnimated) {
+    await react(message, spinText('{⏱|⏳|🕓|⏰}'))
+  }
+
+  let data = url ? url
+    : <Buffer>await downloadMediaMessage(message, 'buffer', {})
+
+  if (!url) {
+    const mimeType = getMediaMessage(message)?.mimetype
+    if (phrases) {
+      data = await addTextOnImage(data as Buffer, mimeType!, phrases)
+      if (!data) {
+        logger.warn('API: textOnImage is down!')
+        await sendMessage(
+          { text: '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.' },
+          message
+        )
+        return
+      }
     }
+  }
 
-    const data = url ? url
-        : <Buffer>await downloadMediaMessage(message, 'buffer', {})
+  const sticker = new Sticker(data, stickerMeta)
+  const result = await sendMessage(await sticker.toMessage(), message, true)
 
-    const sticker = new Sticker(data, stickerMeta)
-    const result = await sendMessage(await sticker.toMessage(), message, true)
+  if (isAnimated) {
+    await react(message, spinText('{🤖|✅}'))
+  }
 
-    if (isVideo){
-        await react(message, spinText('{🤖|✅}'))
-    }
-
-    return result
+  return result
 }
 
 export async function sendAudio(message: WAMessage, path: string) {
-    // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
-    // https://github.com/WhiskeySockets/Baileys/issues/768
-    return await sendMessage(
-        { audio: { url: path }, ptt: true, mimetype: 'audio/mpeg' },
-        message
-    )
+  // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
+  // https://github.com/WhiskeySockets/Baileys/issues/768
+  return await sendMessage(
+    { audio: { url: path }, ptt: true, mimetype: 'audio/mpeg' },
+    message
+  )
+}
+
+export const logCommandExecution = (message: WAMessage, jid: string, group: GroupMetadata | undefined, commandName: string) => {
+  const requester = message.pushName || 'Desconhecido'
+  const groupName = group ? group.subject : 'Desconhecido'
+  const identifier = group ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
+    : `${requester} (${jidDecode(jid)?.user})`
+  logger.info(`Sending ${commandName} @ ${identifier}`)
+}
+
+export const extractPhrasesFromCaption = (caption: string) => {
+  return caption.split(';').filter(phrase => phrase.trim().replaceAll('\n', '')).slice(0, 2)
 }

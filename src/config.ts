@@ -1,5 +1,5 @@
-import dotenv from 'dotenv'
 import { IStickerOptions } from 'wa-sticker-formatter'
+import dotenv from 'dotenv'
 
 // Load OS Env Vars
 dotenv.config()
@@ -10,6 +10,7 @@ export const stickerMeta: IStickerOptions = {
   pack: process.env.SB_PACK || 'StickerBot',
 }
 
+// Baileys Config
 export const baileys = {
   phoneNumber: process.env.SB_PHONE_NUMBER || '',
   useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true'),
@@ -27,4 +28,9 @@ export const bot = {
   groups: process.env.SB_GROUPS?.replaceAll(' ', '').split(
     ';'
   ) || []// TODO - Get from community?
+}
+
+// External APIs
+export const externalEndpoints = {
+  textOnImage: process.env.API_TEXT_ON_IMAGE || 'http://localhost:8000/addText'
 }
