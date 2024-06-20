@@ -1,16 +1,39 @@
+import {
+  amAdminOfGroup,
+  extractPhrasesFromCaption,
+  getBody,
+  getCaption,
+  getFullCachedGroupMetadata,
+  getVideoMessage,
+  groupFetchAllParticipatingJids,
+  logCommandExecution,
+  makeSticker,
+  sendMessage
+} from './utils/baileysHelper'
+import { baileys, bot } from './config'
+import {
+  checkForUpdates,
+  createDirectoryIfNotExists,
+  getLocalVersion
+} from './utils/misc'
+import { handleText, printTotalLoadedCommands } from './handlers/text'
+import makeWASocket, {
+  DisconnectReason,
+  areJidsSameUser,
+  delay,
+  downloadMediaMessage,
+  isJidGroup,
+  makeInMemoryStore,
+  useMultiFileAuthState
+} from '@whiskeysockets/baileys'
 import { Boom } from '@hapi/boom'
 import P from 'pino'
-import express from 'express'
-import makeWASocket, { DisconnectReason, WA_DEFAULT_EPHEMERAL, areJidsSameUser, delay, downloadMediaMessage, isJidGroup, makeInMemoryStore, useMultiFileAuthState } from '@whiskeysockets/baileys'
-import { baileys, bot, stickerMeta } from './config'
-import { checkForUpdates, createDirectoryIfNotExists, getLocalVersion } from './utils/misc'
-import moment from 'moment'
-import { imageSync } from 'qr-image'
-import { amAdminOfGroup, getBody, getFullCachedGroupMetadata, groupFetchAllParticipating, makeSticker, sendMessage } from './utils/baileysHelper'
 import { WAMessageExtended } from './types/Message'
-import { handleText, printTotalLoadedCommands } from './handlers/text'
 import { drawArt } from './utils/art'
+import express from 'express'
 import { getLogger } from './handlers/logger'
+import { imageSync } from 'qr-image'
+import moment from 'moment'
 
 const logger = getLogger()
 
