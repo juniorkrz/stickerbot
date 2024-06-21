@@ -1,20 +1,21 @@
-import { checkCommand } from "../utils/commandValidator";
-import { StickerBotCommand } from "../types/Command";
-import { WAMessageExtended } from "../types/Message";
-import { react } from "../utils/baileysHelper";
-import { capitalize } from "../utils/misc";
-import path from "path";
-import { GroupMetadata } from "@whiskeysockets/baileys";
-import { getClient } from "../bot";
+import { GroupMetadata } from '@whiskeysockets/baileys'
+import path from 'path'
+
+import { getClient } from '../bot'
+import { StickerBotCommand } from '../types/Command'
+import { WAMessageExtended } from '../types/Message'
+import { react } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize } from '../utils/misc'
 
 // Gets the file name without the .ts extension
-const commandName = capitalize(path.basename(__filename, ".ts"));
+const commandName = capitalize(path.basename(__filename, '.ts'))
 
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ["abrir", "open"],
-  desc: "Abre o grupo para que todos possam mandar mensagens.",
+  aliases: ['abrir', 'open'],
+  desc: 'Abre o grupo para que todos possam mandar mensagens.',
   example: false,
   needsPrefix: true,
   inMaintenance: false,
@@ -45,20 +46,18 @@ export const command: StickerBotCommand = {
       isGroupAdmin,
       amAdmin,
       command
-    );
+    )
     if (!check) {
-      return; //original "return false"
+      return
     }
 
-    // Fecha um grupo
-
     // get the client
-    const client = getClient();
+    const client = getClient()
 
     // close the group
-    await client.groupSettingUpdate(jid, "not_announcement");
+    await client.groupSettingUpdate(jid, 'not_announcement')
 
     // react success
-    return await react(message, "🔓");
-  },
-};
+    return await react(message, '🔓')
+  }
+}
