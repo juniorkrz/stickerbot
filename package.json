@@ -44,7 +44,7 @@
     "qrcode-terminal": "^0.12.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
-    "typescript": "^5.3.3",
+    "typescript": "^5.5.2",
     "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter",
     "ytdl-core": "^4.11.5",
     "ytsr": "^3.8.4"
