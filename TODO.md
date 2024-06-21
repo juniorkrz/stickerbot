@@ -29,7 +29,7 @@
 
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
-- [ ] `ttp` / `attp`
+- [x] `ttp` / `attp`
 - [ ] `ban` / `banneds` / `unban`
 - [x] `open` / `close`
 - [ ] `placa` / `fipe`
