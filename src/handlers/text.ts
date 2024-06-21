@@ -15,12 +15,15 @@ const logger = getLogger()
 // Directory where the commands are
 const commandsDir = path.join(__dirname, '../commands')
 
+// Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
+const extension = __filename.endsWith('.js') ? '.js' : '.ts'
+
 // Dynamically load exported commands from each file in the 'commands' folder
 const actions: CommandActions = {}
 
 let totalCommandsLoaded = 0
 fs.readdirSync(commandsDir).forEach(file => {
-  if (file.endsWith('.ts')) {
+  if (file.endsWith(extension)) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const commandModule = require(path.join(commandsDir, file))
     actions[commandModule.command.name.toUpperCase()] = commandModule.command
