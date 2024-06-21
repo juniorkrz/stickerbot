@@ -48,7 +48,9 @@ export const command: StickerBotCommand = {
     }
 
     const maxChars = 200
-    if (!body) {
+    const text = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+
+    if (!text) {
       return await sendMessage(
         {
           text: spintax(`⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* `+
@@ -56,7 +58,7 @@ export const command: StickerBotCommand = {
         },
         message
       )
-    } else if (body.length > maxChars) {
+    } else if (text.length > maxChars) {
       return await sendMessage(
         { text: spintax(`⚠ O texto deve ter no máximo *${maxChars}* caracteres!`) },
         message
@@ -64,7 +66,7 @@ export const command: StickerBotCommand = {
     }
 
     try {
-      const url = `https://ttp.jrkrz.online/ttp?text=${encodeURIComponent(body)}`
+      const url = `https://ttp.jrkrz.online/ttp?text=${encodeURIComponent(text)}`
       return await makeSticker(message, false, undefined, url)
     } catch (error) {
       logger.warn('API: ttp is down!')
