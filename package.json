@@ -10,9 +10,10 @@
     "lint": "npx eslint ./src --ext .ts",
     "build": "npm i && npx tsc",
     "debug": "npx nodemon ./src/bot.ts",
-    "update": "npx npm-check-updates -u -x pino,sharp",
-    "release": "release-it"
+    "publish": "release-it",
+    "update": "npx npm-check-updates -u -x pino,sharp"
   },
+  "private": true,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/juniorkrz/stickerbot.git"
@@ -43,6 +44,7 @@
     "qrcode-terminal": "^0.12.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
+    "typescript": "^5.3.3",
     "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter",
     "ytdl-core": "^4.11.5",
     "ytsr": "^3.8.4"
@@ -60,7 +62,6 @@
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-simple-import-sort": "^10.0.0",
     "release-it": "^17.3.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "ts-node": "^10.9.2"
   }
 }
