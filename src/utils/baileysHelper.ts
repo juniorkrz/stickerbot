@@ -6,6 +6,7 @@ import {
   GroupMetadataParticipants,
   isJidGroup,
   jidDecode,
+  jidNormalizedUser,
   MiscMessageGenerationOptions,
   WA_DEFAULT_EPHEMERAL,
   WAMessage
@@ -270,4 +271,8 @@ export const logCommandExecution = (
 
 export const extractPhrasesFromCaption = (caption: string) => {
   return caption.split(';').filter(phrase => phrase.trim().replaceAll('\n', '')).slice(0, 2)
+}
+
+export function getPhoneFromJid(jid: string) {
+  return jidNormalizedUser(jid).split('@')[0]
 }
