@@ -21,6 +21,7 @@ export const bot = {
   name: process.env.SB_NAME || 'StickerBot',
   sessionId: process.env.WA_SESSION_ID || 'wa-stickerbot',
   sendWarnings: JSON.parse(process.env.SB_SEND_WARNINGS || 'true'),
+  community: process.env.SB_COMMUNITY,
   prefixes: process.env.SB_PREFIXES ? process.env.SB_PREFIXES.split(';') : ['!'],
   admins: process.env.SB_ADMINS?.replaceAll(' ', '').split(
     ';'
