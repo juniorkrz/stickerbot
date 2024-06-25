@@ -48,6 +48,10 @@
 - [ ] `rembg`
 - [ ] `rename`
 - [ ] `toImg`
-- [ ] `uptime`
+- [x] `uptime`
 - [ ] `vcard`
 - [ ] `version`
+
+## 👾 Bugs
+
+- [ ] `sendStickerAsImage` Error: EBUSY: resource busy or locked (on Windows)
