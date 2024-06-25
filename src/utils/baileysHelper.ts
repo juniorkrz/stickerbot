@@ -270,9 +270,17 @@ export const logCommandExecution = (
 }
 
 export const extractPhrasesFromCaption = (caption: string) => {
-  return caption.split(';').filter(phrase => phrase.trim().replaceAll('\n', '')).slice(0, 2)
+  const client = getClient()
+  const botMention = '@' + getPhoneFromJid(client.user?.id)
+  const phrases = caption.replaceAll(botMention, '')// Removes the bot mention
+    .split(';')
+    .filter(
+      phrase => phrase.trim()
+    )
+    .slice(0, 2)
+  return phrases
 }
 
-export function getPhoneFromJid(jid: string) {
+export const getPhoneFromJid = (jid: string | undefined) => {
   return jidNormalizedUser(jid).split('@')[0]
 }
