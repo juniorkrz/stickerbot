@@ -13,14 +13,15 @@ export const stickerMeta: IStickerOptions = {
 // Baileys Config
 export const baileys = {
   phoneNumber: process.env.SB_PHONE_NUMBER || '',
-  useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true'),
+  useQrCode: process.env.SB_USE_QR_CODE !== 'false',
+  skipUnreadMessages: process.env.SB_SKIP_UNREAD === 'true',
 }
 
 // Bot config
 export const bot = {
   name: process.env.SB_NAME || 'StickerBot',
-  sessionId: process.env.WA_SESSION_ID || 'wa-stickerbot',
-  sendWarnings: JSON.parse(process.env.SB_SEND_WARNINGS || 'true'),
+  sessionId: process.env.WA_SESSION_ID || 'stickerbot',
+  sendWarnings:process.env.SB_SEND_WARNINGS === 'false',
   community: process.env.SB_COMMUNITY,
   prefixes: process.env.SB_PREFIXES ? process.env.SB_PREFIXES.split(';') : ['!'],
   admins: process.env.SB_ADMINS?.replaceAll(' ', '').split(
