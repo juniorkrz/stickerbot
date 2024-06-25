@@ -6,6 +6,11 @@
 - [ ] Adicionar thumbnail nas imagens do `sendStickerAsImage`
 - [ ] Limpeza automática de histórico/conversas
 - [ ] Implementar `botSetup`
+- [ ] Logs no grupo de admins
+- [ ] Obrigar usuário a participar da comunidade (configurável)
+- [ ] Limite de taxa (10 mensagens/minuto por usuário)
+- [ ] Sistema de banimento
+  - [ ] `ban` / `banneds` / `unban`
 
 ## 🛠️ Melhorias e Correções
 
@@ -30,7 +35,6 @@
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
 - [x] `ttp` / `attp`
-- [ ] `ban` / `banneds` / `unban`
 - [x] `open` / `close`
 - [ ] `placa` / `fipe`
 - [x] `everyone`
