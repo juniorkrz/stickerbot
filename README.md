@@ -44,12 +44,17 @@ Compilando o projeto:
 npm run build
 ```
 
-Inicie o bot com o comando:
+Rodar em produção:
 ```bash
-node .\dist\bot.js
+npm start
 ```
 
-Desenvolvimento:
+Rodar em desenvolvimento:
+```bash
+npm run dev
+```
+
+Rodar em desenvolvimento com auto reload:
 ```bash
 npm run debug
 ```

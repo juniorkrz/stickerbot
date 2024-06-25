@@ -4,7 +4,8 @@
   "description": "A WhatsApp bot for creating stickers and much more.",
   "main": "bot.js",
   "scripts": {
-    "start": "ts-node src/bot.ts",
+    "start": "node ./dist/bot.js",
+    "dev": "ts-node ./src/bot.ts --skip-unread",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "npx eslint ./src --ext .ts --fix",
     "lint": "npx eslint ./src --ext .ts",

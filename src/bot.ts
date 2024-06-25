@@ -36,36 +36,51 @@ import {
   getLocalVersion
 } from './utils/misc'
 
+// get the logger
 const logger = getLogger()
-
-// the moment the bot started
-export const startedAt: moment.Moment = moment()
 
 // create express webserver
 const app = express()
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 
+// directories to be created
 const directories = {
   creds: `/data/${bot.sessionId}/creds`,
   store: `/data/${bot.sessionId}/store`
 }
 
+// create directories
 Object.values(directories).forEach(dir => {
   createDirectoryIfNotExists(dir)
 })
+
+// to do something before starting
+let inWarmup = true
 
 let client: ReturnType<typeof makeWASocket>
 let store: ReturnType<typeof makeInMemoryStore>
 let qr: string | undefined
 let pairingCode: string | undefined
 
+const skipUnreadMessages = baileys.skipUnreadMessages || process.argv.includes('--skip-unread')
+
+// the moment the bot started
+export const startedAt: moment.Moment = moment()
+
+// exportable client
 export const getClient = (): ReturnType<typeof makeWASocket> => {
   return client
 }
 
+// exportable store
 export const getStore = (): ReturnType<typeof makeInMemoryStore> => {
   return store
+}
+
+// exportable botStartedAt
+export const botStartedAt = (): moment.Moment => {
+  return startedAt
 }
 
 const connectToWhatsApp = async () => {
@@ -113,6 +128,21 @@ const connectToWhatsApp = async () => {
 
   // Receive and process messages
   client.ev.on('messages.upsert', async (event) => {
+    // Skip messages received while offline, if specified
+    if (
+      inWarmup &&
+      skipUnreadMessages &&
+      event.type == 'append'
+    ) {
+      const totalSkippedMessages = event.messages.length
+      if (totalSkippedMessages > 0) {
+        logger.warn(`Skipped ${totalSkippedMessages} message${totalSkippedMessages > 1 ? 's' : ''} ` +
+            'received while offline')
+      }
+      inWarmup = false
+      return
+    }
+
     for (const message of event.messages as WAMessageExtended[]) {
       // This is where the fun begins!
 
