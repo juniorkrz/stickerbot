@@ -284,3 +284,13 @@ export const extractPhrasesFromCaption = (caption: string) => {
 export const getPhoneFromJid = (jid: string | undefined) => {
   return jidNormalizedUser(jid).split('@')[0]
 }
+
+export const getMentionedJids = (message: WAMessage) => {
+  return getMessage(message)?.contextInfo?.mentionedJid
+}
+
+export const isMentioned = (message: WAMessage, jid: string | undefined) => {
+  if (!jid) return false
+  const mentionedJids = getMentionedJids(message)
+  return mentionedJids?.includes(jidNormalizedUser(jid))
+}

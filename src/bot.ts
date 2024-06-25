@@ -26,6 +26,7 @@ import {
   getFullCachedGroupMetadata,
   getVideoMessage,
   groupFetchAllParticipatingJids,
+  isMentioned,
   logCommandExecution,
   makeSticker,
   sendMessage
@@ -198,6 +199,17 @@ const connectToWhatsApp = async () => {
         }
       }
 
+      // Is it a group?
+      if (isGroup) {
+        // Was the bot mentioned?
+        const botMentioned = isMentioned(message, client.user?.id)
+        // Is it an official bot group?
+        const isBotGroup = bot.groups.includes(message.key.remoteJid)
+        // If the bot was not mentioned and it's not an official group, skip.
+        if (!(botMentioned || isBotGroup))
+          continue
+      }
+
       // Handle audio message
       /* if (message.message.audioMessage) {
                 await handleAudio(message)
@@ -293,6 +305,13 @@ const stickerBot = async () => {
     logger.warn('No admins were loaded!')
   } else {
     logger.info(`${totalAdmins} admin${totalAdmins > 1 ? 's' : ''} loaded!`)
+  }
+
+  const totalGroups = bot.groups.length
+  if (totalGroups == 0) {
+    logger.warn('No groups have been set!')
+  } else {
+    logger.info(`${totalGroups} group${totalGroups > 1 ? 's' : ''} have been set!`)
   }
 
   const port = 3000

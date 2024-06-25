@@ -16,10 +16,10 @@
 
 ## 🔍 Validações para Criar Sticker
 
-- [ ] Chat privado
-- [ ] Grupos
-  - [ ] Criar se for mencionado
-  - [ ] Criar se for um grupo oficial
+- [x] Chat privado
+- [x] Grupos
+  - [x] Criar se for mencionado
+  - [x] Criar se for um grupo oficial
 
 ## 📝 Criar Sticker com Texto
 
