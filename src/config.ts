@@ -12,16 +12,17 @@ export const stickerMeta: IStickerOptions = {
 
 // Baileys Config
 export const baileys = {
-  phoneNumber: process.env.SB_PHONE_NUMBER || '',
-  useQrCode: process.env.SB_USE_QR_CODE !== 'false',
-  skipUnreadMessages: process.env.SB_SKIP_UNREAD === 'true',
+  phoneNumber: process.env.SB_PHONE_NUMBER || undefined,
+  useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true') as boolean,
+  skipUnreadMessages: JSON.parse(process.env.SB_SKIP_UNREAD || 'false') as boolean
 }
 
 // Bot config
 export const bot = {
   name: process.env.SB_NAME || 'StickerBot',
   sessionId: process.env.WA_SESSION_ID || 'stickerbot',
-  sendWarnings:process.env.SB_SEND_WARNINGS === 'false',
+  sendWarnings: JSON.parse(process.env.SB_SEND_WARNINGS || 'true') as boolean,
+  refuseCalls: JSON.parse(process.env.SB_REFUSE_CALLS || 'false') as boolean,
   community: process.env.SB_COMMUNITY,
   prefixes: process.env.SB_PREFIXES ? process.env.SB_PREFIXES.split(';') : ['!'],
   admins: process.env.SB_ADMINS?.replaceAll(' ', '').split(

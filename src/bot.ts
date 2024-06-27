@@ -6,7 +6,9 @@ import makeWASocket, {
   downloadMediaMessage,
   isJidGroup,
   makeInMemoryStore,
-  useMultiFileAuthState
+  useMultiFileAuthState,
+  WACallEvent,
+  WACallUpdateType
 } from '@whiskeysockets/baileys'
 import express from 'express'
 import moment from 'moment'
@@ -32,6 +34,7 @@ import {
   makeSticker,
   sendMessage
 } from './utils/baileysHelper'
+import { colors } from './utils/colors'
 import {
   checkForUpdates,
   createDirectoryIfNotExists,
@@ -118,15 +121,34 @@ const connectToWhatsApp = async () => {
   client.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
+      logger.warn(`Lost ${colors.green}WhatsApp${colors.reset} connection`)
       const isLogout =
       (lastDisconnect?.error as Boom)?.output?.statusCode !==
       DisconnectReason.loggedOut
       if (isLogout) {
+        logger.info(`Reconnecting to ${colors.green}WhatsApp${colors.reset}...`)
         connectToWhatsApp()
       }
     } else if (connection === 'open') {
-      logger.info('Opened WhatsApp connection')
+      logger.info(`Opened ${colors.green}WhatsApp${colors.reset} connection`)
       //setupBot()
+    }
+  })
+
+  /* client.ev.on('group-participants.update', async (event) => {
+  }) */
+
+  // Refuse calls
+  client.ev.on('call', async (call: WACallEvent[]) => {
+    if (bot.refuseCalls) {
+      const callFrom: string = call[0].chatId
+      const callStatus: WACallUpdateType = call[0].status
+      if (callStatus === 'offer') {
+        logger.info(`Refusing call from ${callFrom}`)
+        await client.rejectCall(call[0].id, call[0].from).catch(error => {
+          logger.error(`Error refusing call: ${error}`)
+        })
+      }
     }
   })
 
@@ -333,6 +355,12 @@ const stickerBot = async () => {
     logger.warn('No groups have been set!')
   } else {
     logger.info(`${totalGroups} group${totalGroups > 1 ? 's' : ''} have been set!`)
+  }
+
+  if (bot.refuseCalls) {
+    logger.info(`Refuse calls is ${colors.green}active${colors.reset}, the bot will reject all calls automatically!`)
+  } else {
+    logger.info(`Refuse calls ${colors.red}disabled${colors.reset}, the bot does not reject calls.`)
   }
 
   const port = 3000
