@@ -13,7 +13,7 @@ import {
 } from '@whiskeysockets/baileys'
 import { Sticker } from 'wa-sticker-formatter'
 
-import { getClient } from '../bot'
+import { getClient, getStore } from '../bot'
 import { stickerMeta } from '../config'
 import { getCache } from '../handlers/cache'
 import { addTextOnImage } from '../handlers/image'
@@ -206,18 +206,19 @@ export const makeSticker = async (
   message: WAMessage,
   isAnimated: boolean,
   phrases: string[] | undefined = undefined,
-  url: string | undefined = undefined
+  url: string | undefined = undefined,
+  quotedMsg: WAMessage
 ) => {
   if (isAnimated) {
     await react(message, spintax('{⏱|⏳|🕓|⏰}'))
   }
 
   let data = url ? url
-    : <Buffer>await downloadMediaMessage(message, 'buffer', {})
+    : <Buffer>await downloadMediaMessage(quotedMsg, 'buffer', {})
 
   if (!url) {
-    const mimeType = getMediaMessage(message)?.mimetype
-    if (phrases) {
+    const mimeType = getMediaMessage(quotedMsg)?.mimetype
+    if (phrases && !isAnimated) {
       data = await addTextOnImage(data as Buffer, mimeType!, phrases)
       if (!data) {
         logger.warn('API: textOnImage is down!')
@@ -269,14 +270,14 @@ export const logCommandExecution = (
   logger.info(`Sending ${commandName} @ ${identifier}`)
 }
 
-export const extractPhrasesFromCaption = (caption: string) => {
+export const extractPhrasesFromBodyOrCaption = (source: string) => {
   const client = getClient()
   const botMention = '@' + getPhoneFromJid(client.user?.id)
-  const phrases = caption.replaceAll(botMention, '')// Removes the bot mention
-    .split(';')
-    .filter(
-      phrase => phrase.trim()
-    )
+  const phrases = source.replaceAll(botMention, '')// Removes the bot mention
+    .replaceAll('\n', '')
+    .split(';')// Line splitter. ex: `Top text;Bottom text`
+    .map(phrase => phrase.trim())
+    .filter(phrase => phrase.length > 0)// Removes empty strings
     .slice(0, 2)
   return phrases
 }
@@ -293,4 +294,12 @@ export const isMentioned = (message: WAMessage, jid: string | undefined) => {
   if (!jid) return false
   const mentionedJids = getMentionedJids(message)
   return mentionedJids?.includes(jidNormalizedUser(jid))
+}
+
+export const getQuotedMessage = (message: WAMessage) => {
+  const store = getStore()
+  const quotedMsgId = message.message?.extendedTextMessage?.contextInfo?.stanzaId ||
+  message.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.stanzaId
+  const chatMessages = store.messages[message.key.remoteJid!]
+  return chatMessages?.get(quotedMsgId!)
 }

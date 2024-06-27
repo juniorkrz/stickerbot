@@ -2,6 +2,7 @@
 
 ## 🚀 Funcionalidades Novas
 
+- [x] Criar stickers de mensagens citadas
 - [ ] Carregar frases de um JSON
 - [ ] Adicionar thumbnail nas imagens do `sendStickerAsImage`
 - [ ] Limpeza automática de histórico/conversas
@@ -18,6 +19,7 @@
 - [x] Adicionar `Dependabot`
 - [x] Adicionar `ESLint`
 - [x] Implementar `makeSticker`
+- [ ] Aprimorar `makeSticker` (tem muitos argumentos, não tá legal)
 
 ## 🔍 Validações para Criar Sticker
 

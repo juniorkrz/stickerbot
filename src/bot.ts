@@ -20,10 +20,11 @@ import { WAMessageExtended } from './types/Message'
 import { drawArt } from './utils/art'
 import {
   amAdminOfGroup,
-  extractPhrasesFromCaption,
+  extractPhrasesFromBodyOrCaption,
   getBody,
   getCaption,
   getFullCachedGroupMetadata,
+  getQuotedMessage,
   getVideoMessage,
   groupFetchAllParticipatingJids,
   isMentioned,
@@ -193,11 +194,17 @@ const connectToWhatsApp = async () => {
         const body = getBody(message)
 
         if (body) {
-          handleText(message, body, group, isBotAdmin, isGroupAdmin, amAdmin)
-            .catch((error: Error) => {
+          try {
+            const result = await handleText(message, body, group, isBotAdmin, isGroupAdmin, amAdmin)
+            if (result) continue
+          } catch (error: unknown) {
+            if (error instanceof Error) {
               logger.error(`An error occurred while processing the message: ${error.message}`)
-            })
-          continue
+            } else {
+              logger.error('An error occurred while processing the message: An unexpected error occurred')
+            }
+            continue
+          }
         }
       }
 
@@ -219,43 +226,55 @@ const connectToWhatsApp = async () => {
             } */
 
       // Handle Image / GIF / Video message
+
+      const quotedMsg = getQuotedMessage(message)
+
+      const msg = quotedMsg ? quotedMsg : message
+
+      if (!msg) continue
+
       if (
-        message.message.imageMessage ||
-        message.message.videoMessage ||
-        message.message.ephemeralMessage?.message?.imageMessage ||
-        message.message.ephemeralMessage?.message?.videoMessage ||
-        message.message.viewOnceMessage?.message?.imageMessage ||
-        message.message.viewOnceMessage?.message?.videoMessage ||
-        message.message.viewOnceMessageV2?.message?.imageMessage ||
-        message.message.viewOnceMessageV2?.message?.videoMessage
+        msg.message?.imageMessage ||
+        msg.message?.videoMessage ||
+        msg.message?.ephemeralMessage?.message?.imageMessage ||
+        msg.message?.ephemeralMessage?.message?.videoMessage ||
+        msg.message?.viewOnceMessage?.message?.imageMessage ||
+        msg.message?.viewOnceMessage?.message?.videoMessage ||
+        msg.message?.viewOnceMessageV2?.message?.imageMessage ||
+        msg.message?.viewOnceMessageV2?.message?.videoMessage
       ) {
-        const isAnimated = getVideoMessage(message) ? true : false
+        const isAnimated = getVideoMessage(msg) ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
-        logCommandExecution(message, message.key.remoteJid, group, commandName)
-        const caption = getCaption(message)
-        if (caption) {
-          const phrases = extractPhrasesFromCaption(caption)
-          await makeSticker(message, isAnimated, phrases)
+        logCommandExecution(msg, message.key.remoteJid, group, commandName)
+        const source = quotedMsg ? getBody(message) : getCaption(message)
+        if (source) {
+          const phrases = extractPhrasesFromBodyOrCaption(source)
+          await makeSticker(message, isAnimated, phrases, undefined, msg)// TODO: This isn't cool, let's fix it later
         } else {
-          await makeSticker(message, isAnimated)
+          await makeSticker(message, isAnimated, undefined, undefined, msg)// TODO: This isn't cool, let's fix it later
         }
       }
 
       // Handle sticker message
       if (message.message.stickerMessage) {
-        // send sticker as image
-        logCommandExecution(message, message.key.remoteJid, group, 'Sticker as Image')
-        const image = (await downloadMediaMessage(
-          message,
-          'buffer',
-          {}
-        )) as Buffer
+        // Send sticker as image
+        try {
+          logCommandExecution(message, message.key.remoteJid, group, 'Sticker as Image')
+          const image = (await downloadMediaMessage(
+            message,
+            'buffer',
+            {}
+          )) as Buffer
 
-        await sendMessage(
-          { image },
-          message
-        )
-        continue
+          await sendMessage(
+            { image },
+            message
+          )
+          continue
+        } catch (error) {
+          // TODO: Error: EBUSY: resource busy or locked (on Windows)
+          logger.error(`An error occurred when converting the sticker to image: ${error}`)
+        }
       }
     }
   })

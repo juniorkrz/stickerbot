@@ -1,4 +1,4 @@
-import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata, proto, WAMessage } from '@whiskeysockets/baileys'
 import fs from 'fs'
 import { normalizeText } from 'normalize-text'
 import path from 'path'
@@ -42,7 +42,7 @@ export const handleText = async (
   isBotAdmin: boolean,
   isGroupAdmin: boolean,
   amAdmin: boolean
-): Promise<void> => {
+): Promise<proto.WebMessageInfo | undefined> => {
   const client = getClient()
 
   // Mark all messages as read
@@ -62,7 +62,7 @@ export const handleText = async (
     const command = actions[action.toUpperCase()]
     if (command) {
       logCommandExecution(message, jid, group, command.name)
-      await command.run(
+      return await command.run(
         jid,
         message,
         alias,

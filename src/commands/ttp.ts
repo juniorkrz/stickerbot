@@ -67,7 +67,7 @@ export const command: StickerBotCommand = {
 
     try {
       const url = `https://ttp.jrkrz.online/ttp?text=${encodeURIComponent(text)}`
-      return await makeSticker(message, false, undefined, url)
+      return await makeSticker(message, false, undefined, url, message)// TODO: This isn't cool, let's fix it later
     } catch (error) {
       logger.warn('API: ttp is down!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
