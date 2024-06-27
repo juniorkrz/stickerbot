@@ -60,10 +60,19 @@ Object.values(directories).forEach(dir => {
 let inWarmup = true
 
 let client: ReturnType<typeof makeWASocket>
-let store: ReturnType<typeof makeInMemoryStore>
 let qr: string | undefined
 let pairingCode: string | undefined
 
+// the store maintains the data of the WA connection in memory
+const store = makeInMemoryStore({ })
+// read from a file
+store.readFromFile(`${directories.creds}/baileys.json`)
+// saves the state to a file every 10s
+setInterval(() => {
+  store.writeToFile(`${directories.creds}/baileys.json`)
+}, 10_000)
+
+// to skip unread messages by environment variable or args
 const skipUnreadMessages = baileys.skipUnreadMessages || process.argv.includes('--skip-unread')
 
 // the moment the bot started
@@ -85,14 +94,6 @@ export const botStartedAt = (): moment.Moment => {
 }
 
 const connectToWhatsApp = async () => {
-  /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
-  store = makeInMemoryStore({ logger: Pino({ level: 'silent' }) as any })
-  store.readFromFile(`${directories.creds}/baileys.json`)
-
-  setInterval(async () => {
-    store.writeToFile(`${directories.store}/baileys.json`)
-  }, 10_000)
-
   const { state, saveCreds } = await useMultiFileAuthState(directories.creds)
 
   client = makeWASocket({
@@ -108,7 +109,8 @@ const connectToWhatsApp = async () => {
     logger.info(`Pairing code: ${pairingCode}`)
   }
 
-  store?.bind(client.ev)
+  // will listen from this client
+  store.bind(client.ev)
 
   client.ev.on('connection.update', (state) => (qr = state.qr))
   client.ev.on('creds.update', saveCreds)
@@ -116,8 +118,8 @@ const connectToWhatsApp = async () => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
       const isLogout =
-        (lastDisconnect?.error as Boom)?.output?.statusCode !==
-        DisconnectReason.loggedOut
+      (lastDisconnect?.error as Boom)?.output?.statusCode !==
+      DisconnectReason.loggedOut
       if (isLogout) {
         connectToWhatsApp()
       }
