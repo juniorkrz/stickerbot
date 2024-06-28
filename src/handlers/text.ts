@@ -9,6 +9,7 @@ import { logCommandExecution } from '../utils/baileysHelper'
 import { hasValidPrefix } from '../utils/misc'
 import { addCount } from './db'
 import { getLogger } from './logger'
+import { handleLimitedSender } from './senderUsage'
 
 const logger = getLogger()
 
@@ -37,6 +38,7 @@ export const printTotalLoadedCommands = () => {
 
 export const handleText = async (
   message: WAMessage,
+  sender: string,
   body: string,
   group: GroupMetadata | undefined,
   isBotAdmin: boolean,
@@ -55,24 +57,24 @@ export const handleText = async (
   const { alias, action } = await getTextAction(body)
 
   if (action && alias) {
+    // If sender is rate limited, do nothing
+    if (handleLimitedSender(message, jid, group, sender)) return
+
     // Add to Statistics
-    addCount(action)
+    logAction(message, jid, group, action)
 
     // Run command
     const command = actions[action.toUpperCase()]
-    if (command) {
-      logCommandExecution(message, jid, group, command.name)
-      return await command.run(
-        jid,
-        message,
-        alias,
-        body,
-        group,
-        isBotAdmin,
-        isGroupAdmin,
-        amAdmin
-      )
-    }
+    return await command.run(
+      jid,
+      message,
+      alias,
+      body,
+      group,
+      isBotAdmin,
+      isGroupAdmin,
+      amAdmin
+    )
   }
 }
 

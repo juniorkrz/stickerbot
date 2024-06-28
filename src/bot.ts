@@ -17,6 +17,7 @@ import { imageSync } from 'qr-image'
 
 import { baileys, bot } from './config'
 import { getLogger } from './handlers/logger'
+import { handleLimitedSender } from './handlers/senderUsage'
 import { handleText, printTotalLoadedCommands } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
 import { drawArt } from './utils/art'
@@ -182,17 +183,19 @@ const connectToWhatsApp = async () => {
       )
         continue
 
+      // Get the jid of the chat
+      const jid = message.key.remoteJid
       // Get the sender of the message
       const sender = message.key.participant
         ? message.key.participant
-        : message.key.remoteJid
+        : jid
       // Is the sender the Bot owner?
       const isBotAdmin = bot.admins.includes(sender.split('@')[0])
       // Is this a Group?
-      const isGroup = isJidGroup(message.key.remoteJid)
+      const isGroup = isJidGroup(jid)
       // If so, get the group
       const group = isGroup
-        ? await getFullCachedGroupMetadata(message.key.remoteJid)
+        ? await getFullCachedGroupMetadata(jid)
         : undefined
       // Is the sender an admin of the group?
       const isGroupAdmin = group
@@ -217,7 +220,7 @@ const connectToWhatsApp = async () => {
 
         if (body) {
           try {
-            const result = await handleText(message, body, group, isBotAdmin, isGroupAdmin, amAdmin)
+            const result = await handleText(message, sender, body, group, isBotAdmin, isGroupAdmin, amAdmin)
             if (result) continue
           } catch (error: unknown) {
             if (error instanceof Error) {
@@ -235,7 +238,7 @@ const connectToWhatsApp = async () => {
         // Was the bot mentioned?
         const botMentioned = isMentioned(message, client.user?.id)
         // Is it an official bot group?
-        const isBotGroup = bot.groups.includes(message.key.remoteJid)
+        const isBotGroup = bot.groups.includes(jid)
         // If the bot was not mentioned and it's not an official group, skip.
         if (!(botMentioned || isBotGroup))
           continue
@@ -265,6 +268,9 @@ const connectToWhatsApp = async () => {
         msg.message?.viewOnceMessageV2?.message?.imageMessage ||
         msg.message?.viewOnceMessageV2?.message?.videoMessage
       ) {
+        // If sender is rate limited, do nothing
+        if (handleLimitedSender(message, jid, group, sender)) return
+
         const isAnimated = getVideoMessage(msg) ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
         logCommandExecution(msg, message.key.remoteJid, group, commandName)
@@ -281,7 +287,10 @@ const connectToWhatsApp = async () => {
       if (message.message.stickerMessage) {
         // Send sticker as image
         try {
-          logCommandExecution(message, message.key.remoteJid, group, 'Sticker as Image')
+          // If sender is rate limited, do nothing
+          if (handleLimitedSender(message, jid, group, sender)) return
+
+          logAction(message, jid, group, 'Sticker as Image')
           const image = (await downloadMediaMessage(
             message,
             'buffer',

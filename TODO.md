@@ -9,7 +9,7 @@
 - [ ] Implementar `botSetup`
 - [ ] Logs no grupo de admins
 - [ ] Obrigar usuário a participar da comunidade (configurável)
-- [ ] Limite de taxa (10 mensagens/minuto por usuário)
+- [x] Limite de taxa (10 mensagens/minuto por usuário)
 - [ ] Sistema de banimento
   - [ ] `ban` / `banneds` / `unban`
 

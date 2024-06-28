@@ -25,6 +25,11 @@ export const bot = {
   refuseCalls: JSON.parse(process.env.SB_REFUSE_CALLS || 'false') as boolean,
   community: process.env.SB_COMMUNITY,
   prefixes: process.env.SB_PREFIXES ? process.env.SB_PREFIXES.split(';') : ['!'],
+  maxUsagePerTime: process.env.SB_MAX_USAGE_PER_TIME ?
+    process.env.SB_MAX_USAGE_PER_TIME.split(';')
+      .map(v => parseInt(v))
+      .slice(0, 2)
+    : [10, 60],
   admins: process.env.SB_ADMINS?.replaceAll(' ', '').split(
     ';'
   ) || [],
