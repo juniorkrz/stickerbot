@@ -31,7 +31,7 @@ import {
   getVideoMessage,
   groupFetchAllParticipatingJids,
   isMentioned,
-  logCommandExecution,
+  logAction,
   makeSticker,
   sendMessage
 } from './utils/baileysHelper'
@@ -273,7 +273,7 @@ const connectToWhatsApp = async () => {
 
         const isAnimated = getVideoMessage(msg) ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
-        logCommandExecution(msg, message.key.remoteJid, group, commandName)
+        logAction(msg, jid, group, commandName)
         const source = quotedMsg ? getBody(message) : getCaption(message)
         if (source) {
           const phrases = extractPhrasesFromBodyOrCaption(source)

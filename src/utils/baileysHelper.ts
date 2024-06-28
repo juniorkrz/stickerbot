@@ -16,6 +16,7 @@ import { Sticker } from 'wa-sticker-formatter'
 import { getClient, getStore } from '../bot'
 import { stickerMeta } from '../config'
 import { getCache } from '../handlers/cache'
+import { addCount } from '../handlers/db'
 import { addTextOnImage } from '../handlers/image'
 import { getLogger } from '../handlers/logger'
 import { spintax } from './misc'
@@ -257,17 +258,22 @@ export async function sendAudio(message: WAMessage, path: string) {
   )
 }
 
-export const logCommandExecution = (
+export const logAction = (
   message: WAMessage,
   jid: string,
   group: GroupMetadata | undefined,
-  commandName: string
+  action: string,
+  addToStatistics: boolean = true
 ) => {
   const requester = message.pushName || 'Desconhecido'
   const groupName = group ? group.subject : 'Desconhecido'
+
   const identifier = group ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
     : `${requester} (${jidDecode(jid)?.user})`
-  logger.info(`Sending ${commandName} @ ${identifier}`)
+
+  logger.info(`Sending ${action} @ ${identifier}`)
+
+  if (addToStatistics) addCount(action)
 }
 
 export const extractPhrasesFromBodyOrCaption = (source: string) => {

@@ -5,9 +5,8 @@ import path from 'path'
 
 import { getClient } from '../bot'
 import { CommandActions } from '../types/Command'
-import { logCommandExecution } from '../utils/baileysHelper'
+import { logAction } from '../utils/baileysHelper'
 import { hasValidPrefix } from '../utils/misc'
-import { addCount } from './db'
 import { getLogger } from './logger'
 import { handleLimitedSender } from './senderUsage'
 
