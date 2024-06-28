@@ -1,5 +1,5 @@
 import { colors } from './colors'
-import { getHomepage, getLocalVersion } from './misc'
+import { getProjectHomepage, getProjectInfo, getProjectLocalVersion } from './misc'
 
 const stickerBotArt: string = `
 ███████╗████████╗██╗ ██████╗██╗  ██╗███████╗██████╗ ██████╗  ██████╗ ████████╗
@@ -81,12 +81,19 @@ const drawLine = () => {
   console.log(`${colors.reset}${line}${colors.reset}`)
 }
 
-export const drawArt = () => {
+export const drawHeader = () => {
+  const projectInfo = getProjectInfo()
+
   drawLine()
   drawLogo()
   drawLine()
-  drawText(`${getHomepage()}`, 'center')
-  drawText(`v${getLocalVersion()}`, 'center')
+
+  if(projectInfo?.description) {
+    drawText(`${projectInfo.description}`, 'center')
+  }
+
+  drawText(`${getProjectHomepage()}`, 'center')
+  drawText(`v${getProjectLocalVersion()}`, 'center')
   drawLine()
   drawText('Developed by Krz', 'right', { padRight: 5 })
 }

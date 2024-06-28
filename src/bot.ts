@@ -20,7 +20,7 @@ import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
 import { handleText, printTotalLoadedCommands } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
-import { drawArt } from './utils/art'
+import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
   extractPhrasesFromBodyOrCaption,
@@ -39,7 +39,8 @@ import { colors } from './utils/colors'
 import {
   checkForUpdates,
   createDirectoryIfNotExists,
-  getLocalVersion
+  getProjectHomepage,
+  getProjectLocalVersion
 } from './utils/misc'
 
 // get the logger
@@ -315,7 +316,8 @@ app.get('/', (_req, res) => {
   res.json({
     status: 'ok',
     session: bot.sessionId,
-    version: getLocalVersion()
+    git: getProjectHomepage(),
+    version: getProjectLocalVersion()
   })
 })
 
@@ -347,7 +349,7 @@ app.post('/api/webhook', (req, res) => {
 })
 
 const stickerBot = async () => {
-  drawArt()
+  drawHeader()
   await checkForUpdates()
   printTotalLoadedCommands()
   await connectToWhatsApp()

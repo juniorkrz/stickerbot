@@ -18,7 +18,7 @@ export const createDirectoryIfNotExists = async (directory: string) => {
   }
 }
 
-export const getPackageInfo = () => {
+export const getProjectInfo = () => {
   try {
     const packageJsonPath = './package.json'
     const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8')
@@ -26,21 +26,21 @@ export const getPackageInfo = () => {
     return packageJson
   } catch (error) {
     if (error instanceof SyntaxError) {
-      console.error('Error reading local package.json:', error.message)
+      logger.error(`Error reading local package.json: ${error.message}`)
     } else {
-      console.error('Other error occurred:', error)
+      logger.error(`Other error occurred: ${error}`)
     }
     return null
   }
 }
 
-export const getLocalVersion = () => {
-  const info = getPackageInfo()
+export const getProjectLocalVersion = () => {
+  const info = getProjectInfo()
   return info ? info.version : null
 }
 
-export const getHomepage = () => {
-  const info = getPackageInfo()
+export const getProjectHomepage = () => {
+  const info = getProjectInfo()
   return info ? info.homepage.replace('#readme', '') : 'https://github.com/juniorkrz'
 }
 
@@ -87,8 +87,7 @@ const getJsonFromUrl = async (url: string) => {
   return false
 }
 
-
-const fetchVersionFromJson = async () => {
+const getProjectLatestVersion = async () => {
   try {
     const versionUrl = 'https://raw.githubusercontent.com/juniorkrz/stickerbot/main/package.json'// don't change it
     const json = await getJsonFromUrl(versionUrl)
@@ -104,8 +103,8 @@ const fetchVersionFromJson = async () => {
 
 export const checkForUpdates = async () => {
   logger.info('Checking for updates...')
-  const latestVersion = await fetchVersionFromJson()
-  const localVersion = await getLocalVersion()
+  const latestVersion = await getProjectLatestVersion()
+  const localVersion = await getProjectLocalVersion()
   if (!latestVersion || !localVersion) {
     logger.error('Failed to check for updates [!]')
   } else {
