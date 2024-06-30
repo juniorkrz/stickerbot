@@ -85,6 +85,9 @@ setInterval(() => {
 // to skip unread messages by environment variable or args
 const skipUnreadMessages = baileys.skipUnreadMessages || process.argv.includes('--skip-unread')
 
+// is the bot running in development?
+const dev = process.argv.includes('--dev')
+
 // the moment the bot started
 export const startedAt: moment.Moment = moment()
 
@@ -139,7 +142,8 @@ const connectToWhatsApp = async () => {
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
       await setupBot()
       logger.info(`${colors.purpleLight}${bot.name}${colors.reset} is ${colors.green}ready${colors.reset}!`)
-      sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
+      if (dev) logger.warn('Development mode is active!')
+      if (!dev) sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
     }
   })
 
