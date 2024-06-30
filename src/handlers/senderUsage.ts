@@ -2,7 +2,7 @@ import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
 import { SenderUsage } from 'types/SenderUsage'
 
 import { bot } from '../config'
-import { logAction, sendMessage } from '../utils/baileysHelper'
+import { getPhoneFromJid, logAction, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { spintax } from '../utils/misc'
 import { getCache } from './cache'
 
@@ -61,8 +61,8 @@ export const handleLimitedSender = async (
 
   // Alert sender if necessary
   if (senderUsage.shouldAlertSender) {
-    // TODO: Send log to admins group
     logAction(message, jid, group, 'Rate Limited Alert')
+    await sendLogToAdmins(`*[RATE LIMITED]:* User ${getPhoneFromJid(sender)} has been limited!`)
     await sendMessage(
       {
         text: spintax(

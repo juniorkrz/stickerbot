@@ -240,6 +240,7 @@ export const makeSticker = async (
       data = await addTextOnImage(data as Buffer, mimeType!, phrases)
       if (!data) {
         logger.warn('API: textOnImage is down!')
+        await sendLogToAdmins('*[API]:* textOnImage is down!')
         // TODO: Load texts from JSON
         const reply = '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
           'Por favor, tente novamente mais tarde.'
@@ -260,6 +261,25 @@ export const makeSticker = async (
   }
 
   return result
+}
+
+export const unmakeSticker = async (message: WAMessage) => {
+  // Send sticker as image
+  try {
+    const image = (await downloadMediaMessage(
+      message,
+      'buffer',
+      {}
+    )) as Buffer
+
+    await sendMessage(
+      { image },
+      message
+    )
+  } catch (error) {
+    // TODO: Error: EBUSY: resource busy or locked (on Windows)
+    logger.error(`An error occurred when converting the sticker to image: ${error}`)
+  }
 }
 
 export async function sendAudio(message: WAMessage, path: string) {
@@ -341,7 +361,7 @@ export const getAllGroupsFromCommunity = async (communityId: string) => {
     .filter(group => group.linkedParent == communityId)
 }
 
-export const sendLogToAdmins = async (text: string, mentions: string[] | undefined) => {
+export const sendLogToAdmins = async (text: string, mentions: string[] | undefined = undefined) => {
   if (!bot.logsGroup) return
 
   const client = getClient()

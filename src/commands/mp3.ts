@@ -7,7 +7,7 @@ import { getLogger } from '../handlers/logger'
 import { downloadYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { react, sendAudio, sendMessage } from '../utils/baileysHelper'
+import { react, sendAudio, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, getRandomItemFromArray, getTempFilePath, spintax } from '../utils/misc'
 
@@ -115,6 +115,7 @@ export const command: StickerBotCommand = {
 
 
     if (!audio || !duration) {
+      await sendLogToAdmins('*[ERROR]:* YouTube error!')
       await sendMessage({ text: spintax(replies.UNKNOWN_ERROR) }, message)
       await react(message, '❌')
       return

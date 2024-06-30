@@ -3,7 +3,6 @@ import makeWASocket, {
   areJidsSameUser,
   delay,
   DisconnectReason,
-  downloadMediaMessage,
   isJidGroup,
   makeInMemoryStore,
   useMultiFileAuthState,
@@ -36,7 +35,8 @@ import {
   isMentioned,
   logAction,
   makeSticker,
-  sendMessage
+  sendLogToAdmins,
+  unmakeSticker
 } from './utils/baileysHelper'
 import { colors } from './utils/colors'
 import {
@@ -138,6 +138,7 @@ const connectToWhatsApp = async () => {
       logger.info(`Opened ${colors.green}WhatsApp${colors.reset} connection`)
       //if (bot.community) console.log(await getAllGroupsFromCommunity(bot.community))
       //setupBot()
+      sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
     }
   })
 
@@ -304,28 +305,13 @@ const connectToWhatsApp = async () => {
 
       // Handle sticker message
       if (message.message.stickerMessage) {
+        // If sender is rate limited, do nothing
+        const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
+        if (isSenderRateLimited) return
+
         // Send sticker as image
-        try {
-          // If sender is rate limited, do nothing
-          const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
-          if (isSenderRateLimited) return
-
-          logAction(message, jid, group, 'Sticker as Image')
-          const image = (await downloadMediaMessage(
-            message,
-            'buffer',
-            {}
-          )) as Buffer
-
-          await sendMessage(
-            { image },
-            message
-          )
-          continue
-        } catch (error) {
-          // TODO: Error: EBUSY: resource busy or locked (on Windows)
-          logger.error(`An error occurred when converting the sticker to image: ${error}`)
-        }
+        logAction(message, jid, group, 'Sticker as Image')
+        unmakeSticker(message)
       }
     }
   })

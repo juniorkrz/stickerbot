@@ -4,7 +4,7 @@ import path from 'path'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { makeSticker, sendMessage } from '../utils/baileysHelper'
+import { makeSticker, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -71,6 +71,7 @@ export const command: StickerBotCommand = {
       return await makeSticker(message, false, undefined, url, message)// TODO: This isn't cool, let's fix it later
     } catch (error) {
       logger.warn('API: attp is down!')
+      await sendLogToAdmins('*[API]:* attp is down!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
       await sendMessage(
         { text: reply },

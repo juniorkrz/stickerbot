@@ -7,11 +7,11 @@
 - [ ] Adicionar thumbnail nas imagens do `sendStickerAsImage`
 - [ ] Limpeza automática de histórico/conversas
 - [ ] Implementar `botSetup`
-- [ ] Logs no grupo de admins
+- [x] Logs no grupo de admins
 - [ ] Obrigar usuário a participar da comunidade (configurável)
 - [x] Limite de taxa (10 mensagens/minuto por usuário)
-- [X] Sistema de banimento
-  - [X] `ban` / `banneds` / `unban`
+- [x] Sistema de banimento
+  - [x] `ban` / `banneds` / `unban`
 
 ## 🛠️ Melhorias e Correções
 
@@ -20,7 +20,7 @@
 - [x] Adicionar `ESLint`
 - [x] Implementar `makeSticker`
 - [ ] Aprimorar `makeSticker` (tem muitos argumentos, não tá legal)
-- [ ] Implementar `unmakeSticker`
+- [x] Implementar `unmakeSticker`
 
 ## 🔍 Validações para Criar Sticker
 
@@ -41,7 +41,7 @@
 - [x] `open` / `close`
 - [ ] `placa` / `fipe`
 - [x] `everyone`
-- [x] `invite`
+- [ ] `invite`
 - [x] `jid`
 - [ ] `kick`
 - [x] `link`
@@ -58,6 +58,8 @@
 - [x] `uptime`
 - [ ] `vcard`
 - [ ] `version`
+- [ ] `s` / `s2` / `s3`
+- [ ] `stickers`
 
 ## 👾 Bugs
 
