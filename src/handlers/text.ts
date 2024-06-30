@@ -101,8 +101,7 @@ export const getTextAction = async (
 
         // Extract prefix if present
         const prefix = action.needsPrefix && validPrefix ? body[0] : ''
-        const messageWithoutPrefix = body.startsWith(prefix) ? body.slice(1).trim() : body
-
+        const messageWithoutPrefix = body.startsWith(prefix) && action.needsPrefix ? body.slice(1).trim() : body
         // Checks if the message starts with the alias followed by a space or end of string
         if (messageWithoutPrefix === normalizedAlias || messageWithoutPrefix.startsWith(`${normalizedAlias} `)) {
           return {
