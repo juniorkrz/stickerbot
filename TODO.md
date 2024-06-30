@@ -45,7 +45,7 @@
 - [x] `jid`
 - [ ] `kick`
 - [x] `link`
-- [ ] `menu`
+- [x] `menu`
 - [x] `mp3`
 - [x] `ping`
 - [x] `pinga`
@@ -60,6 +60,7 @@
 - [ ] `version`
 - [ ] `s` / `s2` / `s3`
 - [ ] `stickers`
+- [ ] `Feedback`
 
 ## 👾 Bugs
 

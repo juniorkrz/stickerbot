@@ -19,7 +19,7 @@ const commandName = capitalize(path.basename(__filename, extension))
 export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['banidos'],
-  desc: 'Mostra os usuários banidos',
+  desc: 'Mostra os usuários banidos.',
   example: false,
   needsPrefix: true,
   inMaintenance: false,

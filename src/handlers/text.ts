@@ -16,20 +16,22 @@ const commandsDir = path.join(__dirname, '../commands')
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
 
 // Dynamically load exported commands from each file in the 'commands' folder
-const actions: CommandActions = {}
+export const actions: CommandActions = {}
 
-let totalCommandsLoaded = 0
 fs.readdirSync(commandsDir).forEach(file => {
   if (file.endsWith(extension)) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const commandModule = require(path.join(commandsDir, file))
     actions[commandModule.command.name.toUpperCase()] = commandModule.command
-    totalCommandsLoaded++
   }
 })
 
+export const getActions = () => {
+  return actions
+}
+
 export const getTotalCommandsLoaded = () => {
-  return totalCommandsLoaded
+  return Object.keys(actions).length
 }
 
 export const handleText = async (
