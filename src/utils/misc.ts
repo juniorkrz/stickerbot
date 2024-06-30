@@ -109,7 +109,8 @@ export const checkForUpdates = async () => {
     logger.error('Failed to check for updates [!]')
   } else {
     const isUpdated = compare(localVersion, latestVersion.version, '=')
-    const versionMessage = isUpdated ? `You're up to date! ${bot.name} running on v${localVersion}. Have fun! :)`
+    const versionMessage = isUpdated
+      ? `You're up to date! ${bot.name} running on v${localVersion}. Have fun! :)`
       : `New version available! => ${latestVersion.version} - You are running ${bot.name} on v${localVersion}! :(`
     const messageColor = isUpdated ? colors.green : colors.red
     logger.info(`${messageColor}${versionMessage}${colors.reset}`)

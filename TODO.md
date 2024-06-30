@@ -10,8 +10,8 @@
 - [ ] Logs no grupo de admins
 - [ ] Obrigar usuário a participar da comunidade (configurável)
 - [x] Limite de taxa (10 mensagens/minuto por usuário)
-- [ ] Sistema de banimento
-  - [ ] `ban` / `banneds` / `unban`
+- [X] Sistema de banimento
+  - [X] `ban` / `banneds` / `unban`
 
 ## 🛠️ Melhorias e Correções
 
@@ -20,6 +20,7 @@
 - [x] Adicionar `ESLint`
 - [x] Implementar `makeSticker`
 - [ ] Aprimorar `makeSticker` (tem muitos argumentos, não tá legal)
+- [ ] Implementar `unmakeSticker`
 
 ## 🔍 Validações para Criar Sticker
 

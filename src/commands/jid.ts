@@ -1,5 +1,6 @@
-import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
+import { WAMessageExtended } from 'types/Message'
 
 import { StickerBotCommand } from '../types/Command'
 import { sendMessage } from '../utils/baileysHelper'
@@ -30,7 +31,8 @@ export const command: StickerBotCommand = {
   limiter: {}, // do not touch this
   run: async (
     jid: string,
-    message: WAMessage,
+    sender: string,
+    message: WAMessageExtended,
     alias: string,
     body: string,
     group: GroupMetadata | undefined,

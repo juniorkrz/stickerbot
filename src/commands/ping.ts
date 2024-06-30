@@ -34,6 +34,7 @@ export const command: StickerBotCommand = {
   limiter: {}, // Não mecha nisso!
   run: async (
     jid: string, // ID do chat
+    sender: string,// JID do sender
     message: WAMessageExtended, // Mensagem (WAMessage)
     alias: string, // O alias que o usuário escolheu
     body: string, // Corpo da mensagem

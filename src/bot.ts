@@ -16,17 +16,20 @@ import Pino from 'pino'
 import { imageSync } from 'qr-image'
 
 import { baileys, bot } from './config'
+import { getAllBannedUsers, isUserBanned } from './handlers/db'
 import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
-import { handleText, printTotalLoadedCommands } from './handlers/text'
+import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
+  deleteMessage,
   extractPhrasesFromBodyOrCaption,
   getBody,
   getCaption,
   getFullCachedGroupMetadata,
+  getPhoneFromJid,
   getQuotedMessage,
   getVideoMessage,
   groupFetchAllParticipatingJids,
@@ -120,10 +123,10 @@ const connectToWhatsApp = async () => {
 
   client.ev.on('connection.update', (state) => (qr = state.qr))
   client.ev.on('creds.update', saveCreds)
-  client.ev.on('connection.update', (update) => {
+  client.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
-      logger.warn(`Lost ${colors.green}WhatsApp${colors.reset} connection`)
+      logger.warn(`Lost ${colors.green}WhatsApp${colors.yellow} connection`)
       const isLogout =
       (lastDisconnect?.error as Boom)?.output?.statusCode !==
       DisconnectReason.loggedOut
@@ -133,6 +136,7 @@ const connectToWhatsApp = async () => {
       }
     } else if (connection === 'open') {
       logger.info(`Opened ${colors.green}WhatsApp${colors.reset} connection`)
+      //if (bot.community) console.log(await getAllGroupsFromCommunity(bot.community))
       //setupBot()
     }
   })
@@ -190,14 +194,16 @@ const connectToWhatsApp = async () => {
       const sender = message.key.participant
         ? message.key.participant
         : jid
-      // Is the sender the Bot owner?
-      const isBotAdmin = bot.admins.includes(sender.split('@')[0])
       // Is this a Group?
       const isGroup = isJidGroup(jid)
       // If so, get the group
       const group = isGroup
         ? await getFullCachedGroupMetadata(jid)
         : undefined
+      // Get the sender phone
+      const phone = getPhoneFromJid(sender)
+      // Is the sender an bot admin?
+      const isBotAdmin = bot.admins.includes(phone)
       // Is the sender an admin of the group?
       const isGroupAdmin = group
         ? group.participants
@@ -206,9 +212,20 @@ const connectToWhatsApp = async () => {
         : false
       // Is the Bot an admin of the group?
       const amAdmin = amAdminOfGroup(group)
+      // Is sender banned?
+      const isBanned = phone
+        ? await isUserBanned(phone)
+        : false
 
       // Message local timestamp
       message.messageLocalTimestamp = Date.now()
+
+      // Delete messages of banned users, except Owner
+      if (!isBotAdmin && isBanned) {
+        await deleteMessage(message)
+        continue
+      }
+
 
       // Handle simple text message
       if (
@@ -270,7 +287,8 @@ const connectToWhatsApp = async () => {
         msg.message?.viewOnceMessageV2?.message?.videoMessage
       ) {
         // If sender is rate limited, do nothing
-        if (handleLimitedSender(message, jid, group, sender)) return
+        const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
+        if (isSenderRateLimited) return
 
         const isAnimated = getVideoMessage(msg) ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
@@ -289,7 +307,8 @@ const connectToWhatsApp = async () => {
         // Send sticker as image
         try {
           // If sender is rate limited, do nothing
-          if (handleLimitedSender(message, jid, group, sender)) return
+          const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
+          if (isSenderRateLimited) return
 
           logAction(message, jid, group, 'Sticker as Image')
           const image = (await downloadMediaMessage(
@@ -350,28 +369,48 @@ app.post('/api/webhook', (req, res) => {
 
 const stickerBot = async () => {
   drawHeader()
+
   await checkForUpdates()
-  printTotalLoadedCommands()
-  await connectToWhatsApp()
+
+  connectToWhatsApp()
+
+  const totalCommandsLoaded = getTotalCommandsLoaded()
+  if (totalCommandsLoaded == 0) {
+    logger.warn(`${colors.purpleLight}[COMMANDS]${colors.reset} No commands loaded`)
+  } else {
+    logger.info(`${colors.purpleLight}[COMMANDS]${colors.reset} ` +
+    `${totalCommandsLoaded} command${totalCommandsLoaded > 1 ? 's' : ''} have been loaded!`)
+  }
 
   const totalAdmins = bot.admins.length
   if (totalAdmins == 0) {
-    logger.warn('No admins were loaded!')
+    logger.warn(`${colors.yellow}[ADMINS]${colors.reset} No admins were loaded!`)
   } else {
-    logger.info(`${totalAdmins} admin${totalAdmins > 1 ? 's' : ''} loaded!`)
+    logger.info(`${colors.yellow}[ADMINS]${colors.reset} ${totalAdmins} admin${totalAdmins > 1 ? 's' : ''} loaded!`)
   }
 
   const totalGroups = bot.groups.length
   if (totalGroups == 0) {
-    logger.warn('No groups have been set!')
+    logger.warn(`${colors.blue}[GROUPS]${colors.reset} No groups have been set!`)
   } else {
-    logger.info(`${totalGroups} group${totalGroups > 1 ? 's' : ''} have been set!`)
+    logger.info(`${colors.blue}[GROUPS]${colors.reset} ${totalGroups} ` +
+    `group${totalGroups > 1 ? 's' : ''} have been set!`)
+  }
+
+  const banneds = await getAllBannedUsers()
+  const totalBanned = banneds.length
+  if (totalBanned == 0) {
+    logger.warn(`${colors.red}[BANS]${colors.reset} No users banned!`)
+  } else {
+    logger.info(`${colors.red}[BANS]${colors.reset} ${totalBanned} user${totalBanned > 1 ? 's' : ''} banned!`)
   }
 
   if (bot.refuseCalls) {
-    logger.info(`Refuse calls is ${colors.green}active${colors.reset}, the bot will reject all calls automatically!`)
+    logger.info(`${colors.green}[CALLS]${colors.reset} Refuse calls is ${colors.green}active${colors.reset}, ` +
+      'the bot will reject all calls automatically!')
   } else {
-    logger.info(`Refuse calls ${colors.red}disabled${colors.reset}, the bot does not reject calls.`)
+    logger.info(`${colors.green}[CALLS]${colors.reset} Refuse calls ${colors.red}disabled${colors.reset}, ` +
+      'the bot does not reject calls.')
   }
 
   const port = 3000

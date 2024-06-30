@@ -14,7 +14,7 @@ import {
 import { Sticker } from 'wa-sticker-formatter'
 
 import { getClient, getStore } from '../bot'
-import { stickerMeta } from '../config'
+import { bot, stickerMeta } from '../config'
 import { getCache } from '../handlers/cache'
 import { addCount } from '../handlers/db'
 import { addTextOnImage } from '../handlers/image'
@@ -23,12 +23,28 @@ import { spintax } from './misc'
 
 const logger = getLogger()
 
+export const getCachedGroupFetchAllParticipating = async (): Promise<{
+  [_: string]: GroupMetadata
+}> => {
+  const cache = getCache()
+  const data = cache.get('AllParticipating')
+  if (data) {
+    return data as {
+      [_: string]: GroupMetadata
+    }
+  }
+
+  const client = getClient()
+  const groups = await client.groupFetchAllParticipating()
+  cache.set('AllParticipating', groups, 30)
+  return groups
+}
+
 export const groupFetchAllParticipatingJids = async (): Promise<{
   [_: string]: string;
 }> => {
-  const client = getClient()
   const result: { [_: string]: string; } = {}
-  const groups = await client.groupFetchAllParticipating()
+  const groups = await getCachedGroupFetchAllParticipating()
   for (const group in groups) {
     result[group] = groups[group].subject
   }
@@ -164,11 +180,12 @@ export const getVideoMessage = (message: WAMessage) => {
   )
 }
 
-export const getMessageExpiration = (message: WAMessage) => {
+export const getMessageExpiration = (message: WAMessage | undefined) => {
+  if (!message) return
   return getMessage(message)?.contextInfo?.expiration
 }
 
-export const getMessageOptions = (message: WAMessage, quote: boolean): MiscMessageGenerationOptions => {
+export const getMessageOptions = (message: WAMessage | undefined, quote: boolean): MiscMessageGenerationOptions => {
   return {
     cachedGroupMetadata: getCachedGroupMetadata,
     quoted: quote ? message : undefined,
@@ -289,7 +306,7 @@ export const extractPhrasesFromBodyOrCaption = (source: string) => {
 }
 
 export const getPhoneFromJid = (jid: string | undefined) => {
-  return jidNormalizedUser(jid).split('@')[0]
+  return jidNormalizedUser(jid).replace(/\D/g, '')
 }
 
 export const getMentionedJids = (message: WAMessage) => {
@@ -308,4 +325,32 @@ export const getQuotedMessage = (message: WAMessage) => {
   message.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.stanzaId
   const chatMessages = store.messages[message.key.remoteJid!]
   return chatMessages?.get(quotedMsgId!)
+}
+
+export const deleteMessage = async (message: WAMessage) => {
+  await sendMessage(
+    { delete: message.key },
+    message,
+    false
+  )
+}
+
+export const getAllGroupsFromCommunity = async (communityId: string) => {
+  const allGroups = await getCachedGroupFetchAllParticipating()
+  return Object.values(allGroups)
+    .filter(group => group.linkedParent == communityId)
+}
+
+export const sendLogToAdmins = async (text: string, mentions: string[] | undefined) => {
+  if (!bot.logsGroup) return
+
+  const client = getClient()
+  return await client.sendMessage(
+    bot.logsGroup,
+    {
+      text: text,
+      mentions: mentions
+    },
+    getMessageOptions(undefined, false)
+  )
 }

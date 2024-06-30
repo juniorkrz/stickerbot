@@ -61,3 +61,7 @@ export const isUserBanned = async (user: string) => {
     (await db.get('SELECT COUNT(0) ct FROM Banned WHERE user = ?', user)).ct > 0
   )
 }
+
+export const getAllBannedUsers = async (): Promise<{ user: string }[]> => {
+  return await db.all('SELECT user FROM Banned')
+}

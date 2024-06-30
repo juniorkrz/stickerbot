@@ -1,9 +1,11 @@
-import { GroupMetadata, jidNormalizedUser, WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getClient } from '../bot'
+import { getAllBannedUsers } from '../handlers/db'
 import { StickerBotCommand } from '../types/Command'
-import { react, sendMessage } from '../utils/baileysHelper'
+import { WAMessageExtended } from '../types/Message'
+import { getMessageOptions, getPhoneFromJid, react } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -16,23 +18,23 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['todos', 'todas', 'tds', 'all', 'everyone'],
-  desc: 'Menciona todos os membros do grupo.',
-  example: 'olhem isso aqui!',
+  aliases: ['banidos'],
+  desc: 'Mostra os usuários banidos',
+  example: false,
   needsPrefix: true,
   inMaintenance: false,
-  runInPrivate: false,
+  runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,
-  onlyBotAdmin: false,
+  onlyBotAdmin: true,
   onlyAdmin: false,
   botMustBeAdmin: false,
-  interval: 30,
+  interval: 5,
   limiter: {}, // do not touch this
   run: async (
     jid: string,
     sender: string,
-    message: WAMessage,
+    message: WAMessageExtended,
     alias: string,
     body: string,
     group: GroupMetadata | undefined,
@@ -45,31 +47,26 @@ export const command: StickerBotCommand = {
       return
     }
 
-    // Mentions all group members except the bot.
+    const banneds = await getAllBannedUsers()
+    let response = '🚫 *Usuários banidos*\n'
 
-    const client = getClient()
-    const alert = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
-
-    if (!group) {
-      await react(message, '❌')
-      return
+    if (banneds.length == 0) {
+      response += '\nNenhum usuário banido'
+    } else {
+      banneds.forEach((banned, index) => {
+        const phone = getPhoneFromJid(banned.user)
+        if (phone) {
+          response += `\n${index + 1} - ${phone}`
+        }})
     }
 
-    const botJid = jidNormalizedUser(client.user?.id)
-    const participants = group.participants.filter(
-      participant => participant.id !== botJid)
-      .map(({ id }) => id)
-
-    const phrase = alert ?
-      `{📢|📣|⚠|❗|‼️} - ${alert}` :
-      '{📢|📣|⚠|❗|‼️} - {Atenção|Olhem isso|Prestem atenção|Ei}!'
-
-    return await sendMessage(
-      {
-        text: spintax(phrase),
-        mentions: participants
-      },
-      message
+    const client = getClient()
+    await react(message, '🤖')
+    return await client.sendMessage(
+      sender,
+      { text: spintax(response) },
+      getMessageOptions(message, false)
     )
+
   }
 }

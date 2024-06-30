@@ -12,6 +12,7 @@ export interface CommandLimiter {
 export interface CommandRunFunction {
     (
         jid: string,
+        sender: string,
         message: WAMessage,
         alias: string,
         body: string,

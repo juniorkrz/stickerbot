@@ -24,6 +24,7 @@ export const bot = {
   sendWarnings: JSON.parse(process.env.SB_SEND_WARNINGS || 'true') as boolean,
   refuseCalls: JSON.parse(process.env.SB_REFUSE_CALLS || 'false') as boolean,
   community: process.env.SB_COMMUNITY,
+  logsGroup: process.env.SB_LOGS_GROUP,
   prefixes: process.env.SB_PREFIXES ? process.env.SB_PREFIXES.split(';') : ['!'],
   maxUsagePerTime: process.env.SB_MAX_USAGE_PER_TIME ?
     process.env.SB_MAX_USAGE_PER_TIME.split(';')

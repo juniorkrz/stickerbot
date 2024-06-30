@@ -7,10 +7,7 @@ import { getClient } from '../bot'
 import { CommandActions } from '../types/Command'
 import { logAction } from '../utils/baileysHelper'
 import { hasValidPrefix } from '../utils/misc'
-import { getLogger } from './logger'
 import { handleLimitedSender } from './senderUsage'
-
-const logger = getLogger()
 
 // Directory where the commands are
 const commandsDir = path.join(__dirname, '../commands')
@@ -31,8 +28,8 @@ fs.readdirSync(commandsDir).forEach(file => {
   }
 })
 
-export const printTotalLoadedCommands = () => {
-  logger.info(`${totalCommandsLoaded} commands loaded!`)
+export const getTotalCommandsLoaded = () => {
+  return totalCommandsLoaded
 }
 
 export const handleText = async (
@@ -57,7 +54,8 @@ export const handleText = async (
 
   if (action && alias) {
     // If sender is rate limited, do nothing
-    if (handleLimitedSender(message, jid, group, sender)) return
+    const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
+    if (isSenderRateLimited) return
 
     // Add to Statistics
     logAction(message, jid, group, action)
@@ -66,6 +64,7 @@ export const handleText = async (
     const command = actions[action.toUpperCase()]
     return await command.run(
       jid,
+      sender,
       message,
       alias,
       body,

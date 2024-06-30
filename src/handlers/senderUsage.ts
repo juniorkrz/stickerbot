@@ -50,7 +50,7 @@ export const getSenderUsage = (sender: string) => {
   return usage
 }
 
-export const handleLimitedSender = (
+export const handleLimitedSender = async (
   message: WAMessage,
   jid: string,
   group: GroupMetadata | undefined,
@@ -63,7 +63,7 @@ export const handleLimitedSender = (
   if (senderUsage.shouldAlertSender) {
     // TODO: Send log to admins group
     logAction(message, jid, group, 'Rate Limited Alert')
-    sendMessage(
+    await sendMessage(
       {
         text: spintax(
           '🛑 {Ei|Opa|Ops}, {você|vc|tu} {atingiu|alcançou} o limite de solicitações. ' +

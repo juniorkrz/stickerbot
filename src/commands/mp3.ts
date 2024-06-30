@@ -37,6 +37,7 @@ export const command: StickerBotCommand = {
   limiter: {}, // do not touch this
   run: async (
     jid: string,
+    sender: string,
     message: WAMessageExtended,
     alias: string,
     body: string,
