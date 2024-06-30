@@ -36,6 +36,7 @@ import {
   logAction,
   makeSticker,
   sendLogToAdmins,
+  setupBot,
   unmakeSticker
 } from './utils/baileysHelper'
 import { colors } from './utils/colors'
@@ -126,18 +127,18 @@ const connectToWhatsApp = async () => {
   client.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
-      logger.warn(`Lost ${colors.green}WhatsApp${colors.yellow} connection`)
+      logger.warn(`${colors.green}[WA]${colors.yellow} Lost connection`)
       const isLogout =
       (lastDisconnect?.error as Boom)?.output?.statusCode !==
       DisconnectReason.loggedOut
       if (isLogout) {
-        logger.info(`Reconnecting to ${colors.green}WhatsApp${colors.reset}...`)
+        logger.info(`${colors.green}[WA]${colors.reset} Reconnecting...`)
         connectToWhatsApp()
       }
     } else if (connection === 'open') {
-      logger.info(`Opened ${colors.green}WhatsApp${colors.reset} connection`)
-      //if (bot.community) console.log(await getAllGroupsFromCommunity(bot.community))
-      //setupBot()
+      logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
+      await setupBot()
+      logger.info(`${colors.purpleLight}${bot.name}${colors.reset} is ${colors.green}ready${colors.reset}!`)
       sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
     }
   })
@@ -151,7 +152,7 @@ const connectToWhatsApp = async () => {
       const callFrom: string = call[0].chatId
       const callStatus: WACallUpdateType = call[0].status
       if (callStatus === 'offer') {
-        logger.info(`Refusing call from ${callFrom}`)
+        logger.info(`Refusing call from ${colors.green}${callFrom}${colors.reset}`)
         await client.rejectCall(call[0].id, call[0].from).catch(error => {
           logger.error(`Error refusing call: ${error}`)
         })
@@ -400,7 +401,8 @@ const stickerBot = async () => {
   }
 
   const port = 3000
-  app.listen(port, () => logger.info(`Web Server Started on port ${port}`))
+  app.listen(port, () =>logger.info(`${colors.blue}[WS]${colors.reset} ` +
+    `Started on port ${colors.green}${port}${colors.reset}`))
 }
 
 stickerBot()

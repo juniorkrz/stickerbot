@@ -19,7 +19,8 @@ import { getCache } from '../handlers/cache'
 import { addCount } from '../handlers/db'
 import { addTextOnImage } from '../handlers/image'
 import { getLogger } from '../handlers/logger'
-import { spintax } from './misc'
+import { colors } from './colors'
+import { getProjectLocalVersion, spintax } from './misc'
 
 const logger = getLogger()
 
@@ -302,13 +303,14 @@ export const logAction = (
   action: string,
   addToStatistics: boolean = true
 ) => {
-  const requester = message.pushName || 'Desconhecido'
-  const groupName = group ? group.subject : 'Desconhecido'
+  const requester = message.pushName || `${colors.red}Desconhecido${colors.reset}`
+  const groupName = group ? group.subject : `${colors.red}Desconhecido${colors.reset}`
 
-  const identifier = group ? `${groupName} (${jidDecode(jid)?.user}) for ${requester}`
-    : `${requester} (${jidDecode(jid)?.user})`
+  const identifier = group
+    ? `${groupName} (${colors.green}${jidDecode(jid)?.user}${colors.reset}) for ${requester}`
+    : `${requester} (${colors.green}${jidDecode(jid)?.user}${colors.reset})`
 
-  logger.info(`Sending ${action} @ ${identifier}`)
+  logger.info(`Sending ${colors.blue}${action}${colors.reset} @ ${identifier}`)
 
   if (addToStatistics) addCount(action)
 }
@@ -373,4 +375,70 @@ export const sendLogToAdmins = async (text: string, mentions: string[] | undefin
     },
     getMessageOptions(undefined, false)
   )
+}
+
+export const setupBot = async () => {
+  if (!bot.setup) {
+    return
+  }
+
+  logger.info(`${colors.green}[WA]${colors.reset} Setting up...`)
+  const client = getClient()
+
+  const status = await client.fetchStatus(jidNormalizedUser(client?.user?.id))
+  const botStatus = `${bot.status} | v${getProjectLocalVersion()}`
+  if (status?.status != botStatus) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting profile status`)
+    await client.updateProfileStatus(botStatus)
+  }
+
+  const privacySettings = await client.fetchPrivacySettings(true)
+
+  // Profile Name
+  if (client.user?.name != bot.name) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting profile name`)
+    await client.updateProfileName(bot.name)
+  }
+
+  // Last seen Privacy
+  if (privacySettings.last != bot.lastSeenPrivacy) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting last seen privacy`)
+    await client.updateLastSeenPrivacy(bot.lastSeenPrivacy)
+  }
+
+  // Online Privacy
+  if (privacySettings.online != bot.onlinePrivacy) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting online privacy`)
+    await client.updateOnlinePrivacy(bot.onlinePrivacy)
+  }
+
+  // Profile Pic Privacy
+  if (privacySettings.profile != bot.profilePicPrivacy) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic privacy`)
+    await client.updateProfilePicturePrivacy(bot.profilePicPrivacy)
+  }
+
+  // Status Privacy
+  if (privacySettings.status != bot.statusPrivacyValue) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting status privacy value`)
+    await client.updateStatusPrivacy(bot.statusPrivacyValue)
+  }
+
+  // Read Receipts Privacy
+  if (privacySettings.readreceipts != bot.readReceiptsPrivacy) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting read receipts privacy`)
+    await client.updateReadReceiptsPrivacy(bot.readReceiptsPrivacy)
+  }
+
+  // Groups Add Privacy
+  if (privacySettings.groupadd != bot.groupsAddPrivacy) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting groups add privacy`)
+    await client.updateGroupsAddPrivacy(bot.groupsAddPrivacy)
+  }
+
+  // Default Disappearing Mode
+  if (WA_DEFAULT_EPHEMERAL != bot.defaultDisappearingMode) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting default disappearing mode`)
+    await client.updateDefaultDisappearingMode(bot.defaultDisappearingMode)
+  }
 }

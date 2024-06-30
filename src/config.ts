@@ -1,3 +1,4 @@
+import { WAPrivacyOnlineValue, WAPrivacyValue, WAReadReceiptsValue } from '@whiskeysockets/baileys'
 import dotenv from 'dotenv'
 import { IStickerOptions } from 'wa-sticker-formatter'
 
@@ -21,6 +22,16 @@ export const baileys = {
 export const bot = {
   name: process.env.SB_NAME || 'StickerBot',
   sessionId: process.env.WA_SESSION_ID || 'stickerbot',
+  setup: JSON.parse(process.env.SB_SETUP || 'false') as boolean,
+  status: process.env.SB_STATUS || 'Developed by @juniorkrz',
+  //donationLink: process.env.SB_DONATION || 'pix@jrkrz.com',
+  lastSeenPrivacy: process.env.SB_LAST_SEEN_PRIVACY as WAPrivacyValue || 'all',
+  onlinePrivacy: process.env.SB_ONLINE_PRIVACY as WAPrivacyOnlineValue || 'all',
+  profilePicPrivacy: process.env.SB_PROFILE_PIC_PRIVACY as WAPrivacyValue || 'all',
+  statusPrivacyValue: process.env.SB_STATUS_PRIVACY as WAPrivacyValue || 'all',
+  readReceiptsPrivacy: process.env.SB_READ_RECEIPTS_PRIVACY as WAReadReceiptsValue || 'all',
+  groupsAddPrivacy: process.env.SB_GROUPS_ADD_PRIVACY as WAPrivacyValue || 'contact_blacklist',
+  defaultDisappearingMode: parseInt(process.env.SB_DEFAULT_DISAPPEARING_MODE || '604800') as number,
   sendWarnings: JSON.parse(process.env.SB_SEND_WARNINGS || 'true') as boolean,
   refuseCalls: JSON.parse(process.env.SB_REFUSE_CALLS || 'false') as boolean,
   community: process.env.SB_COMMUNITY,

@@ -4,9 +4,9 @@
 
 - [x] Criar stickers de mensagens citadas
 - [ ] Carregar frases de um JSON
-- [ ] Adicionar thumbnail nas imagens do `sendStickerAsImage`
+- [ ] Adicionar thumbnail nas imagens do `unmakeSticker`
 - [ ] Limpeza automática de histórico/conversas
-- [ ] Implementar `botSetup`
+- [x] Implementar `botSetup`
 - [x] Logs no grupo de admins
 - [ ] Obrigar usuário a participar da comunidade (configurável)
 - [x] Limite de taxa (10 mensagens/minuto por usuário)
@@ -63,4 +63,4 @@
 
 ## 👾 Bugs
 
-- [ ] `sendStickerAsImage` Error: EBUSY: resource busy or locked (on Windows)
+- [ ] `unmakeSticker` Error: EBUSY: resource busy or locked (on Windows)
