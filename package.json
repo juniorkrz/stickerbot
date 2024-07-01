@@ -56,7 +56,7 @@
     "@types/qrcode-terminal": "^0.12.2",
     "@typescript-eslint/eslint-plugin": "^6.18.1",
     "@typescript-eslint/parser": "^6.18.1",
-    "eslint-plugin-autofix": "^2.0.0",
+    "eslint-plugin-autofix": "^2.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jsdoc": "^48.4.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
