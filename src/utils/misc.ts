@@ -127,3 +127,9 @@ export const getTempFilePath = (filename: string): string => {
   const tempDir = os.tmpdir()
   return path.join(tempDir, filename)
 }
+
+export const getRandomImage = (dir: string): string => {
+  const files = fs.readdirSync(dir)
+  const randomIndex = Math.floor(Math.random() * files.length)
+  return path.join(dir, files[randomIndex])
+}
