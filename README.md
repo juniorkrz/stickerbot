@@ -71,9 +71,9 @@ Run:
 docker run -d --name stickerbot -p 3000:3000 -v [/your/data/folder]:/data juniorkrz/stickerbot
 ```
 
-### Como escanear o código QR
+### Como escanear o QR Code
 
-Assim que o contêiner estiver em execução, você precisará vincular seu telefone a ele. Para fazer isso, você tem algumas opções:
+Assim que o container estiver em execução, você precisará vincular seu telefone a ele. Para fazer isso, você tem algumas opções:
 
 - `http://localhost:3000/qr` para ver uma pequena página com o QR Code para digitalizar.
 - `docker logs -f stickerbot` para abrir o log. O QR será impresso lá. (Via Docker)
