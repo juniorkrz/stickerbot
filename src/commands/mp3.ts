@@ -56,9 +56,7 @@ export const command: StickerBotCommand = {
       amAdmin,
       command
     )
-    if (!check) {
-      return
-    }
+    if (!check) return
 
     // Baixa música do YouTube
     let url: string | undefined = body

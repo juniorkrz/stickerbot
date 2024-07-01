@@ -44,9 +44,7 @@ export const command: StickerBotCommand = {
     amAdmin: boolean
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
-    if (!check) {
-      return
-    }
+    if (!check) return
 
     const maxChars = 200
     const text = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()

@@ -43,9 +43,7 @@ export const command: StickerBotCommand = {
     amAdmin: boolean
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
-    if (!check) {
-      return
-    }
+    if (!check) return
 
     const banneds = await getAllBannedUsers()
     let response = '🚫 *Usuários banidos*\n'

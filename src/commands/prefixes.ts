@@ -42,9 +42,7 @@ export const command: StickerBotCommand = {
     amAdmin: boolean
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
-    if (!check) {
-      return
-    }
+    if (!check) return
 
     let response = '🔣 *Prefixos*\n\n'
     response += `O ${bot.name} aceita os seguintes prefixos:\n\n`

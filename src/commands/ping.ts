@@ -45,9 +45,7 @@ export const command: StickerBotCommand = {
   ) => {
     // Não modifique
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
-    if (!check) {
-      return
-    }
+    if (!check) return
 
     // Sinta-se livre para criar seu comando abaixo.
     // Tipo de retorno: Promise<proto.WebMessageInfo | undefined

@@ -51,9 +51,7 @@ export const command: StickerBotCommand = {
       amAdmin,
       command
     )
-    if (!check) {
-      return
-    }
+    if (!check) return
 
     // get the client
     const client = getClient()
