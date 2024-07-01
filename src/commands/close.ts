@@ -6,6 +6,7 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
+import { emojis } from '../utils/emojis'
 import { capitalize } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
@@ -60,6 +61,6 @@ export const command: StickerBotCommand = {
     await client.groupSettingUpdate(jid, 'announcement')
 
     // react success
-    return await react(message, '🔒')
+    return await react(message, emojis.close)
   }
 }

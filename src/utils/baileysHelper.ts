@@ -20,7 +20,8 @@ import { addCount } from '../handlers/db'
 import { addTextOnImage } from '../handlers/image'
 import { getLogger } from '../handlers/logger'
 import { colors } from './colors'
-import { getProjectLocalVersion, spintax } from './misc'
+import { emojis } from './emojis'
+import { getProjectLocalVersion, getRandomItemFromArray } from './misc'
 
 const logger = getLogger()
 
@@ -229,7 +230,7 @@ export const makeSticker = async (
   quotedMsg: WAMessage
 ) => {
   if (isAnimated) {
-    await react(message, spintax('{⏱|⏳|🕓|⏰}'))
+    await react(message, getRandomItemFromArray(emojis.wait))
   }
 
   let data = url ? url
@@ -258,7 +259,7 @@ export const makeSticker = async (
   const result = await sendMessage(await sticker.toMessage(), message, true)
 
   if (isAnimated) {
-    await react(message, spintax('{🤖|✅}'))
+    await react(message, getRandomItemFromArray(emojis.success))
   }
 
   return result

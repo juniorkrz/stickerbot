@@ -9,6 +9,7 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendAudio, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
+import { emojis } from '../utils/emojis'
 import { capitalize, getRandomItemFromArray, getTempFilePath, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
@@ -66,9 +67,9 @@ export const command: StickerBotCommand = {
 
     // TODO: Load texts from JSON
     const replies = {
-      UNKNOWN_ERROR: '❌ {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!',
+      UNKNOWN_ERROR: `${emojis.error} {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!`,
       MISSING_NAME_OR_LINK: '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o nome da música ou o link após o comando!',
-      VIDEO_IS_TOO_LONG: '{Foi mal|Ops|Eita|Ei|Opa}, eu {posso|consigo} baixar músicas, não CDs completos {🫤|🫠|🥲|🙃|🤨|🤯|🤗|😑}',
+      VIDEO_IS_TOO_LONG: `{Foi mal|Ops|Eita|Ei|Opa}, eu {posso|consigo} baixar músicas, não CDs completos ${getRandomItemFromArray(emojis.confused)}`,
       WAIT: [
         'Essa música é {boa|top|das boas|show}, {calma|espera|pera|aguenta} aí, já já te {envio|mando}...',
         'Eu {estava|tava} ouvindo essa {agorinha|agora}, vou te enviar, {pera|espera|já vai}...',
@@ -80,14 +81,14 @@ export const command: StickerBotCommand = {
         '{Calma|Espera|Pera|Aguenta} aí, a música {está|tá} quase saindo do {forno|forninho} digital, fresquinha e pronta para {você|tu|vc}!',
         '{Tô|Estou} acelerando o envio da música para {você|vc|tu}, em alguns {instantes|segundos} estará batendo na porta do seu {dispositivo|celular|aifone}!',
         '{Calma|Espera|Pera|Aguenta} aí {CNPJoto|Muçarelo|meu Samsungo|meu Tim Maio|meu Madonno|Calabreso}, eu já {tô|estou} {enviando|fazendo o upload|mandando}...',
-        'O que {você|vc|tu} me pede chorando que eu não faço {sorrindo|rindo}? {😁|😆|😄|🤣|😂}',
+        `O que {você|vc|tu} me pede chorando que eu não faço {sorrindo|rindo}? ${getRandomItemFromArray(emojis.happy)}`,
         'Calma ae paizão, já to baixando seu audio! a pressa é a inimiga da perfeição...'
       ]
     }
 
     if (!url) {
       await sendMessage({ text: spintax(replies.MISSING_NAME_OR_LINK) }, message)
-      await react(message, '❌')
+      await react(message, emojis.error)
       return
     }
 
@@ -100,7 +101,7 @@ export const command: StickerBotCommand = {
     const videoResult = await getYoutubeVideo(url)
     if (!videoResult) {
       await sendMessage({ text: spintax(replies.MISSING_NAME_OR_LINK) }, message)
-      await react(message, '❌')
+      await react(message, emojis.error)
       return
     }
 
@@ -115,14 +116,14 @@ export const command: StickerBotCommand = {
     if (!audio || !duration) {
       await sendLogToAdmins('*[ERROR]:* YouTube error!')
       await sendMessage({ text: spintax(replies.UNKNOWN_ERROR) }, message)
-      await react(message, '❌')
+      await react(message, emojis.error)
       return
     }
 
     // test duration
     if (duration > (10 * 60000)) { // maximum video duration is 10 minutes
       await sendMessage({ text: spintax(replies.VIDEO_IS_TOO_LONG) }, message)
-      await react(message, '❌')
+      await react(message, emojis.error)
       return
     }
 
@@ -130,7 +131,7 @@ export const command: StickerBotCommand = {
       { text: spintax(getRandomItemFromArray(replies.WAIT)) },
       message
     )
-    await react(message, spintax('{⏱|⏳|🕓|⏰}'))
+    await react(message, getRandomItemFromArray(emojis.wait))
 
     // set presence recording
     const client = getClient()
@@ -155,9 +156,9 @@ export const command: StickerBotCommand = {
     })
 
     if (result?.status == 1) {
-      return await react(message, spintax('{🎧|📻|🎶|🎹|🎸|🎤|🎺|🎼|🎙|🎚|🔈|🔊|🎵|🪗}'))
+      return await react(message, getRandomItemFromArray(emojis.music))
     } else {
-      await react(message, '❌')
+      await react(message, emojis.error)
     }
     return
   }

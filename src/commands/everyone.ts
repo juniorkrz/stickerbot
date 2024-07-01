@@ -5,6 +5,7 @@ import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
 import { react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
+import { emojis } from '../utils/emojis'
 import { capitalize, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
@@ -49,7 +50,7 @@ export const command: StickerBotCommand = {
     const alert = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
 
     if (!group) {
-      await react(message, '❌')
+      await react(message, emojis.error)
       return
     }
 

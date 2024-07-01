@@ -6,6 +6,7 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendLogToAdmins } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
+import { emojis } from '../utils/emojis'
 import { capitalize } from '../utils/misc'
 
 // Gets the logger
@@ -59,6 +60,6 @@ export const command: StickerBotCommand = {
     logger.warn('New feedback received!')
     console.log(feedback)
     sendLogToAdmins(feedback)
-    return await react(message, '🙏')
+    return await react(message, emojis.pray)
   }
 }

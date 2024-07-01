@@ -5,7 +5,8 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spintax } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -46,7 +47,7 @@ export const command: StickerBotCommand = {
     let response
 
     if (group) {
-      await react(message, '🤖')
+      await react(message, getRandomItemFromArray(emojis.success))
       response = group.desc || '¯\\_(ツ)_/¯'
     } else {
       response = '¯\\_(ツ)_/¯'

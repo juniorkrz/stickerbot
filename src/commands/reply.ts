@@ -7,7 +7,8 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { getBody, getQuotedMessage, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -53,7 +54,7 @@ export const command: StickerBotCommand = {
 
     // Get the quoted message
     const quotedMsg = getQuotedMessage(message)
-    if (!quotedMsg) return await react(message, '❌')
+    if (!quotedMsg) return await react(message, emojis.error)
 
     try {
       // Extract feedback JID and stanza ID from the quoted message
@@ -67,7 +68,7 @@ export const command: StickerBotCommand = {
       const chatMessages = store.messages[feedbackJid]
       const feedbackMsg = chatMessages?.get(stanzaId)
 
-      if (!feedbackMsg) return await react(message, '❌')
+      if (!feedbackMsg) return await react(message, emojis.error)
 
       // Prepare the response message
       let response = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
@@ -77,9 +78,9 @@ export const command: StickerBotCommand = {
       await sendMessage({ text: response }, feedbackMsg)
 
       // React to the message with a success emoji
-      return await react(message, '✅')
+      return await react(message, getRandomItemFromArray(emojis.success))
     } catch {
-      return await react(message, '❌')
+      return await react(message, emojis.error)
     }
   }
 }

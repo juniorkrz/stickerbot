@@ -16,7 +16,8 @@ import {
   sendMessage
 } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spintax } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the logger
 const logger = getLogger()
@@ -151,6 +152,6 @@ export const command: StickerBotCommand = {
     // If there is an admin group set, send log
     sendLogToAdmins(logs.slice(0, -1), [sender])
 
-    return await react(message, spintax('{🤖|✅}'))
+    return await react(message, getRandomItemFromArray(emojis.success))
   }
 }

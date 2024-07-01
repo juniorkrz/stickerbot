@@ -7,7 +7,8 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spintax } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
 //import { getClient } from '../bot'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
@@ -67,7 +68,8 @@ export const command: StickerBotCommand = {
     const ms = Date.now() - time
 
     // Mensagem a ser enviada
-    const responseMsg = `Pong! 🏓\n\n⏱ Tempo de resposta do {${bot.name}|bot} foi de *${ms}ms*.`
+    const responseMsg = `Pong! ${emojis.ping}\n\n${getRandomItemFromArray(emojis.wait)} ` +
+    `Tempo de resposta do {${bot.name}|bot} foi de *${ms}ms*.`
 
     const quote = true// true: envia a mensagem como resposta | false: envia a mensagem normal
 
@@ -77,6 +79,6 @@ export const command: StickerBotCommand = {
       quote
     )
 
-    return await react(message, '🏓')
+    return await react(message, emojis.ping)
   }
 }
