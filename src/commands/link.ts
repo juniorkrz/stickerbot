@@ -3,11 +3,15 @@ import path from 'path'
 
 import { getClient } from '../bot'
 import { bot } from '../config'
+import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
+
+// Gets the logger
+const logger = getLogger()
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -48,13 +52,17 @@ export const command: StickerBotCommand = {
     const client = getClient()
 
     if (bot.community){
-      const cmmCode = await client.groupInviteCode(bot.community)
-      if (cmmCode) {
-        return await sendMessage(
-          { text: spintax(`{Participe da|Entre na|Tire suas dúvidas na} comunidade oficial do *${bot.name}*! ` +
-            `💜\n\nhttps://chat.whatsapp.com/${cmmCode}`) },
-          message
-        )
+      try {
+        const cmmCode = await client.groupInviteCode(bot.community)
+        if (cmmCode) {
+          return await sendMessage(
+            { text: spintax(`{Participe da|Entre na|Tire suas dúvidas na} comunidade oficial do *${bot.name}*! ` +
+              `💜\n\nhttps://chat.whatsapp.com/${cmmCode}`) },
+            message
+          )
+        }
+      } catch (error) {
+        logger.error(`Error fetching community invite code: ${error}`)
       }
     }
 
