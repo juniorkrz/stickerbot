@@ -1,12 +1,13 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
-import { getLogger } from '../handlers/logger'
+import { getSimSimiResponse } from '../handlers/simsimi'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { makeSticker, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { getMentionedJids, getPhoneFromJid, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spintax } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -14,14 +15,12 @@ const extension = __filename.endsWith('.js') ? '.js' : '.ts'
 // Gets the file name without the .ts/.js extension
 const commandName = capitalize(path.basename(__filename, extension))
 
-const logger = getLogger()
-
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['ttp'],
-  desc: 'Cria uma figurinha com o texto fornecido.',
-  example: 'Olá mundo!',
+  aliases: ['simi', 'bot'],
+  desc: 'Responde mensagens usando a API SimSimi.',
+  example: 'salve mano, como você tá?',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -46,10 +45,23 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const maxChars = 200
-    const text = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    let query = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '')
 
-    if (!text) {
+    // Remove all mentions from the message
+    // TODO - improvement: Replace mentioned numbers with pushname?
+    const mentionedJids = getMentionedJids(message)
+    if (mentionedJids) {
+      mentionedJids.forEach(mentionedJid => {
+        const phone = getPhoneFromJid(mentionedJid)
+        const mentionPattern = new RegExp('@' + phone, 'g')
+        query = query.replace(mentionPattern, '')
+      })
+    }
+
+    // Remove extra spaces
+    query = query.replace(/\s{2,}/g, ' ').trim()
+
+    if (!query) {
       return await sendMessage(
         {
           text: spintax(`⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* `+
@@ -57,24 +69,26 @@ export const command: StickerBotCommand = {
         },
         message
       )
-    } else if (text.length > maxChars) {
-      return await sendMessage(
-        { text: spintax(`⚠ O texto deve ter no máximo *${maxChars}* caracteres!`) },
-        message
-      )
     }
 
-    try {
-      const url = `https://ttp.jrkrz.online/ttp?text=${encodeURIComponent(text)}`
-      return await makeSticker(message, false, undefined, url, message)// TODO: This isn't cool, let's fix it later
-    } catch (error) {
-      logger.warn('API: ttp is down!')
-      await sendLogToAdmins('*[API]:* ttp is down!')
+    await react(message, getRandomItemFromArray(emojis.wait))
+
+    const response = await getSimSimiResponse(query)
+
+    if (!response) {
+      await sendLogToAdmins('*[API]:* SimSimi is down!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
-      await sendMessage(
+      return await sendMessage(
         { text: reply },
         message
       )
     }
+
+    await sendMessage(
+      { text: '*Simi:* ' + response },
+      message
+    )
+
+    return await react(message, getRandomItemFromArray(emojis.simi))
   }
 }
