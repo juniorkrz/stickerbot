@@ -443,3 +443,30 @@ export const setupBot = async () => {
     await client.updateDefaultDisappearingMode(bot.defaultDisappearingMode)
   }
 }
+
+export const checkBotAdminStatus = async () => {
+  if (!bot.community) return true
+  logger.info('[MOD] Checking admin status in the community...')
+
+  const groups = await getAllGroupsFromCommunity(bot.community)
+  const community = await getFullCachedGroupMetadata(bot.community)
+
+  if (community) groups.push(community)
+
+  let logs = ''
+  for (const group of groups) {
+    const amAdmin = amAdminOfGroup(group)
+    if (!amAdmin) {
+      const log = `*[MOD]* ${bot.name} is not a admin of ${group.subject} (${group.id})`
+      logger.warn(log.replaceAll('*', ''))
+      logs += `${log}\n`
+    }
+  }
+
+  if (logs) {
+    logger.info('[MOD] Sending logs')
+    sendLogToAdmins(logs.slice(0, -1))
+  }
+
+  logger.info('[MOD] Check complete!')
+}

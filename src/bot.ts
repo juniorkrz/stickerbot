@@ -23,6 +23,7 @@ import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
+  checkBotAdminStatus,
   deleteMessage,
   extractPhrasesFromBodyOrCaption,
   getBody,
@@ -144,6 +145,7 @@ const connectToWhatsApp = async () => {
       logger.info(`${colors.purpleLight}${bot.name}${colors.reset} is ${colors.green}ready${colors.reset}!`)
       if (dev) logger.warn('Development mode is active!')
       if (!dev) sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
+      if (!dev) checkBotAdminStatus()
     }
   })
 
