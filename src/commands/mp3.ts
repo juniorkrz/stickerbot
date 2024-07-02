@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import fs from 'fs'
 import path from 'path'
