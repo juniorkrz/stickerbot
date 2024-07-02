@@ -52,5 +52,8 @@ export const bot = {
 
 // External APIs
 export const externalEndpoints = {
-  textOnImage: process.env.API_TEXT_ON_IMAGE || 'http://localhost:8000/addText'
+  // get your own api here: https://github.com/juniorkrz/text-on-image-api
+  textOnImage: process.env.TEXT_ON_IMAGE_API || 'http://localhost:7000',
+  // get your own api here: https://github.com/juniorkrz/placa-fipe-api
+  placaFipe: process.env.PLACA_FIPE_API || 'http://localhost:8000'
 }

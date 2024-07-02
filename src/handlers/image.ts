@@ -24,7 +24,7 @@ export async function addTextOnImage(imageBuffer: Buffer, mimeType: string, phra
       contentType: mimeType,
     })
 
-    const response = await axios.post(externalEndpoints.textOnImage, formData, {
+    const response = await axios.post(`${externalEndpoints.textOnImage}/addText`, formData, {
       headers: {
         ...formData.getHeaders()
       },
