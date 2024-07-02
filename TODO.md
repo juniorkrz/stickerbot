@@ -39,11 +39,11 @@
 
 - [x] `ttp` / `attp`
 - [x] `open` / `close`
-- [ ] `placa` / `fipe`
+- [x] `placa` / `fipe`
 - [x] `everyone`
 - [ ] `invite`
 - [x] `jid`
-- [ ] `kick`
+- [x] `kick`
 - [x] `link`
 - [x] `menu`
 - [x] `mp3`
