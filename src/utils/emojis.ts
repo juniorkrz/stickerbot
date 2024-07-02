@@ -14,5 +14,8 @@ export const emojis = {
   car: '🚗',
   bike:  '🏍',
   bus: '🚎',
-  truck: '🚚'
+  truck: '🚚',
+  heart: '💜',
+  promote: '⬆',
+  demote: '⬇'
 }
