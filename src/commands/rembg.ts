@@ -2,12 +2,16 @@ import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getLogger } from '../handlers/logger'
-import { makeSticker } from '../handlers/sticker'
+import { makeRembgSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { getImageMessage, getQuotedMessage, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spintax } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray } from '../utils/misc'
+
+// Gets the logger
+const logger = getLogger()
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -15,14 +19,12 @@ const extension = __filename.endsWith('.js') ? '.js' : '.ts'
 // Gets the file name without the .ts/.js extension
 const commandName = capitalize(path.basename(__filename, extension))
 
-const logger = getLogger()
-
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['attp'],
-  desc: 'Cria uma figurinha animada com o texto fornecido.',
-  example: 'Olá mundo!',
+  aliases: ['rembg', 'bg', 'recortar', 'recorte'],
+  desc: 'Cria um sticker removendo a imagem de fundo.',
+  example: false,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -31,7 +33,7 @@ export const command: StickerBotCommand = {
   onlyBotAdmin: false,
   onlyAdmin: false,
   botMustBeAdmin: false,
-  interval: 5,
+  interval: 0,
   limiter: {}, // do not touch this
   run: async (
     jid: string,
@@ -47,35 +49,30 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const maxChars = 200
-    const text = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    const quotedMsg = getQuotedMessage(message)
 
-    if (!text) {
-      return await sendMessage(
-        {
-          text: spintax(`⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* `+
-            '{você|vc|tu} {precisa|deve} {escrever|digitar} {um texto|algo} {após |depois d}o comando. {🧐|🫠|🥲|🙃|📝}')
-        },
-        message
-      )
-    } else if (text.length > maxChars) {
-      return await sendMessage(
-        { text: spintax(`⚠ O texto deve ter no máximo *${maxChars}* caracteres!`) },
-        message
-      )
-    }
+    const targetMessage = quotedMsg
+      ? quotedMsg
+      : message
 
-    try {
-      const url = `https://ttp.jrkrz.online/attp?text=${encodeURIComponent(text)}`
-      return await makeSticker(message, { url })
-    } catch (error) {
-      logger.warn('API: attp is down!')
-      await sendLogToAdmins('*[API]:* attp is down!')
+    const imageMessage = getImageMessage(targetMessage)
+
+    if (!imageMessage) return await react(message, emojis.error)
+
+    await react(message, getRandomItemFromArray(emojis.wait))
+
+    const result = await makeRembgSticker(message, targetMessage)
+
+    if (!result) {
+      logger.warn('API: rembg is down!')
+      await sendLogToAdmins('*[API]:* rembg is down!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
-      await sendMessage(
+      return await sendMessage(
         { text: reply },
         message
       )
     }
+
+    return await react(message, getRandomItemFromArray(emojis.success))
   }
 }

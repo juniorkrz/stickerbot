@@ -1,7 +1,6 @@
 import {
   AnyMessageContent,
   areJidsSameUser,
-  downloadMediaMessage,
   GroupMetadata,
   GroupMetadataParticipants,
   isJidGroup,
@@ -11,17 +10,14 @@ import {
   WA_DEFAULT_EPHEMERAL,
   WAMessage
 } from '@whiskeysockets/baileys'
-import { Sticker } from 'wa-sticker-formatter'
 
 import { getClient, getStore } from '../bot'
-import { bot, stickerMeta } from '../config'
+import { bot } from '../config'
 import { getCache } from '../handlers/cache'
 import { addCount } from '../handlers/db'
-import { addTextOnImage } from '../handlers/image'
 import { getLogger } from '../handlers/logger'
 import { colors } from './colors'
-import { emojis } from './emojis'
-import { getProjectLocalVersion, getRandomItemFromArray } from './misc'
+import { getProjectLocalVersion } from './misc'
 
 const logger = getLogger()
 
@@ -220,68 +216,6 @@ export const react = async (message: WAMessage, emoji: string) => {
     message,
     false
   )
-}
-
-export const makeSticker = async (
-  message: WAMessage,
-  isAnimated: boolean,
-  phrases: string[] | undefined = undefined,
-  url: string | undefined = undefined,
-  quotedMsg: WAMessage
-) => {
-  if (isAnimated) {
-    await react(message, getRandomItemFromArray(emojis.wait))
-  }
-
-  let data = url ? url
-    : <Buffer>await downloadMediaMessage(quotedMsg, 'buffer', {})
-
-  if (!url) {
-    const mimeType = getMediaMessage(quotedMsg)?.mimetype
-    if (phrases && !isAnimated) {
-      data = await addTextOnImage(data as Buffer, mimeType!, phrases)
-      if (!data) {
-        logger.warn('API: textOnImage is down!')
-        await sendLogToAdmins('*[API]:* textOnImage is down!')
-        // TODO: Load texts from JSON
-        const reply = '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
-          'Por favor, tente novamente mais tarde.'
-        await sendMessage(
-          { text: reply },
-          message
-        )
-        return
-      }
-    }
-  }
-
-  const sticker = new Sticker(data, stickerMeta)
-  const result = await sendMessage(await sticker.toMessage(), message, true)
-
-  if (isAnimated) {
-    await react(message, getRandomItemFromArray(emojis.success))
-  }
-
-  return result
-}
-
-export const unmakeSticker = async (message: WAMessage) => {
-  // Send sticker as image
-  try {
-    const image = (await downloadMediaMessage(
-      message,
-      'buffer',
-      {}
-    )) as Buffer
-
-    await sendMessage(
-      { image },
-      message
-    )
-  } catch (error) {
-    // TODO: Error: EBUSY: resource busy or locked (on Windows)
-    logger.error(`An error occurred when converting the sticker to image: ${error}`)
-  }
 }
 
 export async function sendAudio(message: WAMessage, path: string) {

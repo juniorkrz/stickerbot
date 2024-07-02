@@ -19,7 +19,7 @@
 - [x] Adicionar `Dependabot`
 - [x] Adicionar `ESLint`
 - [x] Implementar `makeSticker`
-- [ ] Aprimorar `makeSticker` (tem muitos argumentos, não tá legal)
+- [x] Aprimorar `makeSticker` (tem muitos argumentos, não tá legal)
 - [x] Implementar `unmakeSticker`
 
 ## 🔍 Validações para Criar Sticker
@@ -50,9 +50,9 @@
 - [x] `ping`
 - [x] `pinga`
 - [x] `pix`
-- [ ] `promote` / `demote`
+- [x] `promote` / `demote`
 - [x] `sorteio`
-- [ ] `rembg`
+- [x] `rembg`
 - [ ] `rename`
 - [ ] `toImg`
 - [x] `uptime`
@@ -60,7 +60,7 @@
 - [ ] `version`
 - [ ] `s` / `s2` / `s3`
 - [ ] `stickers`
-- [ ] `Feedback`
+- [x] `Feedback`
 
 ## 👾 Bugs
 

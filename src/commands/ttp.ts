@@ -2,9 +2,10 @@ import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getLogger } from '../handlers/logger'
+import { makeSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { makeSticker, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -66,7 +67,7 @@ export const command: StickerBotCommand = {
 
     try {
       const url = `https://ttp.jrkrz.online/ttp?text=${encodeURIComponent(text)}`
-      return await makeSticker(message, false, undefined, url, message)// TODO: This isn't cool, let's fix it later
+      return await makeSticker(message, { url })
     } catch (error) {
       logger.warn('API: ttp is down!')
       await sendLogToAdmins('*[API]:* ttp is down!')

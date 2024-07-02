@@ -18,6 +18,12 @@ import { baileys, bot } from './config'
 import { getAllBannedUsers, isUserBanned } from './handlers/db'
 import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
+import {
+  makeAnimatedSticker,
+  makeStaticSticker,
+  makeStaticStickerWithCaptions,
+  unmakeSticker
+} from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
@@ -35,10 +41,8 @@ import {
   groupFetchAllParticipatingJids,
   isMentioned,
   logAction,
-  makeSticker,
   sendLogToAdmins,
   setupBot,
-  unmakeSticker
 } from './utils/baileysHelper'
 import { colors } from './utils/colors'
 import {
@@ -241,11 +245,11 @@ const connectToWhatsApp = async () => {
         message.message.ephemeralMessage
       ) {
         // Body of message is different whether it's individual or group
-        const body = getBody(message)
+        const text = getBody(message) || getCaption(message)
 
-        if (body) {
+        if (text) {
           try {
-            const result = await handleText(message, sender, body, group, isBotAdmin, isGroupAdmin, amAdmin)
+            const result = await handleText(message, sender, text, group, isBotAdmin, isGroupAdmin, amAdmin)
             if (result) continue
           } catch (error: unknown) {
             if (error instanceof Error) {
@@ -303,9 +307,13 @@ const connectToWhatsApp = async () => {
         const source = quotedMsg ? getBody(message) : getCaption(message)
         if (source) {
           const phrases = extractPhrasesFromBodyOrCaption(source)
-          await makeSticker(message, isAnimated, phrases, undefined, msg)// TODO: This isn't cool, let's fix it later
+          await makeStaticStickerWithCaptions(message, msg, phrases)
         } else {
-          await makeSticker(message, isAnimated, undefined, undefined, msg)// TODO: This isn't cool, let's fix it later
+          if (isAnimated) {
+            await makeAnimatedSticker(msg)
+          } else {
+            await makeStaticSticker(msg)
+          }
         }
       }
 
@@ -317,7 +325,7 @@ const connectToWhatsApp = async () => {
 
         // Send sticker as image
         logAction(message, jid, group, 'Sticker as Image')
-        unmakeSticker(message)
+        await unmakeSticker(message)
       }
     }
   })
