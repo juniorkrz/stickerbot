@@ -149,8 +149,7 @@ const connectToWhatsApp = async () => {
     }
   })
 
-  /* client.ev.on('group-participants.update', async (event) => {
-  }) */
+  /* client.ev.on('group-participants.update', async (event) => {}) */
 
   // Refuse calls
   client.ev.on('call', async (call: WACallEvent[]) => {

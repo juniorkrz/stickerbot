@@ -24,7 +24,7 @@ export const bot = {
   sessionId: process.env.WA_SESSION_ID || 'stickerbot',
   setup: JSON.parse(process.env.SB_SETUP || 'false') as boolean,
   status: process.env.SB_STATUS || 'Developed by @juniorkrz',
-  //donationLink: process.env.SB_DONATION || 'pix@jrkrz.com',
+  donationLink: process.env.SB_DONATION || 'pix@jrkrz.com',
   lastSeenPrivacy: process.env.SB_LAST_SEEN_PRIVACY as WAPrivacyValue || 'all',
   onlinePrivacy: process.env.SB_ONLINE_PRIVACY as WAPrivacyOnlineValue || 'all',
   profilePicPrivacy: process.env.SB_PROFILE_PIC_PRIVACY as WAPrivacyValue || 'all',

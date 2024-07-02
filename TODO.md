@@ -41,7 +41,7 @@
 - [x] `open` / `close`
 - [x] `placa` / `fipe`
 - [x] `everyone`
-- [ ] `invite`
+- [x] `invite`
 - [x] `jid`
 - [x] `kick`
 - [x] `link`
@@ -49,7 +49,7 @@
 - [x] `mp3`
 - [x] `ping`
 - [x] `pinga`
-- [ ] `pix`
+- [x] `pix`
 - [ ] `promote` / `demote`
 - [x] `sorteio`
 - [ ] `rembg`
