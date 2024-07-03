@@ -65,3 +65,4 @@
 ## 👾 Bugs
 
 - [ ] `unmakeSticker` Error: EBUSY: resource busy or locked (on Windows)
+- [ ] `menu` Error: ENOENT: no such file or directory, scandir '/usr/src/app/dist/img/menu'
