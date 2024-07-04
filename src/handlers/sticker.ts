@@ -6,8 +6,8 @@ import { stickerMeta } from '../config'
 import { getMediaMessage, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { emojis } from '../utils/emojis'
 import { getRandomItemFromArray } from '../utils/misc'
-import { addTextOnImage } from './image'
 import { getLogger } from './logger'
+import { addCaptionOnImage } from './memeCaption'
 import { removeBackground } from './rembgApi'
 
 const logger = getLogger()
@@ -62,10 +62,10 @@ export const makeStaticStickerWithCaptions = async (
   const buffer = <Buffer>await downloadMediaMessage(mediaMessage, 'buffer', {})
   const mimeType = getMediaMessage(mediaMessage)?.mimetype
 
-  const data = await addTextOnImage(buffer, mimeType!, captions)
+  const data = await addCaptionOnImage(buffer, mimeType!, captions)
   if (!data) {
-    logger.warn('API: textOnImage is down!')
-    await sendLogToAdmins('*[API]:* textOnImage is down!')
+    logger.warn('API: memeCaption is down!')
+    await sendLogToAdmins('*[API]:* memeCaption is down!')
     // TODO: Load texts from JSON
     const reply = '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
       'Por favor, tente novamente mais tarde.'
