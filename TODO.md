@@ -9,6 +9,7 @@
 - [x] Implementar `botSetup`
 - [x] Logs no grupo de admins
 - [ ] Obrigar usuário a participar da comunidade (configurável)
+- [ ] Ignorar chat privado (configurável)
 - [x] Limite de taxa (10 mensagens/minuto por usuário)
 - [x] Sistema de banimento
   - [x] `ban` / `banneds` / `unban`
@@ -61,8 +62,9 @@
 - [ ] `s` / `s2` / `s3`
 - [ ] `stickers`
 - [x] `Feedback`
+- [ ] `Stats`
 
 ## 👾 Bugs
 
 - [ ] `unmakeSticker` Error: EBUSY: resource busy or locked (on Windows)
-- [ ] `menu` Error: ENOENT: no such file or directory, scandir '/usr/src/app/dist/img/menu'
+- [x] `menu` Error: ENOENT: no such file or directory, scandir '/usr/src/app/dist/img/menu'
