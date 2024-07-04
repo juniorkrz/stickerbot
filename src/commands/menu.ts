@@ -107,7 +107,7 @@ export const command: StickerBotCommand = {
     menu = menu.slice(0, -2)
     menu = menu.replace('{totalCommands}', totalCommands.toString())
 
-    const menuImgDir = path.join(__dirname, '../img/menu')
+    const menuImgDir = path.resolve(__dirname, '../../src/img/menu')
     const randomImage = getRandomImage(menuImgDir)
 
     return await sendMessage(
