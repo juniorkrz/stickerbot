@@ -81,10 +81,10 @@ let pairingCode: string | undefined
 // the store maintains the data of the WA connection in memory
 const store = makeInMemoryStore({ })
 // read from a file
-store.readFromFile(`${directories.creds}/baileys.json`)
+store.readFromFile(`${directories.store}/baileys.json`)
 // saves the state to a file every 10s
 setInterval(() => {
-  store.writeToFile(`${directories.creds}/baileys.json`)
+  store.writeToFile(`${directories.store}/baileys.json`)
 }, 10_000)
 
 // to skip unread messages by environment variable or args
