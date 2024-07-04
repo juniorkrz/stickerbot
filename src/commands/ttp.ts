@@ -1,4 +1,5 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
+import { externalEndpoints } from 'config'
 import path from 'path'
 
 import { getLogger } from '../handlers/logger'
@@ -66,7 +67,7 @@ export const command: StickerBotCommand = {
     }
 
     try {
-      const url = `https://ttp.jrkrz.online/ttp?text=${encodeURIComponent(text)}`
+      const url = `${externalEndpoints.ttp}/ttp?text=${encodeURIComponent(text)}`
       return await makeSticker(message, { url })
     } catch (error) {
       logger.warn('API: ttp is down!')
