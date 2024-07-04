@@ -1,6 +1,6 @@
 {
   "name": "stickerbot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A WhatsApp bot for creating stickers and much more.",
   "main": "bot.js",
   "scripts": {
