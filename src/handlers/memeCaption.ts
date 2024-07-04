@@ -6,7 +6,7 @@ import { getLogger } from './logger'
 
 const logger = getLogger()
 
-export async function addTextOnImage(imageBuffer: Buffer, mimeType: string, phrases: string[]) {
+export async function addCaptionOnImage(imageBuffer: Buffer, mimeType: string, phrases: string[]) {
   try {
     const formData = new FormData()
     // Append text fields
@@ -24,7 +24,7 @@ export async function addTextOnImage(imageBuffer: Buffer, mimeType: string, phra
       contentType: mimeType,
     })
 
-    const response = await axios.post(`${externalEndpoints.textOnImage}/addText`, formData, {
+    const response = await axios.post(`${externalEndpoints.memeCaption}/addCaption`, formData, {
       headers: {
         ...formData.getHeaders()
       },
@@ -34,9 +34,9 @@ export async function addTextOnImage(imageBuffer: Buffer, mimeType: string, phra
     return response.data
   } catch (error: unknown) {
     if (error instanceof Error) {
-      logger.error(`Error adding text on image: ${error.message}`)
+      logger.error(`Error adding caption on image: ${error.message}`)
     } else {
-      logger.error('Error adding text on image: An unexpected error occurred')
+      logger.error('Error adding caption on image: An unexpected error occurred')
     }
   }
 }

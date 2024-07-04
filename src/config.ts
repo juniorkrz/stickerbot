@@ -52,9 +52,9 @@ export const bot = {
 
 // External APIs
 export const externalEndpoints = {
-  // get your own api here: https://github.com/juniorkrz/text-on-image-api
-  textOnImage: process.env.TEXT_ON_IMAGE_API || 'http://localhost:6000',
-  // get your own api here: https://github.com/juniorkrz/text-on-image-api
+  // get your own api here: https://github.com/juniorkrz/meme-caption-api
+  memeCaption: process.env.MEME_CAPTION_API || 'http://localhost:6000',
+  // get your own api here: https://github.com/helv-io/api
   ttp: process.env.TTP_API || 'http://localhost:7000',
   // get your own api here: https://github.com/juniorkrz/placa-fipe-api
   placaFipe: process.env.PLACA_FIPE_API || 'http://localhost:8000',
