@@ -56,7 +56,7 @@ export const command: StickerBotCommand = {
       ? `${senderName} (${jidDecode(sender)?.user}) em ${groupName} (${jidDecode(jid)?.user})`
       : `${senderName} (${jidDecode(jid)?.user})`
 
-    const feedback = `${jid}_${message.key.id}\n\n${identifier}:\n${msg}`
+    const feedback = `${jid}_${message.key.id}\n\n*[FEEDBACK]*\n${identifier}:\n${msg}`
     logger.warn('New feedback received!')
     console.log(feedback)
     sendLogToAdmins(feedback)
