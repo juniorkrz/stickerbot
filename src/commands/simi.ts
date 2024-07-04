@@ -76,7 +76,7 @@ export const command: StickerBotCommand = {
     const response = await getSimSimiResponse(query)
 
     if (!response) {
-      await sendLogToAdmins('*[API]:* SimSimi is down!')
+      await sendLogToAdmins('*[API]:* SimSimi error!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
       return await sendMessage(
         { text: reply },

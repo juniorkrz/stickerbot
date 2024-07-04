@@ -143,7 +143,7 @@ export const command: StickerBotCommand = {
       ban(user)
 
       // Log bans
-      const currentMsg = `*[BAN SYSTEM]:* Admin @${getPhoneFromJid(sender)} banned ${getPhoneFromJid(user)}`
+      const currentMsg = `*[BANS]:* Admin @${getPhoneFromJid(sender)} baniu ${getPhoneFromJid(user)}`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
 

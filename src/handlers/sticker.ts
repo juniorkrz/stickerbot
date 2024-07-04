@@ -65,7 +65,7 @@ export const makeStaticStickerWithCaptions = async (
   const data = await addCaptionOnImage(buffer, mimeType!, captions)
   if (!data) {
     logger.warn('API: memeCaption is down!')
-    await sendLogToAdmins('*[API]:* memeCaption is down!')
+    await sendLogToAdmins('*[API]:* memeCaption está offline!')
     // TODO: Load texts from JSON
     const reply = '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
       'Por favor, tente novamente mais tarde.'

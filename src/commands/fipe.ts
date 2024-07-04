@@ -86,7 +86,7 @@ export const command: StickerBotCommand = {
         query = await fipe.fipeQuery(licensePlate)
       } catch (error) {
         logger.warn(`API: placaFipe is down! Error: ${error}`)
-        await sendLogToAdmins('*[API]:* placaFipe is down!')
+        await sendLogToAdmins('*[API]:* placaFipe está offline!')
         const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
         return await sendMessage(
           { text: reply },

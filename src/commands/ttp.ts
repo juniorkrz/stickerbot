@@ -71,7 +71,7 @@ export const command: StickerBotCommand = {
       return await makeSticker(message, { url })
     } catch (error) {
       logger.warn('API: ttp is down!')
-      await sendLogToAdmins('*[API]:* ttp is down!')
+      await sendLogToAdmins('*[API]:* ttp está offline!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
       await sendMessage(
         { text: reply },

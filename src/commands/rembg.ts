@@ -65,7 +65,7 @@ export const command: StickerBotCommand = {
 
     if (!result) {
       logger.warn('API: rembg is down!')
-      await sendLogToAdmins('*[API]:* rembg is down!')
+      await sendLogToAdmins('*[API]:* rembg está offline!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
       return await sendMessage(
         { text: reply },

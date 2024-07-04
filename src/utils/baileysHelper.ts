@@ -391,7 +391,7 @@ export const checkBotAdminStatus = async () => {
   for (const group of groups) {
     const amAdmin = amAdminOfGroup(group)
     if (!amAdmin) {
-      const log = `*[MOD]* ${bot.name} is not a admin of ${group.subject} (${group.id})`
+      const log = `*[MOD]* ${bot.name} não é um admin do ${group.subject} (${group.id})`
       logger.warn(log.replaceAll('*', ''))
       logs += `${log}\n`
     }
