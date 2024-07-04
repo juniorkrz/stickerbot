@@ -1,7 +1,7 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
-import { externalEndpoints } from 'config'
 import path from 'path'
 
+import { externalEndpoints } from '../config'
 import { getLogger } from '../handlers/logger'
 import { makeSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
