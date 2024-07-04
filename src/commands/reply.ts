@@ -27,8 +27,8 @@ export const command: StickerBotCommand = {
   runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,
-  onlyBotAdmin: false,
-  onlyAdmin: true,
+  onlyBotAdmin: true,
+  onlyAdmin: false,
   botMustBeAdmin: false,
   interval: 0,
   limiter: {}, // do not touch this
