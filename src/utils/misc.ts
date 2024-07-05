@@ -41,7 +41,7 @@ export const getProjectLocalVersion = () => {
 
 export const getProjectHomepage = () => {
   const info = getProjectInfo()
-  return info ? info.homepage.replace('#readme', '') : 'https://github.com/juniorkrz'
+  return info ? info.homepage.replace('#readme', '') : 'https://github.com/juniorkrz/stickerbot'
 }
 
 export const spintax = (text: string) => {
@@ -87,7 +87,7 @@ const getJsonFromUrl = async (url: string) => {
   return false
 }
 
-const getProjectLatestVersion = async () => {
+export const getProjectLatestVersion = async () => {
   try {
     const versionUrl = 'https://raw.githubusercontent.com/juniorkrz/stickerbot/main/package.json'// don't change it
     const json = await getJsonFromUrl(versionUrl)
@@ -132,4 +132,10 @@ export const getRandomImage = (dir: string): string => {
   const files = fs.readdirSync(dir)
   const randomIndex = Math.floor(Math.random() * files.length)
   return path.join(dir, files[randomIndex])
+}
+
+export const rPad = (string: string, length: number = 29, char: string = '.') => {
+  string = string.toString()
+  if (string.length >= length) return string
+  return string + ' ' + char.repeat(length - string.length - 2) + ' '
 }
