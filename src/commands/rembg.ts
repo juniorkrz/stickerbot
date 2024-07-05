@@ -1,11 +1,18 @@
-import { GroupMetadata } from '@whiskeysockets/baileys'
+import { extractMessageContent, GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getLogger } from '../handlers/logger'
 import { makeRembgSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { getImageMessage, getQuotedMessage, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import {
+  getImageMessageFromContent,
+  getQuotedMessage,
+  getStickerMessageFromContent,
+  react,
+  sendLogToAdmins,
+  sendMessage
+} from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
@@ -49,15 +56,35 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
+    // get quoted message
     const quotedMsg = getQuotedMessage(message)
 
+    // get target message
     const targetMessage = quotedMsg
       ? quotedMsg
       : message
 
-    const allowedMedia = getImageMessage(targetMessage) || targetMessage.message?.stickerMessage
+    // get message content
+    const content = extractMessageContent(targetMessage.message)
 
-    if (!allowedMedia) return await sendMessage(
+    // if you can't find the content, send an error message
+    if (!content) return await sendMessage(
+      {
+        text: spintax(
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível encontrar o conteúdo da mensagem.'
+        )
+      },
+      message
+    )
+
+    // is the content allowed?
+    const isContentAllowed = (
+      getImageMessageFromContent(content) ||
+      getStickerMessageFromContent(content)
+    )
+
+    // if not, send an error message
+    if (!isContentAllowed) return await sendMessage(
       {
         text: spintax(
           `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
@@ -67,10 +94,13 @@ export const command: StickerBotCommand = {
       message
     )
 
+    // react wait
     await react(message, getRandomItemFromArray(emojis.wait))
 
+    // make sticker
     const result = await makeRembgSticker(message, targetMessage)
 
+    // if something goes wrong, notify the user and admins
     if (!result) {
       logger.warn('API: rembg is down!')
       await sendLogToAdmins('*[API]:* rembg está offline!')
@@ -81,6 +111,7 @@ export const command: StickerBotCommand = {
       )
     }
 
+    // react success
     return await react(message, getRandomItemFromArray(emojis.success))
   }
 }

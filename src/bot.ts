@@ -3,6 +3,7 @@ import makeWASocket, {
   areJidsSameUser,
   delay,
   DisconnectReason,
+  extractMessageContent,
   isJidGroup,
   makeInMemoryStore,
   useMultiFileAuthState,
@@ -35,9 +36,11 @@ import {
   getBody,
   getCaption,
   getFullCachedGroupMetadata,
+  getImageMessageFromContent,
   getPhoneFromJid,
   getQuotedMessage,
-  getVideoMessage,
+  getStickerMessageFromContent,
+  getVideoMessageFromContent,
   groupFetchAllParticipatingJids,
   isMentioned,
   logAction,
@@ -287,21 +290,20 @@ const connectToWhatsApp = async () => {
 
       if (!msg) continue
 
+      // Extract message content
+      const content = extractMessageContent(msg.message)
+
+      if (!content) continue
+
       if (
-        msg.message?.imageMessage ||
-        msg.message?.videoMessage ||
-        msg.message?.ephemeralMessage?.message?.imageMessage ||
-        msg.message?.ephemeralMessage?.message?.videoMessage ||
-        msg.message?.viewOnceMessage?.message?.imageMessage ||
-        msg.message?.viewOnceMessage?.message?.videoMessage ||
-        msg.message?.viewOnceMessageV2?.message?.imageMessage ||
-        msg.message?.viewOnceMessageV2?.message?.videoMessage
+        getImageMessageFromContent(content) ||
+        getVideoMessageFromContent(content)
       ) {
         // If sender is rate limited, do nothing
         const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
         if (isSenderRateLimited) return
 
-        const isAnimated = getVideoMessage(msg) ? true : false
+        const isAnimated = content.videoMessage ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
         logAction(msg, jid, group, commandName)
         if (isAnimated) {
@@ -319,7 +321,7 @@ const connectToWhatsApp = async () => {
       }
 
       // Handle sticker message
-      if (msg.message?.stickerMessage) {
+      if (getStickerMessageFromContent(content)) {
         // If sender is rate limited, do nothing
         const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
         if (isSenderRateLimited) return

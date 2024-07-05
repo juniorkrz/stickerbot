@@ -1,6 +1,7 @@
 import {
   AnyMessageContent,
   areJidsSameUser,
+  extractMessageContent,
   GroupMetadata,
   GroupMetadataParticipants,
   isJidGroup,
@@ -8,7 +9,8 @@ import {
   jidNormalizedUser,
   MiscMessageGenerationOptions,
   WA_DEFAULT_EPHEMERAL,
-  WAMessage
+  WAMessage,
+  WAMessageContent
 } from '@whiskeysockets/baileys'
 
 import { getClient, getStore } from '../bot'
@@ -135,50 +137,35 @@ export const getCaption = (message: WAMessage) => {
 }
 
 export const getMessage = (message: WAMessage) => {
+  const content = extractMessageContent(message.message)
   return (
-    message?.message?.extendedTextMessage ||// text
-    message?.message?.ephemeralMessage?.message?.extendedTextMessage ||// ephemeral text
-    message?.message?.imageMessage ||// image
-    message?.message?.videoMessage ||// video
-    message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
-    message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
-    message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
-    message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
-    message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-    message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
+    content?.extendedTextMessage ||
+    content?.imageMessage ||
+    content?.videoMessage ||
+    content?.stickerMessage
+  )
 }
 
 
 export const getMediaMessage = (message: WAMessage) => {
+  const content = extractMessageContent(message.message)
   return (
-    message?.message?.imageMessage ||// image
-    message?.message?.videoMessage ||// video
-    message?.message?.ephemeralMessage?.message?.imageMessage ||// ephemeral image
-    message?.message?.ephemeralMessage?.message?.videoMessage ||// ephemeral video
-    message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
-    message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
-    message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-    message?.message?.viewOnceMessageV2?.message?.videoMessage ||// viewonce v2 video
-    message?.message?.stickerMessage// sticker message
+    content?.imageMessage ||
+    content?.videoMessage ||
+    content?.stickerMessage
   )
 }
 
-export const getImageMessage = (message: WAMessage) => {
-  return (
-    message.message?.imageMessage ||
-    message.message?.ephemeralMessage?.message?.imageMessage ||
-    message.message?.viewOnceMessage?.message?.imageMessage ||
-    message.message?.viewOnceMessageV2?.message?.imageMessage
-  )
+export const getImageMessageFromContent = (content: WAMessageContent) => {
+  return content?.imageMessage
 }
 
-export const getVideoMessage = (message: WAMessage) => {
-  return (
-    message.message?.videoMessage ||
-    message.message?.ephemeralMessage?.message?.videoMessage ||
-    message.message?.viewOnceMessage?.message?.videoMessage ||
-    message.message?.viewOnceMessageV2?.message?.videoMessage
-  )
+export const getVideoMessageFromContent = (content: WAMessageContent) => {
+  return content?.videoMessage
+}
+
+export const getStickerMessageFromContent = (content: WAMessageContent) => {
+  return content?.stickerMessage
 }
 
 export const getMessageExpiration = (message: WAMessage | undefined) => {
