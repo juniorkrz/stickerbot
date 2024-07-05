@@ -8,7 +8,7 @@ import { WAMessageExtended } from '../types/Message'
 import { getImageMessage, getQuotedMessage, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
-import { capitalize, getRandomItemFromArray } from '../utils/misc'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the logger
 const logger = getLogger()
@@ -55,9 +55,17 @@ export const command: StickerBotCommand = {
       ? quotedMsg
       : message
 
-    const imageMessage = getImageMessage(targetMessage)
+    const allowedMedia = getImageMessage(targetMessage) || targetMessage.message?.stickerMessage
 
-    if (!imageMessage) return await react(message, emojis.error)
+    if (!allowedMedia) return await sendMessage(
+      {
+        text: spintax(
+          `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
+          '{você|vc|tu} {deve|precisa} responder a um{ sticker|a figurinha} ou imagem com o comando.'
+        )
+      },
+      message
+    )
 
     await react(message, getRandomItemFromArray(emojis.wait))
 
