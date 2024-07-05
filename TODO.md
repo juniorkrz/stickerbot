@@ -25,6 +25,7 @@
 
 ## 🔍 Validações para Criar Sticker
 
+- [ ] Unmakesticker apenas por comando (toImg)
 - [x] Chat privado
 - [x] Grupos
   - [x] Criar se for mencionado
@@ -34,7 +35,7 @@
 
 - [x] Texto em imagem
 - [ ] Texto em vídeo
-- [ ] Texto em sticker
+- [x] Texto em sticker
 
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
@@ -54,15 +55,15 @@
 - [x] `promote` / `demote`
 - [x] `sorteio`
 - [x] `rembg`
-- [ ] `rename`
+- [x] `rename`
 - [ ] `toImg`
 - [x] `uptime`
-- [ ] `vcard`
-- [ ] `version`
+- [x] `vcard`
+- [x] `version`
 - [ ] `s` / `s2` / `s3`
 - [ ] `stickers`
 - [x] `Feedback`
-- [ ] `Stats`
+- [x] `Stats`
 
 ## 👾 Bugs
 
