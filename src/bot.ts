@@ -315,17 +315,27 @@ const connectToWhatsApp = async () => {
             await makeStaticSticker(msg)
           }
         }
+        continue
       }
 
       // Handle sticker message
-      if (message.message.stickerMessage) {
+      if (msg.message?.stickerMessage) {
         // If sender is rate limited, do nothing
         const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
         if (isSenderRateLimited) return
 
-        // Send sticker as image
-        logAction(message, jid, group, 'Sticker as Image')
-        await unmakeSticker(message)
+        const source = quotedMsg ? getBody(message) : getCaption(message)
+        if (source) {
+          // Send sticker with caption
+          logAction(message, jid, group, 'Sticker with Caption')
+          const phrases = extractPhrasesFromBodyOrCaption(source)
+          await makeStaticStickerWithCaptions(message, msg, phrases)
+        } else {
+          // Send sticker as image
+          logAction(message, jid, group, 'Sticker as Image')
+          await unmakeSticker(message)
+        }
+        continue
       }
     }
   })

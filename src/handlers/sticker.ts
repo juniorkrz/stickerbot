@@ -5,7 +5,7 @@ import Sticker from 'wa-sticker-formatter'
 import { stickerMeta } from '../config'
 import { getMediaMessage, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { emojis } from '../utils/emojis'
-import { getRandomItemFromArray } from '../utils/misc'
+import { getRandomItemFromArray, spintax } from '../utils/misc'
 import { getLogger } from './logger'
 import { addCaptionOnImage } from './memeCaption'
 import { removeBackground } from './rembgApi'
@@ -61,16 +61,18 @@ export const makeStaticStickerWithCaptions = async (
 
   const buffer = <Buffer>await downloadMediaMessage(mediaMessage, 'buffer', {})
   const mimeType = getMediaMessage(mediaMessage)?.mimetype
+  console.log(buffer, mimeType!, captions)
 
   const data = await addCaptionOnImage(buffer, mimeType!, captions)
+  console.log(data)
   if (!data) {
     logger.warn('API: memeCaption is down!')
-    await sendLogToAdmins('*[API]:* memeCaption está offline!')
+    await sendLogToAdmins('*[API]:* memeCaption error!')
     // TODO: Load texts from JSON
-    const reply = '⚠ Desculpe, o serviço de "Textos em Sticker" está indisponível no momento. ' +
-      'Por favor, tente novamente mais tarde.'
+    const reply = '⚠ Desculpe, algo deu errado ao criar seu sticker. ' +
+      '{Por favor, tente novamente mais tarde|Se o erro persistir, informe ao desenvolvedor na comunidade do bot}.'
     return await sendMessage(
-      { text: reply },
+      { text: spintax(reply) },
       message
     )
   }
@@ -81,9 +83,13 @@ export const makeStaticStickerWithCaptions = async (
 
 export const makeRembgSticker = async (message: WAMessage, quotedMsg: WAMessage | undefined = undefined) => {
   try {
-    const result = makeSticker(message, { rembg: true,
-      quotedMsg: quotedMsg })
-    return result
+    return await makeSticker(
+      message,
+      {
+        rembg: true,
+        quotedMsg: quotedMsg
+      }
+    )
   } catch (error) {
     return
   }

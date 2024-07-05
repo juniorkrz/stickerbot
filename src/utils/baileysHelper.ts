@@ -130,7 +130,8 @@ export const getBody = (message: WAMessage) => {
 }
 
 export const getCaption = (message: WAMessage) => {
-  return getMediaMessage(message)?.caption
+  const media = getMediaMessage(message)
+  if (media && 'caption' in media) return media.caption
 }
 
 export const getMessage = (message: WAMessage) => {
@@ -157,7 +158,9 @@ export const getMediaMessage = (message: WAMessage) => {
     message?.message?.viewOnceMessage?.message?.imageMessage ||// viewonce image
     message?.message?.viewOnceMessage?.message?.videoMessage ||// viewonce video
     message?.message?.viewOnceMessageV2?.message?.imageMessage ||// viewonce v2 image
-    message?.message?.viewOnceMessageV2?.message?.videoMessage)// viewonce v2 video
+    message?.message?.viewOnceMessageV2?.message?.videoMessage ||// viewonce v2 video
+    message?.message?.stickerMessage// sticker message
+  )
 }
 
 export const getImageMessage = (message: WAMessage) => {
