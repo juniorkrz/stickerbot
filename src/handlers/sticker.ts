@@ -61,10 +61,8 @@ export const makeStaticStickerWithCaptions = async (
 
   const buffer = <Buffer>await downloadMediaMessage(mediaMessage, 'buffer', {})
   const mimeType = getMediaMessage(mediaMessage)?.mimetype
-  console.log(buffer, mimeType!, captions)
 
   const data = await addCaptionOnImage(buffer, mimeType!, captions)
-  console.log(data)
   if (!data) {
     logger.warn('API: memeCaption is down!')
     await sendLogToAdmins('*[API]:* memeCaption error!')
