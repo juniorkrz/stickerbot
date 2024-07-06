@@ -45,7 +45,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    let query = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '')
+    let query = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '')
 
     // Remove all mentions from the message
     // TODO - improvement: Replace mentioned numbers with pushname?

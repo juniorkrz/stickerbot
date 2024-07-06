@@ -49,7 +49,7 @@ export const command: StickerBotCommand = {
     if (!check) return
 
     const maxChars = 200
-    const text = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    const text = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
 
     if (!text) {
       return await sendMessage(

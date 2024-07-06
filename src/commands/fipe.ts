@@ -51,7 +51,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    let licensePlate = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    let licensePlate = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
 
     if (!licensePlate) {
       return await sendMessage(

@@ -80,7 +80,7 @@ export const command: StickerBotCommand = {
       const phone = body.slice(command.needsPrefix
         ? 1
         : 0)
-        .replace(alias, '')
+        .replace(new RegExp(alias, 'i'), '')
         .trim()
 
       if (phone.length > 3) {

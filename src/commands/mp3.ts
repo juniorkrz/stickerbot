@@ -63,7 +63,7 @@ export const command: StickerBotCommand = {
     // Baixa música do YouTube
     let url: string | undefined = body
       .slice(command.needsPrefix ? 1 : 0)
-      .replace(alias, '')
+      .replace(new RegExp(alias, 'i'), '')
       .trim()
 
     // TODO: Load texts from JSON

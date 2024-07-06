@@ -94,7 +94,7 @@ export const command: StickerBotCommand = {
     // get custom author/pack
     let author, pack
 
-    const text = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    const text = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
     const splittedText = text.split('|').length > 1
       ? text.split('|')
       : text.split('/').length > 1

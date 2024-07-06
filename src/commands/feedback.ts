@@ -48,7 +48,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const msg = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    const msg = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
 
     const senderName = message.pushName || 'Desconhecido'
     const groupName = group ? group.subject : 'Desconhecido'

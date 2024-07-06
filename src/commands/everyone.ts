@@ -47,7 +47,7 @@ export const command: StickerBotCommand = {
     // Mentions all group members except the bot.
 
     const client = getClient()
-    const alert = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+    const alert = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
 
     if (!group) {
       await react(message, emojis.error)

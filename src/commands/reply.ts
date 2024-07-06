@@ -71,7 +71,7 @@ export const command: StickerBotCommand = {
       if (!feedbackMsg) return await react(message, emojis.error)
 
       // Prepare the response message
-      let response = body.slice(command.needsPrefix ? 1 : 0).replace(alias, '').trim()
+      let response = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
       response += `\n\n_Mensagem enviada pelo administrador: ${message.pushName}_`
 
       // Send the response message
