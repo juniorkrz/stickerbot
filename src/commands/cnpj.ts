@@ -164,7 +164,7 @@ export const command: StickerBotCommand = {
       // CNAEs secundários
       if (data.cnaes_secundarios && data.cnaes_secundarios.length > 0) {
         response += '\n📚 *CNAEs Secundários:*\n'
-        data.cnaes_secundarios.forEach((cnae: { codigo: number; descricao: string }) => {
+        data.cnaes_secundarios.forEach((cnae: { codigo: number, descricao: string }) => {
           response += `• ${cnae.codigo} - ${cnae.descricao}\n`
         })
       }
@@ -172,7 +172,7 @@ export const command: StickerBotCommand = {
       // Quadro de sócios e administradores (QSA)
       if (data.qsa && data.qsa.length > 0) {
         response += '\n👥 *Quadro de Sócios e Administradores (QSA):*\n'
-        data.qsa.forEach((socio: { nome_socio: string; cnpj_cpf_do_socio: string; data_entrada_sociedade: string }) => {
+        data.qsa.forEach((socio: { nome_socio: string, cnpj_cpf_do_socio: string, data_entrada_sociedade: string }) => {
           response += `• ${socio.nome_socio} (${socio.cnpj_cpf_do_socio}) - Entrada: ${socio.data_entrada_sociedade}\n`
         })
       }
