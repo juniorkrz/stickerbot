@@ -64,7 +64,7 @@ export const checkCommand = async (
   }
 
   // Check if the command is in maintenance
-  if (command.inMaintenance) {
+  if (command.inMaintenance && !isBotAdmin) {
     const reply = `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o comando *${alias}* {está|tá} em *manutenção*!`
     await sendMessage(
       { text: spintax(reply) },
