@@ -129,8 +129,8 @@ export const command: StickerBotCommand = {
     const orgao_emissor = query.orgao_emissor
     const valores_tabela_fipe = query.tabela_fipe.valores
     const valores_ipva = query.tabela_fipe.valores_ipva
-    const mercosul = isMercosul ? `Sim ${emojis.success[0]}` : `Não ${emojis.error}`
-    const importado = query.detalhes.importado ? `Sim ${emojis.success[0]}` : `Não ${emojis.error}`
+    const mercosul = isMercosul ? `Sim ${emojis.success[1]}` : `Não ${emojis.error}`
+    const importado = query.detalhes.importado ? `Sim ${emojis.success[1]}` : `Não ${emojis.error}`
     const uf = query.detalhes.uf
     const estado = uf ? fipe.getStateNameByUf(uf) : false
 
