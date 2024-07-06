@@ -146,7 +146,6 @@ export const getMessage = (message: WAMessage) => {
   )
 }
 
-
 export const getMediaMessage = (message: WAMessage) => {
   const content = extractMessageContent(message.message)
   return (

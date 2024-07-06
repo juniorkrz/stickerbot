@@ -1,6 +1,7 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
+import { getStore } from '../bot'
 import { bot } from '../config'
 import { getCount } from '../handlers/db'
 import { getActions } from '../handlers/text'
@@ -51,6 +52,24 @@ export const command: StickerBotCommand = {
     // Build stats text
     let stats = `📊 *Estatísticas do ${bot.name}*\n\n`
 
+    const store = getStore()
+    const totalUsers = store.chats.length
+
+    const totalStickers = await getCount('Static Sticker')
+      + await getCount('Static Sticker')
+      + await getCount('Animated Sticker')
+      + await getCount('Sticker with Caption')
+      + await getCount('Attp')
+      + await getCount('Ttp')
+      + await getCount('Rembg')
+      + await getCount('Rename')
+
+    stats += `👥 *Usuários:* ${totalUsers.toLocaleString('pt-BR').toString()}\n`
+    stats += `🖼 *Stickers criados:* ${totalStickers.toLocaleString('pt-BR').toString()}\n`
+    stats += '🤖 *Comandos executados:* {totalCommands}\n\n'
+
+    let totalCommands = 0
+
     stats += '```'
     const actions = getActions()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -60,6 +79,7 @@ export const command: StickerBotCommand = {
       stats += rPad(`${action.aliases[0]}`, 29 - total.toString().length)
       stats += total
       stats += '\n'
+      totalCommands += total
     }
 
     stats = stats.slice(0, -1)
@@ -70,6 +90,8 @@ export const command: StickerBotCommand = {
       stats += '\n\nDoações:\n'
       stats += bot.donationLink
     }
+
+    stats = stats.replace('{totalCommands}', totalCommands.toLocaleString('pt-BR').toString())
 
     return await sendMessage(
       { text: spintax(stats) },
