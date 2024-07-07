@@ -39,13 +39,13 @@ export const makeSticker = async (
   return await sendMessage(await sticker.toMessage(), message)
 }
 
-export const makeStaticSticker = async (message: WAMessage) => {
-  return await makeSticker(message)
+export const makeStaticSticker = async (message: WAMessage, quotedMsg: WAMessage) => {
+  return await makeSticker(message, { quotedMsg })
 }
 
-export const makeAnimatedSticker = async (message: WAMessage) => {
+export const makeAnimatedSticker = async (message: WAMessage, quotedMsg: WAMessage) => {
   await react(message, getRandomItemFromArray(emojis.wait))
-  const result = await makeSticker(message)
+  const result = await makeSticker(message, { quotedMsg })
   await react(message, getRandomItemFromArray(emojis.success))
   return result
 }

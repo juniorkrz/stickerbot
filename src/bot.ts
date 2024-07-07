@@ -307,14 +307,14 @@ const connectToWhatsApp = async () => {
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
         logAction(msg, jid, group, commandName)
         if (isAnimated) {
-          await makeAnimatedSticker(msg)
+          await makeAnimatedSticker(message, msg)
         } else {
           const source = quotedMsg ? getBody(message) : getCaption(message)
           if (source) {
             const phrases = extractPhrasesFromBodyOrCaption(source)
             await makeStaticStickerWithCaptions(message, msg, phrases)
           } else {
-            await makeStaticSticker(msg)
+            await makeStaticSticker(message, msg)
           }
         }
         continue
