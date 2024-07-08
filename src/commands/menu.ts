@@ -18,8 +18,8 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['menu', 'ajuda', 'comando', 'help'],
-  desc: 'Menu de comandos do bot.',
+  aliases: ['menu', 'comando'],
+  desc: 'Mostra o menu de comandos do bot.',
   example: false,
   needsPrefix: true,
   inMaintenance: false,

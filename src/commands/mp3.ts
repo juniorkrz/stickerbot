@@ -26,7 +26,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['mp3', 'play'],
   desc: 'Baixa música do video no YouTube.',
-  example: 'mp3 link do video no YouTube ou nome da música',
+  example: 'nome da música ou link do video no YouTube',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,

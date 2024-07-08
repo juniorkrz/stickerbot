@@ -4,10 +4,10 @@ import path from 'path'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { react, sendLogToAdmins } from '../utils/baileysHelper'
+import { react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
-import { capitalize } from '../utils/misc'
+import { capitalize, spintax } from '../utils/misc'
 
 // Gets the logger
 const logger = getLogger()
@@ -23,7 +23,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['feedback'],
   desc: 'Envia feedback ao criador do bot.',
-  example: false,
+  example: 'Sua mensagem',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -49,6 +49,14 @@ export const command: StickerBotCommand = {
     if (!check) return
 
     const msg = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+
+    if (!msg) return await sendMessage(
+      {
+        text: spintax(`⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* `+
+          '{você|vc|tu} {precisa|deve} {escrever|digitar} {um texto|algo} {após |depois d}o comando. {🧐|🫠|🥲|🙃|📝}')
+      },
+      message
+    )
 
     const senderName = message.pushName || 'Desconhecido'
     const groupName = group ? group.subject : 'Desconhecido'

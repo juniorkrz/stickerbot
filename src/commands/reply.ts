@@ -21,7 +21,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['reply'],
   desc: 'Envia resposta ao feedback.',
-  example: false,
+  example: 'obrigado pelo seu feedback!',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,

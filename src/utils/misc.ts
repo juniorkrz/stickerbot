@@ -139,3 +139,11 @@ export const rPad = (string: string, length: number = 29, char: string = '.') =>
   if (string.length >= length) return string
   return string + ' ' + char.repeat(length - string.length - 2) + ' '
 }
+
+export const removeValue = <T>(array: T[], value: T): T[] => {
+  const index = array.indexOf(value)
+  if (index !== -1) {
+    array.splice(index, 1)
+  }
+  return array
+}

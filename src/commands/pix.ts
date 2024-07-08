@@ -18,7 +18,7 @@ const commandName = capitalize(path.basename(__filename, extension))
 export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['pix', 'donate'],
-  desc: `Chave Pix para colaborar com o ${bot.name}.`,
+  desc: `Mostra a chave Pix para colaborar com o ${bot.name}.`,
   example: false,
   needsPrefix: true,
   inMaintenance: false,
