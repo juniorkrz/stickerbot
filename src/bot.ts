@@ -23,7 +23,6 @@ import {
   makeAnimatedSticker,
   makeStaticSticker,
   makeStaticStickerWithCaptions,
-  unmakeSticker
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
@@ -332,10 +331,6 @@ const connectToWhatsApp = async () => {
           logAction(message, jid, group, 'Sticker with Caption')
           const phrases = extractPhrasesFromBodyOrCaption(source)
           await makeStaticStickerWithCaptions(message, msg, phrases)
-        } else {
-          // Send sticker as image
-          logAction(message, jid, group, 'Sticker as Image')
-          await unmakeSticker(message)
         }
         continue
       }

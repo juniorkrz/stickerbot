@@ -25,7 +25,7 @@
 
 ## 🔍 Validações para Criar Sticker
 
-- [ ] Unmakesticker apenas por comando (toImg)
+- [x] Unmakesticker apenas por comando (toImg)
 - [x] Chat privado
 - [x] Grupos
   - [x] Criar se for mencionado
@@ -62,6 +62,7 @@
 - [x] `version`
 - [ ] `s` / `s2` / `s3`
 - [ ] `stickers`
+- [ ] `stickerly`
 - [x] `Feedback`
 - [x] `Stats`
 

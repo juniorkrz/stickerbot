@@ -93,8 +93,7 @@ export const makeRembgSticker = async (message: WAMessage, quotedMsg: WAMessage 
   }
 }
 
-export const unmakeSticker = async (message: WAMessage) => {
-  // Send sticker as image
+export const sendStickerAsImage = async (message: WAMessage) => {
   try {
     const image = (await downloadMediaMessage(
       message,
@@ -102,7 +101,7 @@ export const unmakeSticker = async (message: WAMessage) => {
       {}
     )) as Buffer
 
-    await sendMessage(
+    return await sendMessage(
       { image },
       message
     )
