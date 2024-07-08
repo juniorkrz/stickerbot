@@ -56,13 +56,13 @@ export const command: StickerBotCommand = {
     // get message content
     const content = extractMessageContent(quotedMsg?.message)
 
+    // error response
+    const errorResponse = `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
+        '{você|vc|tu} {deve|precisa} responder a um{ sticker|a figurinha} com o comando.'
+
     // if you can't find the content, send an error message
     if (!quotedMsg || !content) return await sendMessage(
-      {
-        text: spintax(
-          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível encontrar o conteúdo da mensagem.'
-        )
-      },
+      { text: spintax(errorResponse) },
       message
     )
 
@@ -73,12 +73,7 @@ export const command: StickerBotCommand = {
 
     // if not, send an error message
     if (!isContentAllowed) return await sendMessage(
-      {
-        text: spintax(
-          `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
-          '{você|vc|tu} {deve|precisa} responder a um{ sticker|a figurinha} com o comando.'
-        )
-      },
+      { text: spintax(errorResponse) },
       message
     )
 
