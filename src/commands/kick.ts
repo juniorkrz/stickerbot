@@ -74,7 +74,7 @@ export const command: StickerBotCommand = {
         return await sendMessage(
           {
             text: spintax(
-              `⚠ {Você|Tu|Vc} não pode ${isMe ? 'me' : 'se'} remover {bobinho(a)|besta}!` +
+              `⚠ {Você|Tu|Vc} não pode ${isMe ? 'me' : 'se'} remover {bobinho(a)|besta}! ` +
               '{`¯\\_(ツ)_/¯`|🧐|🫠|😉|😌|🤓|🤪|🤔|🫤}'
             )
           },
