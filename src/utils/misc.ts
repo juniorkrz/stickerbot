@@ -147,3 +147,15 @@ export const removeValue = <T>(array: T[], value: T): T[] => {
   }
   return array
 }
+
+export const getExtensionFromMimetype = (mimetype: string): string | undefined => {
+  const mimeToExtensionMap: { [key: string]: string } = {
+    'image/png': 'png',
+    'image/jpeg': 'jpeg',
+    'image/jpg': 'jpg',
+    'image/gif': 'gif',
+    'image/webp': 'webp',
+    'video/mp4': 'mp4',
+  }
+  return mimeToExtensionMap[mimetype]
+}

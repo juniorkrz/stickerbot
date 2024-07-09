@@ -28,9 +28,9 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['rembg', 'bg', 'recortar', 'recorte'],
-  desc: 'Cria um sticker removendo a imagem de fundo.',
-  example: false,
+  aliases: ['texto', 'text'],
+  desc: 'Cria um sticker com textos.',
+  example: 'frase de cima;frase de baixo',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -39,7 +39,7 @@ export const command: StickerBotCommand = {
   onlyBotAdmin: false,
   onlyAdmin: false,
   botMustBeAdmin: false,
-  interval: 0,
+  interval: 3,
   limiter: {}, // do not touch this
   run: async (
     jid: string,
@@ -54,6 +54,35 @@ export const command: StickerBotCommand = {
   ) => {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
+
+    // get body without commands
+    const bodyWithoutCommand = body
+      .slice(command.needsPrefix ? 1 : 0)
+      .replace(new RegExp(alias, 'i'), '')
+      .trim()
+      .toLowerCase()
+
+    // get captions
+    const captions = bodyWithoutCommand
+      ? extractCaptionsFromBodyOrCaption(bodyWithoutCommand)
+      : undefined
+
+    // if the text is too large or does not exist, send an error
+    const maxChars = 200
+    if (!captions || captions.length == 0) {
+      return await sendMessage(
+        {
+          text: spintax(`⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* `+
+            '{você|vc|tu} {precisa|deve} {escrever|digitar} {um texto|algo} {após |depois d}o comando. {🧐|🫠|🥲|🙃|📝}')
+        },
+        message
+      )
+    } else if (bodyWithoutCommand.length > maxChars) {
+      return await sendMessage(
+        { text: spintax(`⚠ O texto deve ter no máximo *${maxChars}* caracteres!`) },
+        message
+      )
+    }
 
     // get quoted message
     const quotedMsg = getQuotedMessage(message)
@@ -93,41 +122,19 @@ export const command: StickerBotCommand = {
       message
     )
 
-    // get body without commands
-    const bodyWithoutCommand = body
-      .slice(command.needsPrefix ? 1 : 0)
-      .replace(new RegExp(alias, 'i'), '')
-      .trim()
-      .toLowerCase()
-
-    // get captions
-    const captions = bodyWithoutCommand
-      ? extractCaptionsFromBodyOrCaption(bodyWithoutCommand)
-      : undefined
-
-    // if the text is too large, send an error
-    const maxChars = 200
-    if (bodyWithoutCommand.length > maxChars) {
-      return await sendMessage(
-        { text: spintax(`⚠ O texto deve ter no máximo *${maxChars}* caracteres!`) },
-        message
-      )
-    }
-
     // make sticker
     const result = await makeSticker(
       message,
       {
         quotedMsg,
-        rembg: true,
         captions
       }
     )
 
     // if something goes wrong, notify the user and admins
     if (!result) {
-      logger.warn('API: rembg is down!')
-      await sendLogToAdmins('*[API]:* rembg está offline!')
+      logger.warn('API: memegen/text error!')
+      await sendLogToAdmins('*[API]:* memegen/text error!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
       return await sendMessage(
         { text: reply },

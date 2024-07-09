@@ -1,5 +1,8 @@
 # 📝 TO DO
 
+## 🛠️ Melhorias e Correções
+- [x] Substituir meme-caption por memegen
+
 ## 🚀 Funcionalidades Novas
 
 - [ ] Carregar frases de um JSON
@@ -7,10 +10,6 @@
 - [ ] Limpeza automática de histórico/conversas
 - [ ] Obrigar usuário a participar da comunidade (configurável)
 - [ ] Ignorar chat privado (configurável)
-
-## 📝 Criar Sticker com Texto
-
-- [ ] Texto em vídeo
 
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
@@ -21,3 +20,4 @@
 ## 👾 Bugs
 
 - [ ] `sendStickerAsImage` Error: EBUSY: resource busy or locked (on Windows)
+- [ ] `ban` não está removendo o usuário banido da comunidade.

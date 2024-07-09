@@ -20,9 +20,7 @@ import { getAllBannedUsers, isUserBanned } from './handlers/db'
 import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
-  makeAnimatedSticker,
-  makeStaticSticker,
-  makeStaticStickerWithCaptions,
+  makeSticker,
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
@@ -31,7 +29,7 @@ import {
   amAdminOfGroup,
   checkBotAdminStatus,
   deleteMessage,
-  extractPhrasesFromBodyOrCaption,
+  extractCaptionsFromBodyOrCaption,
   getBody,
   getCaption,
   getFullCachedGroupMetadata,
@@ -285,12 +283,8 @@ const connectToWhatsApp = async () => {
 
       const quotedMsg = getQuotedMessage(message)
 
-      const msg = quotedMsg ? quotedMsg : message
-
-      if (!msg) continue
-
       // Extract message content
-      const content = extractMessageContent(msg.message)
+      const content = extractMessageContent(message.message)
 
       if (!content) continue
 
@@ -302,20 +296,18 @@ const connectToWhatsApp = async () => {
         const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
         if (isSenderRateLimited) return
 
-        const isAnimated = content.videoMessage ? true : false
+        const isAnimated = content.videoMessage?.seconds ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
-        logAction(msg, jid, group, commandName)
-        if (isAnimated) {
-          await makeAnimatedSticker(message, msg)
-        } else {
-          const source = quotedMsg ? getBody(message) : getCaption(message)
-          if (source) {
-            const phrases = extractPhrasesFromBodyOrCaption(source)
-            await makeStaticStickerWithCaptions(message, msg, phrases)
-          } else {
-            await makeStaticSticker(message, msg)
-          }
-        }
+        logAction(message, jid, group, commandName)
+
+        const source = quotedMsg ? getBody(message) : getCaption(message)
+        const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+
+        makeSticker(message, {
+          captions,
+          quotedMsg: quotedMsg,
+          animated: isAnimated
+        })
         continue
       }
 
@@ -326,11 +318,20 @@ const connectToWhatsApp = async () => {
         if (isSenderRateLimited) return
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
-        if (source) {
+        const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+        if (source && captions) {
           // Send sticker with caption
+          const isAnimated = content.stickerMessage?.isAnimated || content.videoMessage?.seconds
+            ? true
+            : false
+
           logAction(message, jid, group, 'Sticker with Caption')
-          const phrases = extractPhrasesFromBodyOrCaption(source)
-          await makeStaticStickerWithCaptions(message, msg, phrases)
+
+          makeSticker(message, {
+            captions,
+            quotedMsg: quotedMsg,
+            animated: isAnimated
+          })
         }
         continue
       }

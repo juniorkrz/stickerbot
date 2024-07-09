@@ -2,12 +2,13 @@ import { downloadMediaMessage,WAMessage } from '@whiskeysockets/baileys'
 import { MakeStickerOptions } from 'types/Sticker'
 import Sticker from 'wa-sticker-formatter'
 
-import { stickerMeta } from '../config'
-import { getMediaMessage, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { externalEndpoints, stickerMeta } from '../config'
+import { getMediaMessage, react, sendMessage } from '../utils/baileysHelper'
 import { emojis } from '../utils/emojis'
-import { getRandomItemFromArray, spintax } from '../utils/misc'
+import { getExtensionFromMimetype, getRandomItemFromArray } from '../utils/misc'
+import { deleteUploadedFile, uploadFile } from './fileUploader'
 import { getLogger } from './logger'
-import { addCaptionOnImage } from './memeCaption'
+import { getCustomMemeUrl } from './memegen'
 import { removeBackground } from './rembgApi'
 
 const logger = getLogger()
@@ -16,79 +17,80 @@ export const makeSticker = async (
   message: WAMessage,
   options: MakeStickerOptions = {}
 ) => {
-  const { meta = stickerMeta, quotedMsg, url, rembg } = options
+  // get options
+  const {
+    animated,
+    captions,
+    meta = stickerMeta,
+    quotedMsg,
+    rembg,
+    url
+  } = options
 
+  // need to react?
+  const needReact = (animated || rembg || (captions && captions?.length > 0))
+    ? true
+    : false
+
+  // if so, react wait
+  if (needReact) await react(message, getRandomItemFromArray(emojis.wait))
+
+  // get media message from original message or quoted message
   const mediaMessage = quotedMsg
     ? quotedMsg
     : message
 
+  // get data
   let data: string | Buffer
+
   if (url) {
     data = url
   } else {
-    let buffer = <Buffer>await downloadMediaMessage(mediaMessage, 'buffer', {})
-    if (rembg) {
-      buffer = await removeBackground(buffer)
-    }
-    data = buffer
+    data = <Buffer>await downloadMediaMessage(mediaMessage, 'buffer', {})
+    // if rembg is true, remove background
+    if (rembg) data = await removeBackground(data)
   }
 
-  if (!data) return
+  // if something went wrong, react error
+  if (!data) return await react(message, emojis.error)
 
-  const sticker = new Sticker(data, meta)
-  return await sendMessage(await sticker.toMessage(), message)
-}
+  let uploadedFilename
 
-export const makeStaticSticker = async (message: WAMessage, quotedMsg: WAMessage) => {
-  return await makeSticker(message, { quotedMsg })
-}
-
-export const makeAnimatedSticker = async (message: WAMessage, quotedMsg: WAMessage) => {
-  await react(message, getRandomItemFromArray(emojis.wait))
-  const result = await makeSticker(message, { quotedMsg })
-  await react(message, getRandomItemFromArray(emojis.success))
-  return result
-}
-
-export const makeStaticStickerWithCaptions = async (
-  message: WAMessage,
-  quotedMsg: WAMessage | undefined,
-  captions: string[]
-) => {
-  const mediaMessage = quotedMsg
-    ? quotedMsg
-    : message
-
-  const buffer = <Buffer>await downloadMediaMessage(mediaMessage, 'buffer', {})
-  const mimeType = getMediaMessage(mediaMessage)?.mimetype
-
-  const data = await addCaptionOnImage(buffer, mimeType!, captions)
-  if (!data) {
-    logger.warn('API: memeCaption is down!')
-    await sendLogToAdmins('*[API]:* memeCaption error!')
-    // TODO: Load texts from JSON
-    const reply = '⚠ Desculpe, algo deu errado ao criar seu sticker. ' +
-      '{Por favor, tente novamente mais tarde|Se o erro persistir, informe ao desenvolvedor na comunidade do bot}.'
-    return await sendMessage(
-      { text: spintax(reply) },
-      message
-    )
+  // adding captions if necessary
+  if (captions && captions.length > 0 && !animated) {
+    // get mimetype
+    const mimetype = getMediaMessage(mediaMessage)?.mimetype
+    // get the file extension
+    const fileExtension = getExtensionFromMimetype(mimetype || 'png')
+    // generate a filename
+    const filename = `${message.key.id}_${message.messageTimestamp}.${fileExtension}`
+    // send file to file uploader
+    const uploadInfo = await uploadFile(data as Buffer, filename)
+    // get the generated filename from file uploader
+    uploadedFilename = uploadInfo.file_id + '.' + uploadInfo.file_format
+    // get the file url
+    const uploadedFileUrl = `${externalEndpoints.fileUploader}/view/${uploadedFilename}`
+    // get the file url with captions
+    data = getCustomMemeUrl(captions, uploadedFileUrl, animated)
   }
 
-  const sticker = new Sticker(data, stickerMeta)
-  return await sendMessage(await sticker.toMessage(), message)
-}
-
-export const makeRembgSticker = async (message: WAMessage, quotedMsg: WAMessage | undefined = undefined) => {
   try {
-    return await makeSticker(
-      message,
-      {
-        rembg: true,
-        quotedMsg: quotedMsg
-      }
-    )
-  } catch (error) {
+    // create and send sticker
+    const sticker = new Sticker(data, meta)
+    const result = await sendMessage(await sticker.toMessage(), message)
+
+    // delete the upload if necessary
+    if (uploadedFilename) await deleteUploadedFile(uploadedFilename)
+
+    // react success
+    if (needReact) await react(message, getRandomItemFromArray(emojis.success))
+
+    // return result
+    return result
+  }
+  catch (error) {
+    // if something went wrong, react error
+    await react(message, emojis.error)
     return
   }
 }
