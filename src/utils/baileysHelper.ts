@@ -239,16 +239,16 @@ export const logAction = (
   if (addToStatistics) addCount(action)
 }
 
-export const extractPhrasesFromBodyOrCaption = (source: string) => {
+export const extractCaptionsFromBodyOrCaption = (source: string) => {
   const client = getClient()
   const botMention = '@' + getPhoneFromJid(client.user?.id)
-  const phrases = source.replaceAll(botMention, '')// Removes the bot mention
+  const caption = source.replaceAll(botMention, '')// Removes the bot mention
     .replaceAll('\n', '')
     .split(';')// Line splitter. ex: `Top text;Bottom text`
     .map(phrase => phrase.trim())
     .filter(phrase => phrase.length > 0)// Removes empty strings
     .slice(0, 2)
-  return phrases
+  return caption
 }
 
 export const getPhoneFromJid = (jid: string | undefined) => {
