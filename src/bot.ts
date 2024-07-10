@@ -21,6 +21,7 @@ import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
   makeSticker,
+  sendStickerAsImage,
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
@@ -146,7 +147,7 @@ const connectToWhatsApp = async () => {
     } else if (connection === 'open') {
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
       await setupBot()
-      logger.info(`${colors.purpleLight}${bot.name}${colors.reset} is ${colors.green}ready${colors.reset}!`)
+      logger.info(`${bot.name} is ${colors.green}ready${colors.reset}!`)
       if (dev) logger.warn('Development mode is active!')
       if (!dev) sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
       if (!dev) checkBotAdminStatus()
@@ -262,10 +263,10 @@ const connectToWhatsApp = async () => {
         }
       }
 
-      // Is it a group?
+      // Was the bot mentioned?
+      const botMentioned = isGroup ? isMentioned(message, client.user?.id) : false
+
       if (isGroup) {
-        // Was the bot mentioned?
-        const botMentioned = isMentioned(message, client.user?.id)
         // Is it an official bot group?
         const isBotGroup = bot.groups.includes(jid)
         // If the bot was not mentioned and it's not an official group, skip.
@@ -273,20 +274,27 @@ const connectToWhatsApp = async () => {
           continue
       }
 
+      // get quoted message
+      const quotedMsg = getQuotedMessage(message)
+
+      // get target message
+      const targetMessage = botMentioned && quotedMsg
+        ? quotedMsg
+        : message
+
+      // Extract message content
+      // Acho q está errado, deveria ser o quoted msg (bot nao ta fazendo sticker se mencionado)
+      const content = extractMessageContent(targetMessage.message)
+
+      if (!content) continue
+
       // Handle audio message
-      /* if (message.message.audioMessage) {
+      /* if (getAudioMessageFromContent(content)) {
                 await handleAudio(message)
                 continue
             } */
 
       // Handle Image / GIF / Video message
-
-      const quotedMsg = getQuotedMessage(message)
-
-      // Extract message content
-      const content = extractMessageContent(message.message)
-
-      if (!content) continue
 
       if (
         getImageMessageFromContent(content) ||
@@ -319,7 +327,7 @@ const connectToWhatsApp = async () => {
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
         const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
-        if (source && captions) {
+        if (source && captions && captions.length > 0) {
           // Send sticker with caption
           const isAnimated = content.stickerMessage?.isAnimated || content.videoMessage?.seconds
             ? true
@@ -332,6 +340,9 @@ const connectToWhatsApp = async () => {
             quotedMsg: quotedMsg,
             animated: isAnimated
           })
+        } else {
+          logAction(message, jid, group, 'Sticker as Image')
+          await sendStickerAsImage(targetMessage)
         }
         continue
       }
