@@ -105,7 +105,7 @@ export const command: StickerBotCommand = {
       pack = splittedText[0]
       author = splittedText[1]
     } else if (message?.pushName) {
-      author = `Feita por ${message.pushName}`
+      author = message.pushName
       pack = stickerMeta.pack
     } else {
       return await sendMessage(
@@ -121,7 +121,7 @@ export const command: StickerBotCommand = {
     }
 
     // make sticker
-    const meta: IStickerOptions = {
+    const customMeta: IStickerOptions = {
       author,
       pack
     }
@@ -129,7 +129,7 @@ export const command: StickerBotCommand = {
     return await makeSticker(
       message,
       {
-        meta,
+        customMeta,
         quotedMsg: targetMessage
       }
     )

@@ -21,11 +21,19 @@ export const makeSticker = async (
   const {
     animated,
     captions,
-    meta = stickerMeta,
+    customMeta,
     quotedMsg,
     rembg,
     url
   } = options
+
+  // generate sticker meta
+  const meta = customMeta
+    ? customMeta
+    : {
+      author: message.pushName || undefined,
+      pack: stickerMeta.pack
+    }
 
   // need to react?
   const needReact = (animated || rembg || (captions && captions?.length > 0))

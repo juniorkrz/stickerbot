@@ -8,7 +8,7 @@ dotenv.config()
 // https://docs.wwebjs.dev/global.html#StickerMetadata
 export const stickerMeta: IStickerOptions = {
   author: process.env.SB_AUTHOR || '@juniorkrz.dev',
-  pack: process.env.SB_PACK || 'StickerBot',
+  pack: process.env.SB_PACK || 'bit.ly/StickerBot',
 }
 
 // Baileys Config
@@ -23,7 +23,7 @@ export const bot = {
   name: process.env.SB_NAME || 'StickerBot',
   sessionId: process.env.WA_SESSION_ID || 'stickerbot',
   setup: JSON.parse(process.env.SB_SETUP || 'false') as boolean,
-  status: process.env.SB_STATUS || 'Developed by @juniorkrz',
+  status: process.env.SB_STATUS || 'Developed by @juniorkrz.dev',
   donationLink: process.env.SB_DONATION || 'pix@jrkrz.com',
   lastSeenPrivacy: process.env.SB_LAST_SEEN_PRIVACY as WAPrivacyValue || 'all',
   onlinePrivacy: process.env.SB_ONLINE_PRIVACY as WAPrivacyOnlineValue || 'all',
