@@ -69,10 +69,10 @@ export const command: StickerBotCommand = {
 
       // Constructing the response message
       const response = `📍 *Informações do CEP ${cep}:*\n\n` +
-        `🗺️ *Estado:* ${state}\n` +
-        `🏙️ *Cidade:* ${city}\n` +
-        `🏘️ *Bairro:* ${neighborhood}\n` +
-        `🛣️ *Rua:* ${street}\n` +
+        `🗺️ *Estado:* ${state ? state : 'Não encontrado'}\n` +
+        `🏙️ *Cidade:* ${city ? city : 'Não encontrada'}\n` +
+        `🏘️ *Bairro:* ${neighborhood ? neighborhood : 'Não encontrado'}\n` +
+        `🛣️ *Rua:* ${street ? street : 'Não encontrada'}\n` +
         `ℹ️ *Serviço:* ${service}\n\n` +
         `_Consultado com ${bot.name}. Digite !pix para apoiar o projeto._`
 
