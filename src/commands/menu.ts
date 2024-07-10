@@ -65,7 +65,7 @@ export const command: StickerBotCommand = {
     for (const [key, action] of Object.entries(actions)) {
       const prefix = action.needsPrefix ? chosenPrefix : ''
       const aliases = action.aliases
-      const inMaintenance = action.inMaintenance ? ' - *(MANUTENÇÃO)*' : ''
+      const inMaintenance = action.inMaintenance ? ' - *(EM MANUTENÇÃO)*' : ''
 
       let line = ''
       line += `*${prefix}${aliases[0]}*${inMaintenance} - _${action.desc}_`
