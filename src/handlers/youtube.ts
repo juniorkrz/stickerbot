@@ -1,5 +1,5 @@
+import ytdl from '@distube/ytdl-core'
 import fs from 'fs'
-import ytdl from 'ytdl-core'
 import ytsr from 'ytsr'
 
 import { ytsrItem } from '../types/Youtube'
@@ -56,6 +56,7 @@ export const getYoutubeVideo = async (url: string) => {
   }
 }
 
+// TODO: return boolean
 export const downloadYoutubeVideo = async (url: string, audioFormat: ytdl.videoFormat, filePath: string) => {
   return new Promise((resolve, reject) => {
     // Start downloading the audio

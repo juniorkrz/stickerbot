@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/juniorkrz/stickerbot#readme",
   "dependencies": {
+    "@distube/ytdl-core": "^4.13.5",
     "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "github:juniorkrz/Baileys",
     "compare-versions": "^6.1.0",
@@ -46,7 +47,6 @@
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter",
-    "ytdl-core": "^4.11.5",
     "ytsr": "^3.8.4"
   },
   "devDependencies": {
