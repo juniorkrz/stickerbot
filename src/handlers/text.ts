@@ -87,8 +87,6 @@ export const getTextAction = async (
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [key, action] of Object.entries(actions)) {
-      if (action.inMaintenance) continue
-
       for (const alias of action.aliases) {
         const normalizedAlias = normalizeText(alias.toLowerCase()).trim()
 
