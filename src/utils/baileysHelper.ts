@@ -167,6 +167,10 @@ export const getStickerMessageFromContent = (content: WAMessageContent) => {
   return content?.stickerMessage
 }
 
+export const getAudioMessageFromContent = (content: WAMessageContent) => {
+  return content?.audioMessage
+}
+
 export const getMessageExpiration = (message: WAMessage | undefined) => {
   if (!message) return
   return getMessage(message)?.contextInfo?.expiration
@@ -283,6 +287,7 @@ export const deleteMessage = async (message: WAMessage) => {
 
 export const getAllGroupsFromCommunity = async (communityId: string) => {
   const allGroups = await getCachedGroupFetchAllParticipating()
+  console.log(allGroups)
   return Object.values(allGroups)
     .filter(group => group.linkedParent == communityId)
 }
@@ -392,4 +397,15 @@ export const checkBotAdminStatus = async () => {
   }
 
   logger.info('[MOD] Check complete!')
+}
+
+export const getMessageAuthor = (message: WAMessage) => {
+  return message.key.fromMe
+    ? message.participant!
+    : message.key.participant!
+}
+
+export const getQuotedMessageAuthor = (message: WAMessage) => {
+  const quotedMsg = getQuotedMessage(message)
+  if (quotedMsg) return getMessageAuthor(quotedMsg)
 }

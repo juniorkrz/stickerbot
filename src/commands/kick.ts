@@ -4,7 +4,7 @@ import path from 'path'
 import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { getMentionedJids, react, sendMessage } from '../utils/baileysHelper'
+import { getMentionedJids, getQuotedMessageAuthor, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
@@ -45,12 +45,25 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
+    // Getting jids to kick
+
+    // Trying to get by mentions or quoted message author
     const mentionedJids = getMentionedJids(message)
 
-    if (!mentionedJids || mentionedJids.length < 1) {
+    let kickedUsers: string[] = []
+    if (mentionedJids && mentionedJids.length >= 1) {
+      kickedUsers = mentionedJids
+    } else {
+      const quotedAuthor = getQuotedMessageAuthor(message)
+      if (quotedAuthor) kickedUsers = [ quotedAuthor ]
+    }
+
+    if (!kickedUsers || kickedUsers.length < 1) {
       return await sendMessage(
         {
-          text: spintax('⚠ {Ei|Opa|Eita|Ops}, o número a ser removido não foi encontrado, *mencione* alguém!')
+          text: spintax(
+            '⚠ {Ei|Opa|Eita|Ops}, o número a ser removido não foi encontrado, *mencione* alguém ou cite uma mensagem!'
+          )
         },
         message
       )
@@ -62,13 +75,13 @@ export const command: StickerBotCommand = {
     if (!group) return await react(message, emojis.error)
 
     const clientJid = jidNormalizedUser(client.user?.id)
-    for (const mentionedJid of mentionedJids) {
+    for (const user of kickedUsers) {
       // Is the user an member of this group?
-      const isMember = group.participants.find(p => areJidsSameUser(p.id, mentionedJid))
+      const isMember = group.participants.find(p => areJidsSameUser(p.id, user))
       // Is the user being kicked the bot?
-      const isMe = areJidsSameUser(mentionedJid, clientJid)
+      const isMe = areJidsSameUser(user, clientJid)
       // Is the user to be kicked the sender himself?
-      const hisSelf = areJidsSameUser(mentionedJid, sender)
+      const hisSelf = areJidsSameUser(user, sender)
 
       if (isMe || hisSelf) {
         return await sendMessage(
@@ -95,7 +108,7 @@ export const command: StickerBotCommand = {
     }
 
     try {
-      const response = await client.groupParticipantsUpdate(jid, mentionedJids.slice(0, 5), 'remove')
+      const response = await client.groupParticipantsUpdate(jid, kickedUsers.slice(0, 5), 'remove')
       const status = response[0].status
 
       if (status === '200') {
