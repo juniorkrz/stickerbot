@@ -109,6 +109,10 @@ export const command: StickerBotCommand = {
     let logs = ''
     const client = getClient()
 
+    const allCommunityGroups = bot.community
+      ? await getAllGroupsFromCommunity(bot.community)
+      : undefined
+
     for (const user of bannedUsers) {
       // Is the user being banned the bot?
       const isMe = areJidsSameUser(user, client.user?.id)
@@ -149,8 +153,7 @@ export const command: StickerBotCommand = {
 
 
       // If there is a set community, kick the user from all groups in the community
-      if (bot.community) {
-        const allCommunityGroups = await getAllGroupsFromCommunity(bot.community)
+      if (bot.community && allCommunityGroups) {
         for (const group of allCommunityGroups) {
           // Is the user an member of this group?
           const isMember = group.participants.find(p => areJidsSameUser(p.id, user))
