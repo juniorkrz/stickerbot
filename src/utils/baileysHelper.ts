@@ -217,7 +217,7 @@ export async function sendAudio(message: WAMessage, path: string) {
   return await sendMessage(
     {
       audio: { url: path },
-      ptt: true,
+      //ptt: true, // false prevents automatic audio download
       mimetype: 'audio/mpeg'
     },
     message

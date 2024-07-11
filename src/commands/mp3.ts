@@ -25,8 +25,8 @@ const logger = getLogger()
 export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['mp3', 'play'],
-  desc: 'Baixa música do video no YouTube.',
-  example: 'nome da música ou link do video no YouTube',
+  desc: 'Baixa música do vídeo no YouTube.',
+  example: 'nome da música ou link do vídeo no YouTube',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
