@@ -340,9 +340,6 @@ const connectToWhatsApp = async () => {
             quotedMsg: quotedMsg,
             animated: isAnimated
           })
-        } else {
-          logAction(message, jid, group, 'Sticker as Image')
-          await sendStickerAsImage(targetMessage)
         }
         continue
       }
