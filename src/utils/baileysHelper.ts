@@ -287,7 +287,6 @@ export const deleteMessage = async (message: WAMessage) => {
 
 export const getAllGroupsFromCommunity = async (communityId: string) => {
   const allGroups = await getCachedGroupFetchAllParticipating()
-  console.log(allGroups)
   return Object.values(allGroups)
     .filter(group => group.linkedParent == communityId)
 }
