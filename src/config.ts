@@ -1,5 +1,7 @@
 import { WAPrivacyOnlineValue, WAPrivacyValue, WAReadReceiptsValue } from '@whiskeysockets/baileys'
 import dotenv from 'dotenv'
+import { GiphySearch } from 'types/Giphy'
+import { TenorSearch } from 'types/Tenor'
 import { IStickerOptions } from 'wa-sticker-formatter'
 
 // Load OS Env Vars
@@ -63,4 +65,24 @@ export const externalEndpoints = {
   placaFipe: process.env.PLACA_FIPE_API || 'http://localhost:8000',
   // get your own api here: https://github.com/danielgatis/rembg
   rembg: process.env.REMBG_API || 'http://localhost:9000',
+}
+
+// https://developers.giphy.com/docs/api/endpoint#search
+export const giphySearch: GiphySearch = {
+  api_key: process.env.GIPHY_API_KEY || '',
+  lang: process.env.GIPHY_LANGUAGE || 'pt',
+  limit: 50,
+  q: 'placeholder',
+  type: 'gif'
+}
+
+// https://developers.google.com/tenor/guides/endpoints
+export const tenorSearch: TenorSearch = {
+  key: process.env.TENOR_API_KEY || '',
+  client_key: process.env.WA_SESSION_ID,
+  locale: process.env.TENOR_LOCALE || 'pt_BR',
+  media_filter: 'webp_transparent',
+  searchfilter: 'sticker,-static',
+  limit: 50,
+  q: 'placeholder'
 }

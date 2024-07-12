@@ -2,6 +2,9 @@ import { compare } from 'compare-versions'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
+import qs from 'qs'
+import { GiphySearch } from 'types/Giphy'
+import { TenorSearch } from 'types/Tenor'
 
 import { bot } from '../config'
 import { getLogger } from '../handlers/logger'
@@ -158,4 +161,8 @@ export const getExtensionFromMimetype = (mimetype: string): string | undefined =
     'video/mp4': 'mp4',
   }
   return mimeToExtensionMap[mimetype]
+}
+
+export const paramSerializer = (p: TenorSearch | GiphySearch) => {
+  return qs.stringify(p, { arrayFormat: 'brackets' })
 }
