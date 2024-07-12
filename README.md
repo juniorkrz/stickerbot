@@ -91,7 +91,7 @@ Assim que o container estiver em execução, você precisará vincular seu telef
 
 ## 💡 Inspirações
 
-Este projeto foi inspirado pelo trabalho de [helvio/wa-stickerbot](https://github.com/helv-io/wa-stickerbot).
+Este projeto foi inspirado pelo trabalho de [helv-io/wa-stickerbot](https://github.com/helv-io/wa-stickerbot).
 
 ## 📄 Licença
 
