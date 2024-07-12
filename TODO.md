@@ -20,4 +20,3 @@
 ## 👾 Bugs
 
 - [ ] `sendStickerAsImage` Error: EBUSY: resource busy or locked (on Windows)
-- [ ] `ban` não está removendo o usuário banido da comunidade.
