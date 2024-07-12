@@ -1,0 +1,120 @@
+import { downloadMediaMessage, extractMessageContent, GroupMetadata } from '@whiskeysockets/baileys'
+import path from 'path'
+
+import { StickerBotCommand } from '../types/Command'
+import { WAMessageExtended } from '../types/Message'
+import {
+  getAudioMessageFromContent,
+  getImageMessageFromContent,
+  getQuotedMessage,
+  getVideoMessageFromContent,
+  sendMessage
+} from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { capitalize, spintax } from '../utils/misc'
+
+// Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
+const extension = __filename.endsWith('.js') ? '.js' : '.ts'
+
+// Gets the file name without the .ts/.js extension
+const commandName = capitalize(path.basename(__filename, extension))
+
+// Command settings:
+export const command: StickerBotCommand = {
+  name: commandName,
+  aliases: ['visualizar', 'view'],
+  desc: 'Mostra a imagem/vídeo/áudio mais uma vez.',
+  example: false,
+  needsPrefix: true,
+  inMaintenance: false,
+  runInPrivate: true,
+  runInGroups: true,
+  onlyInBotGroup: false,
+  onlyBotAdmin: false,
+  onlyAdmin: false,
+  botMustBeAdmin: false,
+  interval: 5,
+  limiter: {}, // do not touch this
+  run: async (
+    jid: string,
+    sender: string,
+    message: WAMessageExtended,
+    alias: string,
+    body: string,
+    group: GroupMetadata | undefined,
+    isBotAdmin: boolean,
+    isGroupAdmin: boolean,
+    amAdmin: boolean
+  ) => {
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    if (!check) return
+
+    // get quoted message
+    const quotedMsg = getQuotedMessage(message)
+
+    // get message content
+    const content = extractMessageContent(quotedMsg?.message)
+
+    // if you can't find the content, send an error message
+    if (!quotedMsg || !content) return await sendMessage(
+      {
+        text: spintax(
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível encontrar o conteúdo da mensagem.'
+        )
+      },
+      message
+    )
+
+    // Check for media type
+    const mediaType = getImageMessageFromContent(content)
+      ? 'image'
+      : getVideoMessageFromContent(content)
+        ? 'video'
+        : getAudioMessageFromContent(content)
+          ? 'audio'
+          : undefined
+
+    // If media type is not allowed, send an error message
+    if (!mediaType) return await sendMessage(
+      {
+        text: spintax(
+          `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
+          '{você|vc|tu} {deve|precisa} responder a uma imagem/vídeo/áudio com o comando.'
+        )
+      },
+      message
+    )
+
+    // download media
+    const buffer = <Buffer>await downloadMediaMessage(quotedMsg, 'buffer', {})
+
+    // generate message content
+    let responseContent
+    if (mediaType == 'image') {
+      responseContent = { image: buffer }
+    } else if (mediaType == 'video') {
+      responseContent = { video: buffer }
+    } else if (mediaType == 'audio') {
+      responseContent = {
+        audio: buffer,
+        ptt: true
+      }
+    }
+
+    // if something wrong, return an error message
+    if (!buffer || !responseContent) return await sendMessage(
+      {
+        text: spintax(
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, algo deu errado ao enviar a mensagem.'
+        )
+      },
+      message
+    )
+
+    // send message
+    return await sendMessage(
+      responseContent,
+      message
+    )
+  }
+}
