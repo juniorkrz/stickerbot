@@ -1,8 +1,5 @@
 # 📝 TO DO
 
-## 🛠️ Melhorias e Correções
-- [x] Substituir meme-caption por memegen
-
 ## 🚀 Funcionalidades Novas
 
 - [ ] Carregar frases de um JSON
@@ -14,8 +11,6 @@
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
 - [ ] `s` / `s2` / `s3` - Tipos de stickers
-- [ ] `stickers` (Tenor/Giphy API)
-- [ ] `stickerly`
 
 ## 👾 Bugs
 
