@@ -20,8 +20,7 @@ import { getAllBannedUsers, isUserBanned } from './handlers/db'
 import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
-  makeSticker,
-  sendStickerAsImage,
+  makeSticker
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { WAMessageExtended } from './types/Message'
