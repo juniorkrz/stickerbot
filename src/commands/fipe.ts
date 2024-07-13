@@ -66,7 +66,7 @@ export const command: StickerBotCommand = {
       )
     }
 
-    licensePlate = fipe.sanitizeInput(licensePlate)
+    licensePlate = fipe.sanitizeInput(licensePlate).toLowerCase()
 
     const cache = getCache()
     const key = `fipeQuery_${licensePlate}`
