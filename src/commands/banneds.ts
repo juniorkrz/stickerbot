@@ -21,7 +21,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['banidos'],
   desc: 'Mostra os usuários banidos.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -29,6 +29,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: true,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 5,
   limiter: {}, // do not touch this
@@ -66,6 +67,5 @@ export const command: StickerBotCommand = {
       { text: spintax(response) },
       getMessageOptions(message, false)
     )
-
   }
 }

@@ -1,7 +1,7 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
-import { getSimSimiResponse } from '../handlers/simsimi'
+import { getSimSimiResponse } from '../handlers/simSimi'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { getMentionedJids, getPhoneFromJid, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
@@ -28,6 +28,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: true,
   botMustBeAdmin: false,
   interval: 30,
   limiter: {}, // do not touch this

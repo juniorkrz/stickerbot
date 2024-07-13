@@ -3,15 +3,13 @@ import path from 'path'
 
 import { getClient } from '../bot'
 import { bot } from '../config'
-import { getLogger } from '../handlers/logger'
+import { getVips } from '../handlers/db'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { sendMessage } from '../utils/baileysHelper'
+import { getMessageOptions, getPhoneFromJid, isSenderBotMaster, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, spintax } from '../utils/misc'
-
-// Gets the logger
-const logger = getLogger()
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -22,19 +20,19 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['link'],
-  desc: 'Envia o link da comunidade do bot.',
+  aliases: ['vips'],
+  desc: 'Mostra os VIPs do bot.',
   example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,
-  onlyBotAdmin: false,
+  onlyBotAdmin: true,
   onlyAdmin: false,
   onlyVip: false,
   botMustBeAdmin: false,
-  interval: 30,
+  interval: 0,
   limiter: {}, // do not touch this
   run: async (
     jid: string,
@@ -50,26 +48,34 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const client = getClient()
+    if (!isSenderBotMaster(sender)) return await sendMessage(
+      {
+        text: spintax(
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, você não tem acesso a esse comando.'
+        )
+      },
+      message
+    )
 
-    if (bot.community){
-      try {
-        const cmmCode = await client.groupInviteCode(bot.community)
-        if (cmmCode) {
-          return await sendMessage(
-            { text: spintax(`{Participe da|Entre na|Tire suas dúvidas na} comunidade oficial do *${bot.name}*! ` +
-              `💜\n\nhttps://chat.whatsapp.com/${cmmCode}`) },
-            message
-          )
-        }
-      } catch (error) {
-        logger.error(`Error fetching community invite code: ${error}`)
-      }
+    const vips = await getVips()
+    let response = `👑 *VIPs do ${bot.name}*\n`
+
+    if (vips.length == 0) {
+      response += '\nNenhum VIP encontrado! :('
+    } else {
+      vips.forEach((vip, index) => {
+        const phone = getPhoneFromJid(vip.jid)
+        if (phone) {
+          response += `\n${index + 1} - ${phone}`
+        }})
     }
 
-    return await sendMessage(
-      { text: spintax('⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o link da comunidade está indisponível no momento!') },
-      message
+    const client = getClient()
+    await react(message, getRandomItemFromArray(emojis.success))
+    return await client.sendMessage(
+      sender,
+      { text: spintax(response) },
+      getMessageOptions(message, false)
     )
   }
 }

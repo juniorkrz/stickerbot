@@ -22,7 +22,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['ping'], // * Tudo que estiver aqui será aceito como comando, precisa ser um array com no mínimo um comando.
   desc: 'Verifica o tempo de resposta do bot.', // * Descrição do comando, será exibido no menu.
-  example: false, // Exemplo do comando, deve ser uma string ou false
+  example: undefined, // Exemplo do comando, deve ser uma string ou false
   needsPrefix: true, // O comando precisa de um prefixo para ser executado?
   inMaintenance: false, // O comando está em manutenção?
   runInPrivate: true, // O comando deve funcionar nos privados?
@@ -30,6 +30,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false, // O comando deve funcionar apenas nos grupos oficiais do bot?
   onlyBotAdmin: false, // O comando deve funcionar apenas para administradores do bot?
   onlyAdmin: false, // O comando deve funcionar apenas para administradores do grupo?
+  onlyVip: false, // O comando deve funcionar apenas para apoiadores do bot?
   botMustBeAdmin: false, // O bot precisa ser administrador do grupo para executar o comando?
   interval: 5, // Intervalo para executar esse comando novamente (em segundos)
   limiter: {}, // Não mecha nisso!

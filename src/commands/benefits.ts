@@ -7,7 +7,8 @@ import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { capitalize, getRandomImage, spintax } from '../utils/misc'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomImage, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -18,8 +19,8 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['menu', 'comando'],
-  desc: 'Mostra o menu de comandos do bot.',
+  aliases: ['vantagens', 'vantagem'],
+  desc: 'Mostra as vantagens de ser um apoiador do bot.',
   example: undefined,
   needsPrefix: true,
   inMaintenance: false,
@@ -48,30 +49,28 @@ export const command: StickerBotCommand = {
 
     const chosenPrefix = body.trim()[0]
 
-    let menu = `*${bot.name} Menu* 🤖\n\n`
-    menu += `Atualmente o ${bot.name} possui *{totalCommands}* comandos.\n\n`
+    let menu = `*Vantagens exclusivas para apoiadores do ${bot.name}* 🤖\n\n`
+    menu += '* Limite de solicitações dobrado 🚀\n'
+    menu += `* Tempo de espera reduzido pela metade ${getRandomItemFromArray(emojis.wait)}\n`
+    menu += '* Adicionar o bot em um grupo (funciona apenas p/ apoiadores) 💥\n'
+    menu += '* *{totalCommands}* comandos exclusivos. 👑\n\n'
     menu += `*${chosenPrefix}comando* - _Descrição_ (intervalo)\n\n`
 
-    const sections = {
-      'commandsForAdmins': { title: 'comandos para admins',
-        commands: [] as string[] },
-      'commandsForGroups': { title: 'comandos para grupos',
-        commands: [] as string[] },
-      'generalCommands': { title: 'comandos gerais',
-        commands: [] as string[] }
-    }
-
+    let totalCommands = 0
     const actions = getActions()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     for (const [key, action] of Object.entries(actions)) {
+      if (!action.onlyVip) continue
+
       const prefix = action.needsPrefix ? chosenPrefix : ''
       const aliases = action.aliases
       const inMaintenance = action.inMaintenance ? ' - *(EM MANUTENÇÃO)*' : ''
 
       let line = ''
       line += `*${prefix}${aliases[0]}*${inMaintenance} - _${action.desc}_`
-      line += action.interval > 0
-        ? ` (${action.interval.toString()}s)`
+      const interval = (action.interval / 2)
+      line += interval > 0
+        ? ` (${interval.toString()}s)`
         : ''
       line += '\n\n'
       line += action.example ? `*Exemplo:* ${prefix}${aliases[0]} ${action.example}\n\n` : ''
@@ -83,26 +82,8 @@ export const command: StickerBotCommand = {
         line += '>\n\n'
       }
 
-      if (action.onlyBotAdmin && isBotAdmin && !group) {
-        sections['commandsForAdmins'].commands.push(line)
-      } else if (action.runInGroups && !action.runInPrivate) {
-        sections['commandsForGroups'].commands.push(line)
-      } else if (!action.onlyBotAdmin) {
-        sections['generalCommands'].commands.push(line)
-      }
-    }
-
-    let totalCommands = 0
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [_, section] of Object.entries(sections)) {
-      const sectionTitle = section.title
-      const sectionCommands = section.commands
-      if (sectionCommands.length > 0) {
-        totalCommands += sectionCommands.length
-        menu += `*${sectionTitle.toUpperCase()}:*\n\n`
-        menu += sectionCommands.join('') || `Não foram encontrados ${sectionTitle.toLowerCase()}.\n\n`
-      }
+      menu += line
+      totalCommands++
     }
 
     menu = menu.slice(0, -2)

@@ -19,7 +19,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['convite', 'invite'],
   desc: 'Envia o link de convite do grupo.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: false,
@@ -27,6 +27,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: true,
+  onlyVip: false,
   botMustBeAdmin: true,
   interval: 30,
   limiter: {},// do not touch this

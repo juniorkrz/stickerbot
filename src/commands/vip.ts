@@ -1,9 +1,7 @@
-import { areJidsSameUser,GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
+import { GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
 import path from 'path'
 
-import { getClient } from '../bot'
-import { bot } from '../config'
-import { unban } from '../handlers/db'
+import { addVip } from '../handlers/db'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
@@ -11,6 +9,7 @@ import {
   getMentionedJids,
   getPhoneFromJid,
   getQuotedMessage,
+  isSenderBotMaster,
   react,
   sendLogToAdmins,
   sendMessage
@@ -31,8 +30,8 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['unban'],
-  desc: 'Desbane o usuário mencionado/autor da mensagem citada/número informado.',
+  aliases: ['vip'],
+  desc: 'Adiciona o usuário mencionado/autor da mensagem citada/número informado aos vips do bot.',
   example: undefined,
   needsPrefix: true,
   inMaintenance: false,
@@ -59,16 +58,25 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    // Getting jids to unban
+    if (!isSenderBotMaster(sender)) return await sendMessage(
+      {
+        text: spintax(
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, você não tem acesso a esse comando.'
+        )
+      },
+      message
+    )
+
+    // Getting jids to add
 
     // Trying to get by mentions
-    let unbannedUsers = getMentionedJids(message)
+    let vips = getMentionedJids(message)
 
     // Trying to get the author of the quoted message
-    if (unbannedUsers?.length == 0) {
+    if (vips?.length == 0) {
       const quotedMsg = getQuotedMessage(message)
       if (quotedMsg) {
-        unbannedUsers = [
+        vips = [
           quotedMsg.key.fromMe
             ? quotedMsg.participant!
             : quotedMsg.key.participant!
@@ -77,26 +85,27 @@ export const command: StickerBotCommand = {
     }
 
     // Trying to get the parameter in the message body
-    if (unbannedUsers?.length == 0) {
-      const phone = body.slice(command.needsPrefix
-        ? 1
-        : 0)
+    if (vips?.length == 0) {
+      const phone = body
+        .slice(command.needsPrefix ? 1 : 0)
         .replace(new RegExp(alias, 'i'), '')
+        .replace('perma', '')
         .trim()
+        .replace(/\D/g, '')
 
       if (phone.length > 3) {
-        unbannedUsers = [jidEncode(phone, 's.whatsapp.net')]
+        vips = [jidEncode(phone, 's.whatsapp.net')]
       }
     }
 
-    unbannedUsers = unbannedUsers?.filter(user => user.length > 0)// Remove empty entries
-    unbannedUsers = Array.from(new Set(unbannedUsers))// Remove duplicate entries
+    vips = vips?.filter(user => user.length > 0)// Remove empty entries
+    vips = Array.from(new Set(vips))// Remove duplicate entries
 
-    if (unbannedUsers?.length == 0) {
+    if (vips?.length == 0) {
       return await sendMessage(
         {
           text: spintax(
-            '⚠ {Ei|Opa|Eita|Ops}, o número a ser desbanido não foi encontrado, ' +
+            '⚠ {Ei|Opa|Eita|Ops}, o número a ser adicionado aos vips não foi encontrado, ' +
             'você pode *mencionar* alguém, *citar* uma mensagem ou *escrever* o número após o comando!'
           )
         },
@@ -104,55 +113,21 @@ export const command: StickerBotCommand = {
       )
     }
 
+    const permanent = body.includes('perma')
+
     let logs = ''
-    const client = getClient()
+    for (const vip of vips) {
+      await addVip(vip, permanent)
 
-    for (const user of unbannedUsers) {
-      // Is the user being unbanned the bot?
-      const isMe = areJidsSameUser(user, client.user?.id)
-      // Is the user to be unbanned the sender himself?
-      const hisSelf = areJidsSameUser(user, sender)
-      // Is the user to be unbanned an admin of the bot?
-      const userIsBotAdmin = bot.admins.includes(getPhoneFromJid(user))
-
-      if (isMe || hisSelf) {
-        return await sendMessage(
-          {
-            text: spintax(
-              `⚠ {Você|Tu|Vc} não pode ${isMe ? 'me' : 'se'} desbanir {bobinho(a)|besta}! ` +
-              '{`¯\\_(ツ)_/¯`|🧐|🫠|😉|😌|🤓|🤪|🤔|🫤}'
-            )
-          },
-          message
-        )
-      }
-
-      if (userIsBotAdmin) {
-        return await sendMessage(
-          {
-            text: spintax(
-              '⚠ {Você|Tu|Vc} não pode desbanir esse número {bobinho(a)|besta}! {`¯\\_(ツ)_/¯`|🧐|🫠|😉|😌|🤓|🤪|🤔|🫤}'
-            )
-          },
-          message
-        )
-      }
-
-      // Save to database
-      unban(user)
-
-      // Log unbans
-      const currentMsg = `*[BANS]:* Admin @${getPhoneFromJid(sender)} desbaniu ${getPhoneFromJid(user)}`
+      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} adicionou ${getPhoneFromJid(vip)}` +
+      `${permanent ? ' *permanentemente*': ''} aos vips!`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
-
-      // Unblock user
-      await client.updateBlockStatus(user, 'unblock')
     }
 
-    // If there is an admin group set, send log
-    sendLogToAdmins(logs.slice(0, -1), [sender])
+    await sendLogToAdmins(logs.slice(0, -1), [sender])
 
     return await react(message, getRandomItemFromArray(emojis.success))
+
   }
 }

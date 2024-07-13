@@ -24,7 +24,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['feriado', 'holiday'],
   desc: 'Mostra informações sobre o próximo feriado no Brasil.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -32,6 +32,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 5,
   limiter: {}, // do not touch this

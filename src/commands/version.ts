@@ -25,7 +25,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['versao', 'version', 'sobre', 'about'],
   desc: 'Mostra a versão atual do bot.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -33,6 +33,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 5,
   limiter: {}, // do not touch this

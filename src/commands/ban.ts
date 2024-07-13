@@ -35,7 +35,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['ban'],
   desc: 'Bane o usuário mencionado/autor da mensagem citada/número informado.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -43,6 +43,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: true,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 0,
   limiter: {}, // do not touch this

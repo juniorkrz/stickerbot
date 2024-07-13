@@ -404,6 +404,14 @@ const stickerBot = async () => {
     logger.info(`${colors.yellow}[ADMINS]${colors.reset} ${totalAdmins} admin${totalAdmins > 1 ? 's' : ''} loaded!`)
   }
 
+  if (bot.vipSystem) {
+    const vips = await getVips()
+    const totalVips = vips.length
+    logger.info(`${colors.yellow}[VIPS]${colors.reset} ${colors.green}Enabled${colors.reset} - ${totalVips} VIPs!`)
+  } else {
+    logger.info(`${colors.yellow}[VIPS]${colors.reset} ${colors.red}Disabled${colors.reset}!`)
+  }
+
   const totalGroups = bot.groups.length
   if (totalGroups == 0) {
     logger.warn(`${colors.blue}[GROUPS]${colors.reset} No groups have been set!`)

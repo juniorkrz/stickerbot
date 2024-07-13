@@ -26,8 +26,8 @@ export interface CommandRunFunction {
 export interface StickerBotCommand {
   name: string
   aliases: string[]
-  desc?: string | null
-  example: string | boolean
+  desc: string
+  example?: string
   needsPrefix: boolean
   inMaintenance: boolean
   runInPrivate: boolean
@@ -35,6 +35,7 @@ export interface StickerBotCommand {
   onlyInBotGroup: boolean
   onlyBotAdmin: boolean
   onlyAdmin: boolean
+  onlyVip: boolean
   botMustBeAdmin: boolean
   interval: number
   limiter: CommandLimiter

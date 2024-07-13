@@ -30,7 +30,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['rembg', 'bg', 'recortar', 'recorte'],
   desc: 'Cria um sticker removendo a imagem de fundo.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -38,6 +38,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: true,
   botMustBeAdmin: false,
   interval: 0,
   limiter: {}, // do not touch this

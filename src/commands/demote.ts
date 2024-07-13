@@ -20,7 +20,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['rebaixar', 'demote'],
   desc: 'Rebaixa o participante mencionado para membro do grupo.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: false,
@@ -28,6 +28,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: true,
+  onlyVip: false,
   botMustBeAdmin: true,
   interval: 5,
   limiter: {}, // do not touch this

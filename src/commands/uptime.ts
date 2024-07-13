@@ -21,7 +21,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['uptime'],
   desc: 'Mostra a quanto tempo o bot está ligado.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -29,6 +29,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 30,
   limiter: {}, // do not touch this

@@ -20,7 +20,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['abrir', 'open'],
   desc: 'Abre o grupo para que todos possam mandar mensagens.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: false,
@@ -28,6 +28,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: true,
+  onlyVip: false,
   botMustBeAdmin: true,
   interval: 30,
   limiter: {}, // do not touch this

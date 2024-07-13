@@ -19,7 +19,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['prefixos', 'prefixes'],
   desc: 'Mostra os prefixos aceitos pelo bot.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -27,6 +27,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 10,
   limiter: {}, // do not touch this

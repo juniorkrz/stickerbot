@@ -1,6 +1,7 @@
 import { GroupMetadata, isJidGroup, WAMessage } from '@whiskeysockets/baileys'
 
 import { bot } from '../config'
+import { senderIsVip } from '../handlers/db'
 import { getLogger } from '../handlers/logger'
 import { CommandLimiter, StickerBotCommand } from '../types/Command'
 import { sendMessage } from './baileysHelper'
@@ -40,7 +41,7 @@ export const checkCommand = async (
   command: StickerBotCommand
 ) => {
   const sender = message.key.participant || jid
-  const isVip = false// TODO: bot.vips.includes(sender)
+  const isVip = await senderIsVip(sender)
   const isDonor = false// TODO: donors.includes(sender)
   const isGroup = isJidGroup(jid)
   const isBotGroup = isGroup ? bot.groups.includes(jid) : false
@@ -75,6 +76,16 @@ export const checkCommand = async (
 
   // Check if the sender needs to be the bot owner
   if (command.onlyBotAdmin && !isBotAdmin) {
+    return false
+  }
+
+  // Check if the command should run only for bot donors/vips
+  if (command.onlyVip && bot.vipSystem && !(isDonor || isVip)) {
+    const reply = `⚠ O comando *${alias}* só funciona para *apoiadores do ${bot.name}*!`
+    await sendMessage(
+      { text: spintax(reply) },
+      message
+    )
     return false
   }
 

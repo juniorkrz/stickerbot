@@ -31,6 +31,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 30,
   limiter: {}, // do not touch this
@@ -75,7 +76,6 @@ export const command: StickerBotCommand = {
       q: term
     }
 
-    console.log(tenorSearch.q, customSearch.q)
     const searchResult = await getTenors(customSearch)
 
     // if no results, send a error message

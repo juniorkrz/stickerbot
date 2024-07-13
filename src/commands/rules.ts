@@ -19,7 +19,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['regras', 'rules', 'rtfm'],
   desc: 'Envia as regras do grupo.',
-  example: false,
+  example: undefined,
   needsPrefix: false,
   inMaintenance: false,
   runInPrivate: false,
@@ -27,6 +27,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 5,
   limiter: {}, // do not touch this

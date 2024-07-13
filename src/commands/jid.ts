@@ -18,7 +18,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['jid'],
   desc: 'Informa o JID do chat.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -26,6 +26,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: true,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 0,
   limiter: {}, // do not touch this

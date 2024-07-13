@@ -18,7 +18,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['pinga'],
   desc: 'Envia uma bebida aleatória.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -26,6 +26,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: false,
   botMustBeAdmin: false,
   interval: 5,
   limiter: {}, // do not touch this

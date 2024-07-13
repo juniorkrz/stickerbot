@@ -22,7 +22,7 @@ export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['trends'],
   desc: 'Envia trending stickers do Stickerly.',
-  example: false,
+  example: undefined,
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -30,6 +30,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
+  onlyVip: true,
   botMustBeAdmin: false,
   interval: 30,
   limiter: {}, // do not touch this

@@ -6,6 +6,7 @@ import {
   GroupMetadataParticipants,
   isJidGroup,
   jidDecode,
+  jidEncode,
   jidNormalizedUser,
   MiscMessageGenerationOptions,
   WA_DEFAULT_EPHEMERAL,
@@ -211,7 +212,7 @@ export const react = async (message: WAMessage, emoji: string) => {
   )
 }
 
-export async function sendAudio(message: WAMessage, path: string) {
+export const sendAudio = async (message: WAMessage, path: string) => {
   // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
   // https://github.com/WhiskeySockets/Baileys/issues/768
   return await sendMessage(
@@ -407,4 +408,9 @@ export const getMessageAuthor = (message: WAMessage) => {
 export const getQuotedMessageAuthor = (message: WAMessage) => {
   const quotedMsg = getQuotedMessage(message)
   if (quotedMsg) return getMessageAuthor(quotedMsg)
+}
+
+export const isSenderBotMaster = (jid: string) => {
+  const botMaster = bot.admins[0]
+  return areJidsSameUser(jid, jidEncode(botMaster, 's.whatsapp.net'))
 }
