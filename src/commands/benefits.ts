@@ -50,6 +50,7 @@ export const command: StickerBotCommand = {
     const chosenPrefix = body.trim()[0]
 
     let menu = `*Vantagens exclusivas para apoiadores do ${bot.name}* 🤖\n\n`
+    menu += `Digite *${chosenPrefix}pix* para saber como se tornar um apoiador.\n\n`
     menu += '* Limite de solicitações dobrado 🚀\n'
     menu += `* Tempo de espera reduzido pela metade ${getRandomItemFromArray(emojis.wait)}\n`
     menu += '* Adicionar o bot em um grupo (funciona apenas p/ apoiadores) 💥\n'
