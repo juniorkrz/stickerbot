@@ -1,6 +1,6 @@
 /* Adapted from https://github.com/sergiooak/deadbyte-bot/blob/master/src/services/functions/stickers.js */
 
-import { StickerlyResponse, StickerlySticker } from 'types/StickerLy'
+import { StickerlyResponse, StickerlySticker } from 'types/Stickerly'
 
 const headers = {
   'User-Agent': 'androidapp.stickerly/2.16.0 (G011A; U; Android 22; pt-BR; br;)',
