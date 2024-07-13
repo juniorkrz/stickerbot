@@ -96,7 +96,7 @@ export const command: StickerBotCommand = {
         {
           text: spintax(
             '⚠ {Ei|Opa|Eita|Ops}, o número a ser desbanido não foi encontrado, ' +
-            'você pode *mencionar* alguém, *citar* uma mensagem ou escrever o número após o comando!'
+            'você pode *mencionar* alguém, *citar* uma mensagem ou *escrever* o número após o comando!'
           )
         },
         message
