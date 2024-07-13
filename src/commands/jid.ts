@@ -44,10 +44,13 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    // Send chat JID
+    // Send chat jid and linkedParent
+
+    let response = `jid: ${jid ?? 'Desconhecido'}`
+    if (group) response += `\nlinkedParent: ${group.linkedParent ?? 'Nenhum'}`
 
     return await sendMessage(
-      { text: jid ? jid : 'Desconhecido' },
+      { text: response },
       message,
     )
   }
