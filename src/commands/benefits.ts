@@ -8,7 +8,7 @@ import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
-import { capitalize, getRandomImage, getRandomItemFromArray, spintax } from '../utils/misc'
+import { capitalize, getRandomFile, getRandomItemFromArray, spintax } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
@@ -90,7 +90,7 @@ export const command: StickerBotCommand = {
     menu = menu.replace('{totalCommands}', totalCommands.toString())
 
     const imgDir = path.resolve(__dirname, `../../src/img/${commandName}`)
-    const randomImage = getRandomImage(imgDir)
+    const randomImage = getRandomFile(imgDir)
 
     return await sendMessage(
       {

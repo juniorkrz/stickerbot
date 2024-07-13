@@ -30,6 +30,7 @@ export const bot = {
   stickers: +(process.env.SB_STICKERS || 5),
   lastSeenPrivacy: process.env.SB_LAST_SEEN_PRIVACY as WAPrivacyValue || 'all',
   onlinePrivacy: process.env.SB_ONLINE_PRIVACY as WAPrivacyOnlineValue || 'all',
+  setProfilePic: JSON.parse(process.env.SB_SET_PROFILE_PIC || 'false') as boolean,
   profilePicPrivacy: process.env.SB_PROFILE_PIC_PRIVACY as WAPrivacyValue || 'all',
   statusPrivacyValue: process.env.SB_STATUS_PRIVACY as WAPrivacyValue || 'all',
   readReceiptsPrivacy: process.env.SB_READ_RECEIPTS_PRIVACY as WAReadReceiptsValue || 'all',

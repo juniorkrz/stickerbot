@@ -13,6 +13,7 @@ import {
   WAMessage,
   WAMessageContent
 } from '@whiskeysockets/baileys'
+import path from 'path'
 
 import { getClient, getStore } from '../bot'
 import { bot } from '../config'
@@ -20,7 +21,7 @@ import { getCache } from '../handlers/cache'
 import { addCount } from '../handlers/db'
 import { getLogger } from '../handlers/logger'
 import { colors } from './colors'
-import { getProjectLocalVersion } from './misc'
+import { getProjectLocalVersion, getRandomFile } from './misc'
 
 const logger = getLogger()
 
@@ -345,6 +346,15 @@ export const setupBot = async () => {
   if (privacySettings.profile != bot.profilePicPrivacy) {
     logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic privacy`)
     await client.updateProfilePicturePrivacy(bot.profilePicPrivacy)
+  }
+
+  // Profile Pic
+  if (bot.setProfilePic) {
+    logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic`)
+    const imgDir = path.resolve(__dirname, '../../src/img/profilePic')
+    const randomImage = getRandomFile(imgDir)
+    const botJid = client.user?.id
+    if (botJid) await client.updateProfilePicture(botJid, { url: randomImage })
   }
 
   // Status Privacy

@@ -146,7 +146,7 @@ const connectToWhatsApp = async () => {
       }
     } else if (connection === 'open') {
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
-      await setupBot()
+      if (!dev) await setupBot()
       logger.info(`${bot.name} is ${colors.green}ready${colors.reset}!`)
       if (dev) logger.warn('Development mode is active!')
       if (!dev) sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
