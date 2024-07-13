@@ -30,7 +30,7 @@ export const command: StickerBotCommand = {
   onlyAdmin: true,
   onlyVip: false,
   botMustBeAdmin: true,
-  interval: 5,
+  interval: 0,
   limiter: {}, // do not touch this
   run: async (
     jid: string,
