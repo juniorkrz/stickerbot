@@ -7,6 +7,7 @@
 - [ ] Limpeza automática de histórico/conversas
 - [ ] Obrigar usuário a participar da comunidade (configurável)
 - [ ] Ignorar chat privado (configurável)
+- [ ] Sistema VIP
 
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
