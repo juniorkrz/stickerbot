@@ -5,7 +5,7 @@
 - [ ] Carregar frases de um JSON
 - [ ] Adicionar thumbnail nas imagens do `unmakeSticker`
 - [ ] Limpeza automática de histórico/conversas
-- [ ] Obrigar usuário a participar da comunidade (configurável)
+- [x] Obrigar usuário a participar da comunidade (configurável)
 - [ ] Ignorar chat privado (configurável)
 - [x] Sistema VIP
 

@@ -16,7 +16,8 @@ import Pino from 'pino'
 import { imageSync } from 'qr-image'
 
 import { baileys, bot } from './config'
-import { getAllBannedUsers, isUserBanned } from './handlers/db'
+import { handleSenderParticipation } from './handlers/community'
+import { getAllBannedUsers, getVips, isUserBanned } from './handlers/db'
 import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
@@ -303,6 +304,10 @@ const connectToWhatsApp = async () => {
         const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
         if (isSenderRateLimited) return
 
+        // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
+        const isCmmMember = await handleSenderParticipation(message, jid, group, sender)
+        if (!isCmmMember) return
+
         const isAnimated = content.videoMessage?.seconds ? true : false
         const commandName = isAnimated ? 'Animated Sticker' : 'Static Sticker'
         logAction(message, jid, group, commandName)
@@ -323,6 +328,10 @@ const connectToWhatsApp = async () => {
         // If sender is rate limited, do nothing
         const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
         if (isSenderRateLimited) return
+
+        // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
+        const isCmmMember = await handleSenderParticipation(message, jid, group, sender)
+        if (!isCmmMember) return
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
         const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined

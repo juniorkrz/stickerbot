@@ -7,6 +7,7 @@ import { getClient } from '../bot'
 import { CommandActions } from '../types/Command'
 import { logAction } from '../utils/baileysHelper'
 import { hasValidPrefix } from '../utils/misc'
+import { handleSenderParticipation } from './community'
 import { handleLimitedSender } from './senderUsage'
 
 // Directory where the commands are
@@ -58,6 +59,10 @@ export const handleText = async (
     // If sender is rate limited, do nothing
     const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
     if (isSenderRateLimited) return
+
+    // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
+    const isCmmMember = await handleSenderParticipation(message, jid, group, sender)
+    if (!isCmmMember) return
 
     // Add to Statistics
     logAction(message, jid, group, action)
