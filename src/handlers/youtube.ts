@@ -1,7 +1,9 @@
 import ytdl from '@distube/ytdl-core'
+import ffmpeg from 'fluent-ffmpeg'
 import fs from 'fs'
 import ytsr from 'ytsr'
 
+import { dev } from '../bot'
 import { ytsrItem } from '../types/Youtube'
 import { getLogger } from './logger'
 
@@ -56,23 +58,41 @@ export const getYoutubeVideo = async (url: string) => {
   }
 }
 
-// TODO: return boolean
-export const downloadYoutubeVideo = async (url: string, audioFormat: ytdl.videoFormat, filePath: string) => {
+export const downloadAudioFromYoutubeVideo = async (
+  url: string, audioFormat: ytdl.videoFormat, filePath: string
+): Promise<string | undefined> => {
   return new Promise((resolve, reject) => {
-    // Start downloading the audio
+    if (dev) logger.info(`[YTDL] Downloading audio to: ${filePath}`)
     const videoStream = ytdl(url, { format: audioFormat })
 
     videoStream.on('error', (error) => {
-      reject(error) // Reject the promise in case of error
+      reject(error)
     })
 
-    videoStream.pipe(fs.createWriteStream(filePath))
+    const fileWriteStream = fs.createWriteStream(filePath)
+    fileWriteStream.on('error', (error) => {
+      reject(error)
+    })
+
+    const output = filePath.replace('mp4', 'aac')
+    if (dev) logger.info(`[YTDL] Audio successfully downloaded: ${filePath}`)
+    if (dev) logger.info(`[YTDL] Converting audio to AAC: ${output}`)
+    videoStream.pipe(fileWriteStream)
       .on('finish', () => {
-        logger.info(`Video audio successfully downloaded: ${filePath}`)
-        resolve(filePath) // Resolves promise with file path when download is complete
+        // Conversion to AAC using ffmpeg
+        ffmpeg(filePath)
+          .output(output)
+          .on('end', function() {
+            if (dev) logger.info(`[YTDL] Audio successfully converted to AAC: ${output}`)
+            resolve(output)
+          }).on('error', function(error){
+            logger.error(`[YTDL] Error converting audio to AAC: ${error}`)
+            resolve(undefined)
+          }).run()
       })
       .on('error', (error) => {
-        reject(error) // Rejects promise in case of error during download
+        logger.error(`[YTDL] Error converting audio to AAC: ${error}`)
+        reject(error)
       })
   })
 }

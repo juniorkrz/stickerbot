@@ -3,9 +3,9 @@ import { GroupMetadata } from '@whiskeysockets/baileys'
 import fs from 'fs'
 import path from 'path'
 
-import { getClient } from '../bot'
+import { dev, getClient } from '../bot'
 import { getLogger } from '../handlers/logger'
-import { downloadYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
+import { downloadAudioFromYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendAudio, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
@@ -129,37 +129,46 @@ export const command: StickerBotCommand = {
       return
     }
 
+    // send wait message
     await sendMessage(
       { text: spintax(getRandomItemFromArray(replies.WAIT)) },
       message
     )
+
+    // react wait
     await react(message, getRandomItemFromArray(emojis.wait))
 
     // set presence recording
     const client = getClient()
     await client.sendPresenceUpdate('recording', jid)
 
-    // download video
-    const filename = `${message.key.id}_${message.messageTimestamp}.mp3`
+    // download audio from video as MP4 and convert audio to AAC
+    const filename = `${message.key.id}_${message.messageTimestamp}.mp4`
     const filePath = getTempFilePath(filename)
-    await downloadYoutubeVideo(url, audio, filePath)
+    const output = await downloadAudioFromYoutubeVideo(url, audio, filePath)
+
+    // if something wrong, react with an error
+    if (!output) return await react(message, emojis.error)
 
     // send audio
+    if (dev) logger.info(`[YTDL] Sending audio ${output}`)
     await client.sendPresenceUpdate('available', jid)
-    const result = await sendAudio(message, filePath)
+    const result = await sendAudio(message, output)
 
-    // delete file...
-    fs.unlink(filePath, (err) => {
+    // delete file
+    fs.unlink(output, (err) => {
       if (err) {
-        logger.error(`An error occurred while deleting the file: ${err}`)
+        logger.error(`[YTDL] An error occurred while deleting the file: ${err}`)
         return
       }
-      logger.info(`File deleted successfully: ${filePath}`)
+      if (dev) logger.info(`[YTDL] File deleted successfully: ${output}`)
     })
 
     if (result?.status == 1) {
+      // react success
       return await react(message, getRandomItemFromArray(emojis.music))
     } else {
+      // react error
       await react(message, emojis.error)
     }
     return

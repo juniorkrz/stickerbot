@@ -214,13 +214,11 @@ export const react = async (message: WAMessage, emoji: string) => {
 }
 
 export const sendAudio = async (message: WAMessage, path: string) => {
-  // TODO: [BUG] Error playing audio on iOS/WA (Windows) devices #768
-  // https://github.com/WhiskeySockets/Baileys/issues/768
   return await sendMessage(
     {
       audio: { url: path },
       //ptt: true, // false prevents automatic audio download
-      mimetype: 'audio/mpeg'
+      mimetype: 'audio/aac'
     },
     message
   )

@@ -92,7 +92,7 @@ setInterval(() => {
 const skipUnreadMessages = baileys.skipUnreadMessages || process.argv.includes('--skip-unread')
 
 // is the bot running in development?
-const dev = process.argv.includes('--dev')
+export const dev = process.argv.includes('--dev')
 
 // the moment the bot started
 export const startedAt: moment.Moment = moment()
