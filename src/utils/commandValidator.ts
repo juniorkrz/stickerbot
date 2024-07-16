@@ -1,7 +1,6 @@
 import { GroupMetadata, isJidGroup, WAMessage } from '@whiskeysockets/baileys'
 
 import { bot } from '../config'
-import { senderIsVip } from '../handlers/db'
 import { getLogger } from '../handlers/logger'
 import { CommandLimiter, StickerBotCommand } from '../types/Command'
 import { sendMessage } from './baileysHelper'
@@ -36,12 +35,12 @@ export const checkCommand = async (
   alias: string,
   group: GroupMetadata | undefined,
   isBotAdmin: boolean,
+  isVip: boolean,
   isGroupAdmin: boolean,
   amAdmin: boolean,
   command: StickerBotCommand
 ) => {
   const sender = message.key.participant || jid
-  const isVip = await senderIsVip(sender)
   const isDonor = false// TODO: donors.includes(sender)
   const isGroup = isJidGroup(jid)
   const isBotGroup = isGroup ? bot.groups.includes(jid) : false

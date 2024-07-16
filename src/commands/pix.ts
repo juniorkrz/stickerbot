@@ -39,22 +39,23 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const chosenPrefix = body.trim()[0]
 
     const response = `{{Apoie|Ajude|Colabore com} o *${bot.name}* 💜\n\n` +
-    '{Qualquer valor é super bem-vindo|Qualquer quantia é super bem-vinda} ' +
-    'e vai nos ajudar a {cobrir|manter} os {custos|gastos} de desenvolvimento e manutenção.\n\n' +
-    `{Utilize|Use} a chave pix: ${bot.donationLink}|🤖 *{Colabore com qualquer valor! 💜|` +
-    `Envie o que seu 💜 mandar!}*\n\nChave Pix: ${bot.donationLink}} (e-mail)\n\n ` +
-    '⚠ *Importante:* para ser adicionado aos VIPs, envie seu DDD + número na descrição do pix.\n\n' +
-    '_Valores acima de R$2,00 serão adicionados aos VIPs por *30 dias*._\n\n' +
-    `_Confira os benefícios VIPs digitando o comando *${chosenPrefix}vantagens*._`
+      '{Qualquer valor é super bem-vindo|Qualquer quantia é super bem-vinda} ' +
+      'e vai nos ajudar a {cobrir|manter} os {custos|gastos} de desenvolvimento e manutenção.\n\n' +
+      `{Utilize|Use} a chave pix: ${bot.donationLink}|🤖 *{Colabore com qualquer valor! 💜|` +
+      `Envie o que seu 💜 mandar!}*\n\nChave Pix: ${bot.donationLink}} (e-mail)\n\n ` +
+      '⚠ *Importante:* para ser adicionado aos VIPs, envie seu DDD + número na descrição do pix.\n\n' +
+      '_Valores acima de R$2,00 serão adicionados aos VIPs por *30 dias*._\n\n' +
+      `_Confira os benefícios VIPs digitando o comando *${chosenPrefix}vantagens*._`
 
     return await sendMessage(
       { text: spintax(response) },

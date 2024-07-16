@@ -18,6 +18,7 @@ export interface CommandRunFunction {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ): Promise<proto.WebMessageInfo | undefined>

@@ -44,10 +44,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     try {
@@ -66,9 +67,9 @@ export const command: StickerBotCommand = {
 
       // Constructing the response message
       const response = `🎉 *Próximo Feriado:* ${name}\n\n` +
-          `📅 *Data:* ${new Date(date).toLocaleDateString('pt-BR')}\n` +
-          '(DD/MM/AAAA)\n\n' +
-          `_Consultado com ${bot.name}. Digite !pix para apoiar o projeto._`
+        `📅 *Data:* ${new Date(date).toLocaleDateString('pt-BR')}\n` +
+        '(DD/MM/AAAA)\n\n' +
+        `_Consultado com ${bot.name}. Digite !pix para apoiar o projeto._`
 
       return await sendMessage(
         { text: spintax(response) },
@@ -78,7 +79,7 @@ export const command: StickerBotCommand = {
       logger.warn('API: BrasilAPI/Feriados error!')
       await sendLogToAdmins('*[API]:* BrasilAPI/Feriados error!')
       const reply = '⚠ Desculpe, não consegui obter informações sobre o próximo feriado. ' +
-          'Por favor, tente novamente mais tarde.'
+        'Por favor, tente novamente mais tarde.'
       await sendMessage(
         { text: reply },
         message

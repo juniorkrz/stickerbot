@@ -17,7 +17,7 @@ import { imageSync } from 'qr-image'
 
 import { baileys, bot } from './config'
 import { handleSenderParticipation } from './handlers/community'
-import { getAllBannedUsers, getVips, isUserBanned } from './handlers/db'
+import { getAllBannedUsers, getVips, isUserBanned, senderIsVip } from './handlers/db'
 import { getLogger } from './handlers/logger'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
@@ -228,6 +228,8 @@ const connectToWhatsApp = async () => {
       const isBanned = phone
         ? await isUserBanned(phone)
         : false
+      // Is sender VIP?
+      const isVip = await senderIsVip(sender)
 
       // Message local timestamp
       message.messageLocalTimestamp = Date.now()
@@ -250,7 +252,7 @@ const connectToWhatsApp = async () => {
 
         if (text) {
           try {
-            const result = await handleText(message, sender, text, group, isBotAdmin, isGroupAdmin, amAdmin)
+            const result = await handleText(message, sender, text, group, isBotAdmin, isVip, isGroupAdmin, amAdmin)
             if (result) continue
           } catch (error: unknown) {
             if (error instanceof Error) {
@@ -283,7 +285,6 @@ const connectToWhatsApp = async () => {
         : message
 
       // Extract message content
-      // Acho q está errado, deveria ser o quoted msg (bot nao ta fazendo sticker se mencionado)
       const content = extractMessageContent(targetMessage.message)
 
       if (!content) continue
@@ -305,7 +306,7 @@ const connectToWhatsApp = async () => {
         if (isSenderRateLimited) return
 
         // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
-        const isCmmMember = await handleSenderParticipation(message, jid, group, sender)
+        const isCmmMember = isVip || await handleSenderParticipation(message, jid, group, sender)
         if (!isCmmMember) return
 
         const isAnimated = content.videoMessage?.seconds ? true : false
@@ -330,7 +331,7 @@ const connectToWhatsApp = async () => {
         if (isSenderRateLimited) return
 
         // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
-        const isCmmMember = await handleSenderParticipation(message, jid, group, sender)
+        const isCmmMember = isVip || await handleSenderParticipation(message, jid, group, sender)
         if (!isCmmMember) return
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
@@ -446,7 +447,7 @@ const stickerBot = async () => {
   }
 
   const port = 3000
-  app.listen(port, () =>logger.info(`${colors.blue}[WS]${colors.reset} ` +
+  app.listen(port, () => logger.info(`${colors.blue}[WS]${colors.reset} ` +
     `Started on port ${colors.green}${port}${colors.reset}`))
 }
 

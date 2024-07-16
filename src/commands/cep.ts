@@ -44,10 +44,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const cep = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
@@ -55,7 +56,7 @@ export const command: StickerBotCommand = {
     // Validate the CEP input
     if (!/^\d{8}$/.test(cep)) {
       const errorMessage = '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o CEP fornecido é inválido. ' +
-      'Por favor, insira um CEP válido de *8 dígitos* e tente novamente.'
+        'Por favor, insira um CEP válido de *8 dígitos* e tente novamente.'
       return await sendMessage(
         { text: spintax(errorMessage) },
         message
@@ -85,7 +86,7 @@ export const command: StickerBotCommand = {
       logger.warn('API: BrasilAPI/CEP error!')
       await sendLogToAdmins('*[API]:* BrasilAPI/CEP está offline!')
       const reply = '⚠ Desculpe, não consegui obter informações para o CEP fornecido. ' +
-      'Por favor, verifique se está correto e tente novamente.'
+        'Por favor, verifique se está correto e tente novamente.'
       await sendMessage(
         { text: reply },
         message

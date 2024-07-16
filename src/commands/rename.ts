@@ -47,10 +47,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     // get quoted message
@@ -102,7 +103,7 @@ export const command: StickerBotCommand = {
         ? text.split('/')
         : false
 
-    if (splittedText && splittedText.length == 2){
+    if (splittedText && splittedText.length == 2) {
       pack = splittedText[0]
       author = splittedText[1]
     } else if (message?.pushName) {

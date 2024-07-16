@@ -40,13 +40,14 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    if(!group) {
+    if (!group) {
       return await react(message, emojis.error)
     }
 
@@ -59,7 +60,7 @@ export const command: StickerBotCommand = {
     const winner = getRandomItemFromArray(participants)
     const raffleName = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
     const phrase = `@${getPhoneFromJid(winner.id)} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
-    `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' + raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`
+      `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' + raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`
 
     return await sendMessage(
       {

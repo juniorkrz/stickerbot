@@ -42,11 +42,12 @@ export const command: StickerBotCommand = {
     body: string, // Corpo da mensagem
     group: GroupMetadata | undefined, // Informações do grupo | Será undefined caso não seja um grupo
     isBotAdmin: boolean, // É um administrador do bot?
+    isVip: boolean,
     isGroupAdmin: boolean, // É um administrador do grupo?
     amAdmin: boolean// O bot é admin no grupo?
   ) => {
     // Não modifique
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     // Sinta-se livre para criar seu comando abaixo.
@@ -70,7 +71,7 @@ export const command: StickerBotCommand = {
 
     // Mensagem a ser enviada
     const responseMsg = `Pong! ${emojis.ping}\n\n${getRandomItemFromArray(emojis.wait)} ` +
-    `Tempo de resposta do {${bot.name}|bot} foi de *${ms}ms*.`
+      `Tempo de resposta do {${bot.name}|bot} foi de *${ms}ms*.`
 
     const quote = true// true: envia a mensagem como resposta | false: envia a mensagem normal
 

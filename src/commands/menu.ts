@@ -40,10 +40,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const chosenPrefix = body.trim()[0]
@@ -53,12 +54,18 @@ export const command: StickerBotCommand = {
     menu += `*${chosenPrefix}comando* - _Descrição_ (intervalo)\n\n`
 
     const sections = {
-      'commandsForAdmins': { title: 'comandos para admins',
-        commands: [] as string[] },
-      'commandsForGroups': { title: 'comandos para grupos',
-        commands: [] as string[] },
-      'generalCommands': { title: 'comandos gerais',
-        commands: [] as string[] }
+      'commandsForAdmins': {
+        title: 'comandos para admins',
+        commands: [] as string[]
+      },
+      'commandsForGroups': {
+        title: 'comandos para grupos',
+        commands: [] as string[]
+      },
+      'generalCommands': {
+        title: 'comandos gerais',
+        commands: [] as string[]
+      }
     }
 
     const actions = getActions()

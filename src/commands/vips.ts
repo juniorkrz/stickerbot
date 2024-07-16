@@ -42,10 +42,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     if (!isSenderBotMaster(sender)) return await sendMessage(
@@ -67,7 +68,8 @@ export const command: StickerBotCommand = {
         const phone = getPhoneFromJid(vip.jid)
         if (phone) {
           response += `\n${index + 1} - ${phone}`
-        }})
+        }
+      })
     }
 
     const client = getClient()

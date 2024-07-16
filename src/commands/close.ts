@@ -40,6 +40,7 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
@@ -48,6 +49,7 @@ export const command: StickerBotCommand = {
       message,
       alias,
       group,
+      isVip,
       isBotAdmin,
       isGroupAdmin,
       amAdmin,

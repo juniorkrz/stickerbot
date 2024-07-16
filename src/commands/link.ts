@@ -44,21 +44,24 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const client = getClient()
 
-    if (bot.community){
+    if (bot.community) {
       try {
         const cmmCode = await client.groupInviteCode(bot.community)
         if (cmmCode) {
           return await sendMessage(
-            { text: spintax(`{Participe da|Entre na|Tire suas dúvidas na} comunidade oficial do *${bot.name}*! ` +
-              `💜\n\nhttps://chat.whatsapp.com/${cmmCode}`) },
+            {
+              text: spintax(`{Participe da|Entre na|Tire suas dúvidas na} comunidade oficial do *${bot.name}*! ` +
+                `💜\n\nhttps://chat.whatsapp.com/${cmmCode}`)
+            },
             message
           )
         }

@@ -20,7 +20,7 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['stickerly', 'ly','stickerlys', 'lys'],
+  aliases: ['stickerly', 'ly', 'stickerlys', 'lys'],
   desc: 'Cria um sticker do tema solicitado via Stickerly, cria vários se usar o comando no plural.',
   example: 'big bang theory',
   needsPrefix: true,
@@ -42,10 +42,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     // multi stickers?

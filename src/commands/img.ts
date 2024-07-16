@@ -45,10 +45,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     // get quoted message
@@ -59,7 +60,7 @@ export const command: StickerBotCommand = {
 
     // error response
     const errorResponse = `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
-        '{você|vc|tu} {deve|precisa} responder a um{ sticker|a figurinha} com o comando.'
+      '{você|vc|tu} {deve|precisa} responder a um{ sticker|a figurinha} com o comando.'
 
     // if you can't find the content, send an error message
     if (!quotedMsg || !content) return await sendMessage(

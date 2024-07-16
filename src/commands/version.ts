@@ -45,10 +45,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const latestVersion = await getProjectLatestVersion()
@@ -61,15 +62,15 @@ export const command: StickerBotCommand = {
       const isUpdated = compare(localVersion, latestVersion.version, '=')
       response = isUpdated
         ? `🤖 *O ${bot.name} está atualizado!* ✅\n\n` +
-          `⚙ *Versão atual:* ${latestVersion.version}\n{🐙|😼} ` +
-          `*GitHub:* ${homepage}\n👨🏻‍💻 *Desenvolvedor:* @juniorkrz.dev`
+        `⚙ *Versão atual:* ${latestVersion.version}\n{🐙|😼} ` +
+        `*GitHub:* ${homepage}\n👨🏻‍💻 *Desenvolvedor:* @juniorkrz.dev`
         : `🤖 *O ${bot.name} está desatualizado!* ❌\n\n` +
-          `⚙ *Versão atual:* ${localVersion}\n🆕 ` +
-          `*Nova versão disponível:* ${latestVersion.version}\n{🐙|😼} ` +
-          `*GitHub:* ${homepage}\n👨🏻‍💻 *Desenvolvedor:* @juniorkrz.dev`
+        `⚙ *Versão atual:* ${localVersion}\n🆕 ` +
+        `*Nova versão disponível:* ${latestVersion.version}\n{🐙|😼} ` +
+        `*GitHub:* ${homepage}\n👨🏻‍💻 *Desenvolvedor:* @juniorkrz.dev`
     } else {
       response = `🤖 *{Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível verificar se o ${bot.name} está atualizado! ` +
-      `{🧐|🫠|🥲|🙃|❌}* ❌\n\n{🐙|😼} *GitHub:* ${homepage}\n👨🏻‍💻 *Desenvolvedor:* @juniorkrz.dev`
+        `{🧐|🫠|🥲|🙃|❌}* ❌\n\n{🐙|😼} *GitHub:* ${homepage}\n👨🏻‍💻 *Desenvolvedor:* @juniorkrz.dev`
     }
 
     return await sendMessage(

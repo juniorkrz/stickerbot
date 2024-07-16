@@ -40,10 +40,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     // Getting jids to kick
@@ -56,7 +57,7 @@ export const command: StickerBotCommand = {
       kickedUsers = mentionedJids
     } else {
       const quotedAuthor = getQuotedMessageAuthor(message)
-      if (quotedAuthor) kickedUsers = [ quotedAuthor ]
+      if (quotedAuthor) kickedUsers = [quotedAuthor]
     }
 
     if (!kickedUsers || kickedUsers.length < 1) {

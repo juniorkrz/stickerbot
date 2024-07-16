@@ -40,16 +40,17 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
 
     const response =
-/* Créditos */
-`🤖 *StickerBot*
+      /* Créditos */
+      `🤖 *StickerBot*
 
 💻 Originalmente desenvolvido em Python, migrado para JavaScript e agora escrito em TypeScript. 🎉
 
@@ -84,7 +85,7 @@ Gostaria de agradecer especialmente a algumas pessoas que me ajudaram com coisas
 Atenciosamente, Júnior "Krz" (@juniorkrz.dev no instagram) - Autor dessa bagaça chamada *StickerBot* - https://github.com/juniorkrz/stickerbot
 
 💜`
-/* Fim créditos */
+    /* Fim créditos */
     await react(message, emojis.heart)
     return await sendMessage(
       { text: response },

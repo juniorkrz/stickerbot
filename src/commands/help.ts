@@ -40,10 +40,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const actions = getActions()
@@ -85,12 +86,12 @@ export const command: StickerBotCommand = {
     let response = ''
 
     if (action.desc) {
-      response +=`O comando *${chosenCommand}* ${action.desc?.charAt(0).toLowerCase() + action.desc.slice(1)}\n\n`
+      response += `O comando *${chosenCommand}* ${action.desc?.charAt(0).toLowerCase() + action.desc.slice(1)}\n\n`
     }
 
     if (action.example) {
       response += `*Exemplo de uso:* ${action.needsPrefix ? chosenPrefix : ''}` +
-      `${chosenCommand} ${action.example}\n\n`
+        `${chosenCommand} ${action.example}\n\n`
     }
 
     const tempAliases = action.aliases.slice()
@@ -114,7 +115,7 @@ export const command: StickerBotCommand = {
 
     if (action.interval > 0) {
       response += `${getRandomItemFromArray(emojis.wait)} ` +
-      `Você só consegue usar o comando uma vez a cada ${action.interval.toString()} segundos.\n\n`
+        `Você só consegue usar o comando uma vez a cada ${action.interval.toString()} segundos.\n\n`
     }
 
     response = response.slice(0, -2)

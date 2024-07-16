@@ -44,10 +44,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const ddd = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
@@ -55,7 +56,7 @@ export const command: StickerBotCommand = {
     // Validate the DDD input
     if (!/^\d{2}$/.test(ddd)) {
       const errorMessage = '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o DDD fornecido é inválido. ' +
-      'Por favor, insira um DDD válido de *2 dígitos* e tente novamente.'
+        'Por favor, insira um DDD válido de *2 dígitos* e tente novamente.'
       return await sendMessage(
         { text: spintax(errorMessage) },
         message
@@ -82,7 +83,7 @@ export const command: StickerBotCommand = {
       logger.warn('API: BrasilAPI/DDD error!')
       await sendLogToAdmins('*[API]:* BrasilAPI/DDD error!')
       const reply = '⚠ Desculpe, não consegui obter informações para o DDD fornecido. ' +
-      'Por favor, verifique se está correto e tente novamente.'
+        'Por favor, verifique se está correto e tente novamente.'
       await sendMessage(
         { text: reply },
         message

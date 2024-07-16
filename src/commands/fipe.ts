@@ -46,10 +46,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     let licensePlate = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
@@ -59,7 +60,7 @@ export const command: StickerBotCommand = {
         {
           text: spintax(
             `${emojis.search} {Ops|Desculpe|Foi mal|Eita}, {você|tu} precisa {digitar|informar|escrever} ` +
-          `uma placa após o comando ${emojis.error}`
+            `uma placa após o comando ${emojis.error}`
           )
         },
         message
@@ -74,7 +75,7 @@ export const command: StickerBotCommand = {
 
     let query: FipeResponse | undefined
 
-    if (!data){
+    if (!data) {
       await sendMessage(
         {
           text: spintax(
@@ -143,7 +144,7 @@ export const command: StickerBotCommand = {
     // Vehicle Emojis
     const vehEmojis: { [key: string]: string } = {
       'carro': emojis.car,
-      'moto':  emojis.bike,
+      'moto': emojis.bike,
       'ônibus': emojis.bus,
       'caminhão': emojis.truck
     }
@@ -210,7 +211,7 @@ export const command: StickerBotCommand = {
     response += descricao ? `\n_${descricao}_\n\n` : '\n'
 
     response += '_Desenvolvido por *Júnior "Krz"*_\n_Considere apoiar o projeto me pagando um café 🍺_' +
-    '\n\n_Chave Pix: pix@jrkrz.com_'
+      '\n\n_Chave Pix: pix@jrkrz.com_'
 
     return await sendMessage(
       { text: spintax(response) },

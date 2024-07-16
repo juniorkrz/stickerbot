@@ -44,10 +44,11 @@ export const command: StickerBotCommand = {
     body: string,
     group: GroupMetadata | undefined,
     isBotAdmin: boolean,
+    isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
   ) => {
-    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isGroupAdmin, amAdmin, command)
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
     const cnpj = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
@@ -68,10 +69,10 @@ export const command: StickerBotCommand = {
 
       // Constructing the response message
       let response = `🏢 *Informações do CNPJ ${cnpj}:*\n\n` +
-          `🔍 *Razão Social:* ${data.razao_social}\n` +
-          `🎯 *Nome Fantasia:* ${data.nome_fantasia}\n` +
-          `📍 *Endereço:* ${data.logradouro}, ${data.numero}, ${data.bairro}, ${data.municipio} - ${data.uf}\n` +
-          `📞 *Telefone:* ${data.ddd_telefone_1}\n`
+        `🔍 *Razão Social:* ${data.razao_social}\n` +
+        `🎯 *Nome Fantasia:* ${data.nome_fantasia}\n` +
+        `📍 *Endereço:* ${data.logradouro}, ${data.numero}, ${data.bairro}, ${data.municipio} - ${data.uf}\n` +
+        `📞 *Telefone:* ${data.ddd_telefone_1}\n`
 
       // Adicionando parâmetros adicionais se estiverem presentes na resposta
       if (data.descricao_matriz_filial) {
@@ -188,7 +189,7 @@ export const command: StickerBotCommand = {
       logger.warn('API: BrasilAPI/CNPJ error!')
       await sendLogToAdmins('*[API]:* BrasilAPI/CNPJ error!')
       const reply = '⚠ Desculpe, não consegui obter informações para o CNPJ fornecido. ' +
-      'Por favor, verifique se está correto e tente novamente.'
+        'Por favor, verifique se está correto e tente novamente.'
       await sendMessage(
         { text: reply },
         message

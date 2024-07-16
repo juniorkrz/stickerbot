@@ -41,6 +41,7 @@ export const handleText = async (
   body: string,
   group: GroupMetadata | undefined,
   isBotAdmin: boolean,
+  isVip: boolean,
   isGroupAdmin: boolean,
   amAdmin: boolean
 ): Promise<proto.WebMessageInfo | undefined> => {
@@ -61,7 +62,7 @@ export const handleText = async (
     if (isSenderRateLimited) return
 
     // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
-    const isCmmMember = await handleSenderParticipation(message, jid, group, sender)
+    const isCmmMember = isVip || await handleSenderParticipation(message, jid, group, sender)
     if (!isCmmMember) return
 
     // Add to Statistics
@@ -77,6 +78,7 @@ export const handleText = async (
       body,
       group,
       isBotAdmin,
+      isVip,
       isGroupAdmin,
       amAdmin
     )
