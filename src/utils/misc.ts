@@ -137,6 +137,10 @@ export const getRandomFile = (dir: string): string => {
   return path.join(dir, files[randomIndex])
 }
 
+export const getRandomInt = (min: number, max: number): number => {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 export const rPad = (string: string, length: number = 29, char: string = '.') => {
   string = string.toString()
   if (string.length >= length) return string
