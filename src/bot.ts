@@ -33,6 +33,7 @@ import {
   extractCaptionsFromBodyOrCaption,
   getBody,
   getCaption,
+  getDocumentMessageFromContent,
   getFullCachedGroupMetadata,
   getImageMessageFromContent,
   getPhoneFromJid,
@@ -49,6 +50,7 @@ import { colors } from './utils/colors'
 import {
   checkForUpdates,
   createDirectoryIfNotExists,
+  getExtensionFromMimetype,
   getProjectHomepage,
   getProjectLocalVersion
 } from './utils/misc'
@@ -80,7 +82,7 @@ let qr: string | undefined
 let pairingCode: string | undefined
 
 // the store maintains the data of the WA connection in memory
-const store = makeInMemoryStore({ })
+const store = makeInMemoryStore({})
 // read from a file
 store.readFromFile(`${directories.store}/baileys.json`)
 // saves the state to a file every 10s
@@ -138,8 +140,8 @@ const connectToWhatsApp = async () => {
     if (connection === 'close') {
       logger.warn(`${colors.green}[WA]${colors.yellow} Lost connection`)
       const isLogout =
-      (lastDisconnect?.error as Boom)?.output?.statusCode !==
-      DisconnectReason.loggedOut
+        (lastDisconnect?.error as Boom)?.output?.statusCode !==
+        DisconnectReason.loggedOut
       if (isLogout) {
         logger.info(`${colors.green}[WA]${colors.reset} Reconnecting...`)
         connectToWhatsApp()
@@ -181,7 +183,7 @@ const connectToWhatsApp = async () => {
       const totalSkippedMessages = event.messages.length
       if (totalSkippedMessages > 0) {
         logger.warn(`Skipped ${totalSkippedMessages} message${totalSkippedMessages > 1 ? 's' : ''} ` +
-            'received while offline')
+          'received while offline')
       }
       inWarmup = false
       return
@@ -324,6 +326,40 @@ const connectToWhatsApp = async () => {
         continue
       }
 
+      // Handle document message
+
+      const documentMessage = getDocumentMessageFromContent(content)
+      if (
+        documentMessage
+      ) {
+        // If sender is rate limited, do nothing
+        const isSenderRateLimited = await handleLimitedSender(message, jid, group, sender)
+        if (isSenderRateLimited) return
+
+        // If the sender is not a member of the community, do nothing (only if SB_FORCE_COMMUNITY is true)
+        const isCmmMember = isVip || await handleSenderParticipation(message, jid, group, sender)
+        if (!isCmmMember) return
+
+        // get mimetype
+        const mimetype = documentMessage.mimetype
+        // get the file extension
+        const fileExtension = getExtensionFromMimetype(mimetype!)
+
+        if (fileExtension) {
+          const commandName = 'Doc as Sticker'
+          logAction(message, jid, group, commandName)
+
+          const source = quotedMsg ? getBody(message) : getCaption(message)
+          const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+
+          makeSticker(message, {
+            captions,
+            quotedMsg: quotedMsg
+          })
+        }
+        continue
+      }
+
       // Handle sticker message
       if (getStickerMessageFromContent(content)) {
         // If sender is rate limited, do nothing
@@ -404,7 +440,7 @@ const stickerBot = async () => {
     logger.warn(`${colors.purpleLight}[COMMANDS]${colors.reset} No commands loaded`)
   } else {
     logger.info(`${colors.purpleLight}[COMMANDS]${colors.reset} ` +
-    `${totalCommandsLoaded} command${totalCommandsLoaded > 1 ? 's' : ''} have been loaded!`)
+      `${totalCommandsLoaded} command${totalCommandsLoaded > 1 ? 's' : ''} have been loaded!`)
   }
 
   const totalAdmins = bot.admins.length
@@ -427,7 +463,7 @@ const stickerBot = async () => {
     logger.warn(`${colors.blue}[GROUPS]${colors.reset} No groups have been set!`)
   } else {
     logger.info(`${colors.blue}[GROUPS]${colors.reset} ${totalGroups} ` +
-    `group${totalGroups > 1 ? 's' : ''} have been set!`)
+      `group${totalGroups > 1 ? 's' : ''} have been set!`)
   }
 
   const banneds = await getAllBannedUsers()

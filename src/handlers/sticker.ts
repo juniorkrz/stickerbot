@@ -67,9 +67,9 @@ export const makeSticker = async (
   // adding captions if necessary
   if (captions && captions.length > 0 && !animated) {
     // get mimetype
-    const mimetype = getMediaMessage(mediaMessage)?.mimetype
+    const mimetype = getMediaMessage(mediaMessage)?.mimetype || 'image/png'
     // get the file extension
-    const fileExtension = getExtensionFromMimetype(mimetype || 'png')
+    const fileExtension = getExtensionFromMimetype(mimetype)
     // generate a filename
     const filename = `${message.key.id}_${message.messageTimestamp}.${fileExtension}`
     // send file to file uploader

@@ -144,7 +144,8 @@ export const getMessage = (message: WAMessage) => {
     content?.extendedTextMessage ||
     content?.imageMessage ||
     content?.videoMessage ||
-    content?.stickerMessage
+    content?.stickerMessage ||
+    content?.documentMessage
   )
 }
 
@@ -163,6 +164,12 @@ export const getImageMessageFromContent = (content: WAMessageContent) => {
 
 export const getVideoMessageFromContent = (content: WAMessageContent) => {
   return content?.videoMessage
+}
+
+export const getDocumentMessageFromContent = (content: WAMessageContent) => {
+  return (
+    content?.documentMessage
+  )
 }
 
 export const getStickerMessageFromContent = (content: WAMessageContent) => {
