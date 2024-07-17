@@ -49,8 +49,8 @@ export const command: StickerBotCommand = {
       message,
       alias,
       group,
-      isVip,
       isBotAdmin,
+      isVip,
       isGroupAdmin,
       amAdmin,
       command
