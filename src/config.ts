@@ -30,6 +30,8 @@ export const bot = {
   status: process.env.SB_STATUS || 'Developed by @juniorkrz.dev',
   donationLink: process.env.SB_DONATION || 'pix@jrkrz.com',
   stickers: +(process.env.SB_STICKERS || 5),
+  groupAdminOnly: JSON.parse(process.env.SB_GROUP_ADMIN_ONLY || 'false'),
+  groupsOnly: JSON.parse(process.env.SB_GROUPS_ONLY || 'false'),
   lastSeenPrivacy: process.env.SB_LAST_SEEN_PRIVACY as WAPrivacyValue || 'all',
   onlinePrivacy: process.env.SB_ONLINE_PRIVACY as WAPrivacyOnlineValue || 'all',
   setProfilePic: JSON.parse(process.env.SB_SET_PROFILE_PIC || 'false') as boolean,

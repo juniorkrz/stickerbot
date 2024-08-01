@@ -241,6 +241,18 @@ const connectToWhatsApp = async () => {
       // Message local timestamp
       message.messageLocalTimestamp = Date.now()
 
+      // Skips personal chats unless specified
+      if (!isGroup) {
+        if (bot.groupsOnly) {
+          continue
+        }
+      } else {
+        // Skips non-administered groups unless specified
+        if (bot.groupAdminOnly && !amAdmin) {
+          continue
+        }
+      }
+
       // Delete messages of banned users, except Owner
       if (!isBotAdmin && isBanned) {
         await deleteMessage(message)

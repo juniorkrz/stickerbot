@@ -1,9 +1,8 @@
 # 📝 TO DO
 
-## 🚀 Funcionalidades Novas
+## 🚀 Melhorias
 
 - [ ] Carregar frases de um JSON
-- [ ] Ignorar chat privado (configurável)
 
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
 
