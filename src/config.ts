@@ -17,7 +17,9 @@ export const stickerMeta: IStickerOptions = {
 export const baileys = {
   phoneNumber: process.env.SB_PHONE_NUMBER || undefined,
   useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true') as boolean,
-  skipUnreadMessages: JSON.parse(process.env.SB_SKIP_UNREAD || 'false') as boolean
+  skipUnreadMessages: JSON.parse(process.env.SB_SKIP_UNREAD || 'false') as boolean,
+  storeAutoDelete: JSON.parse(process.env.SB_STORE_AUTO_DELETE || 'true') as boolean,
+  storeMaxFileSize: +(process.env.SB_STORE_MAX_FILE_SIZE_IN_MB || 1)
 }
 
 // Bot config

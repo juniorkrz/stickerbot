@@ -6,7 +6,7 @@ import qs from 'qs'
 import { GiphySearch } from 'types/Giphy'
 import { TenorSearch } from 'types/Tenor'
 
-import { bot } from '../config'
+import { baileys, bot } from '../config'
 import { getLogger } from '../handlers/logger'
 import { colors } from './colors'
 
@@ -169,4 +169,26 @@ export const getExtensionFromMimetype = (mimetype: string): string | undefined =
 
 export const paramSerializer = (p: TenorSearch | GiphySearch) => {
   return qs.stringify(p, { arrayFormat: 'brackets' })
+}
+
+export const deleteStoreIfFileIsTooLarge = (filePath: string): void => {
+  const maxSizeInBytes = baileys.storeMaxFileSize * 1024 * 1024
+
+  fs.stat(filePath, (err, stats) => {
+    if (err) {
+      logger.error(`Error getting stats of the store file: ${err.message}`)
+      return
+    }
+
+    if (stats.size > maxSizeInBytes) {
+      logger.info('Deleting store file because SB_STORE_AUTO_DELETE is true')
+      fs.unlink(filePath, (err) => {
+        if (err) {
+          logger.error(`Error deleting the store file: ${err.message}`)
+        } else {
+          logger.info(`Store file deleted successfully as it was larger than ${baileys.storeMaxFileSize} MB`)
+        }
+      })
+    }
+  })
 }

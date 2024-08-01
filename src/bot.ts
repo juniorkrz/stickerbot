@@ -50,6 +50,7 @@ import { colors } from './utils/colors'
 import {
   checkForUpdates,
   createDirectoryIfNotExists,
+  deleteStoreIfFileIsTooLarge,
   getExtensionFromMimetype,
   getProjectHomepage,
   getProjectLocalVersion
@@ -70,8 +71,8 @@ const directories = {
 }
 
 // create directories
-Object.values(directories).forEach(dir => {
-  createDirectoryIfNotExists(dir)
+Object.values(directories).forEach(async dir => {
+  await createDirectoryIfNotExists(dir)
 })
 
 // to do something before starting
@@ -81,13 +82,17 @@ let client: ReturnType<typeof makeWASocket>
 let qr: string | undefined
 let pairingCode: string | undefined
 
+// store filepath
+const storeFilepath = `${directories.store}/baileys.json`
+// delete store file if it's too large
+if (baileys.storeAutoDelete) deleteStoreIfFileIsTooLarge(storeFilepath)
 // the store maintains the data of the WA connection in memory
 const store = makeInMemoryStore({})
 // read from a file
-store.readFromFile(`${directories.store}/baileys.json`)
+store.readFromFile(storeFilepath)
 // saves the state to a file every 10s
 setInterval(() => {
-  store.writeToFile(`${directories.store}/baileys.json`)
+  store.writeToFile(storeFilepath)
 }, 10_000)
 
 // to skip unread messages by environment variable or args

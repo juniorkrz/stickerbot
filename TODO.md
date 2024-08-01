@@ -4,7 +4,6 @@
 
 - [ ] Carregar frases de um JSON
 - [ ] Adicionar thumbnail nas imagens do `unmakeSticker`
-- [ ] Limpeza automática de histórico/conversas
 - [ ] Ignorar chat privado (configurável)
 
 ## 🔄 Migrar Comandos Antigos para o Novo Bot
