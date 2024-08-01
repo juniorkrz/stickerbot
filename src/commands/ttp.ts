@@ -10,13 +10,14 @@ import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
+// Gets the logger
+const logger = getLogger()
+
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
 
 // Gets the file name without the .ts/.js extension
 const commandName = capitalize(path.basename(__filename, extension))
-
-const logger = getLogger()
 
 // Command settings:
 export const command: StickerBotCommand = {

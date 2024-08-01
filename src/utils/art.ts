@@ -88,7 +88,7 @@ export const drawHeader = () => {
   drawLogo()
   drawLine()
 
-  if(projectInfo?.description) {
+  if (projectInfo?.description) {
     drawText(`${projectInfo.description}`, 'center')
   }
 
