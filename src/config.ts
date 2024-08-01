@@ -19,7 +19,7 @@ export const baileys = {
   useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true') as boolean,
   skipUnreadMessages: JSON.parse(process.env.SB_SKIP_UNREAD || 'false') as boolean,
   storeAutoDelete: JSON.parse(process.env.SB_STORE_AUTO_DELETE || 'true') as boolean,
-  storeMaxFileSize: +(process.env.SB_STORE_MAX_FILE_SIZE_IN_MB || 1)
+  storeMaxFileSize: +(process.env.SB_STORE_MAX_FILE_SIZE_IN_MB || 50)
 }
 
 // Bot config
