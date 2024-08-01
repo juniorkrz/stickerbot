@@ -33,6 +33,7 @@
   "dependencies": {
     "@distube/ytdl-core": "^4.13.5",
     "@hapi/boom": "^10.0.1",
+    "@vitalets/google-translate-api": "^9.2.0",
     "@whiskeysockets/baileys": "github:juniorkrz/Baileys",
     "compare-versions": "^6.1.0",
     "dotenv": "^16.4.5",
