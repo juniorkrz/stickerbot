@@ -268,8 +268,8 @@ const connectToWhatsApp = async () => {
         try {
           const result = await handleText(message, sender, text, group, isBotAdmin, isVip, isGroupAdmin, amAdmin)
           if (result) continue
-        } catch (error: unknown) {
-          if (error instanceof Error) {
+        } catch (error) {
+          if (error) {
             logger.error(`An error occurred while processing the message: ${error}`)
           } else {
             logger.error('An error occurred while processing the message: An unexpected error occurred')
