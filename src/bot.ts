@@ -67,7 +67,8 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 // directories to be created
 const directories = {
   creds: `/data/${bot.sessionId}/creds`,
-  store: `/data/${bot.sessionId}/store`
+  store: `/data/${bot.sessionId}/store`,
+  resources: `/data/${bot.sessionId}/resources`
 }
 
 // create directories
