@@ -87,7 +87,7 @@ export const command: StickerBotCommand = {
       await sendLogToAdmins('*[API]:* BrasilAPI/CEP está offline!')
       const reply = '⚠ Desculpe, não consegui obter informações para o CEP fornecido. ' +
         'Por favor, verifique se está correto e tente novamente.'
-      await sendMessage(
+      return await sendMessage(
         { text: reply },
         message
       )

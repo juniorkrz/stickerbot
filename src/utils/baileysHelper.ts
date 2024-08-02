@@ -408,7 +408,7 @@ export const checkBotAdminStatus = async () => {
 
   if (logs) {
     logger.info('[MOD] Sending logs')
-    sendLogToAdmins(logs.slice(0, -1))
+    await sendLogToAdmins(logs.slice(0, -1))
   }
 
   logger.info('[MOD] Check complete!')

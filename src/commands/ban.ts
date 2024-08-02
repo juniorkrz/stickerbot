@@ -189,7 +189,7 @@ export const command: StickerBotCommand = {
     }
 
     // If there is an admin group set, send log
-    sendLogToAdmins(logs.slice(0, -1), [sender])
+    await sendLogToAdmins(logs.slice(0, -1), [sender])
 
     return await react(message, getRandomItemFromArray(emojis.success))
   }

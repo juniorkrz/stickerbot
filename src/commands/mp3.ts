@@ -120,15 +120,13 @@ export const command: StickerBotCommand = {
     if (!audio || !duration) {
       await sendLogToAdmins('*[ERROR]:* YouTube error!')
       await sendMessage({ text: spintax(replies.UNKNOWN_ERROR) }, message)
-      await react(message, emojis.error)
-      return
+      return await react(message, emojis.error)
     }
 
     // test duration
     if (duration > (10 * 60000)) { // maximum video duration is 10 minutes
       await sendMessage({ text: spintax(replies.VIDEO_IS_TOO_LONG) }, message)
-      await react(message, emojis.error)
-      return
+      return react(message, emojis.error)
     }
 
     // send wait message

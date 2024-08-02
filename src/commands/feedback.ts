@@ -69,7 +69,7 @@ export const command: StickerBotCommand = {
     const feedback = `${jid}_${message.key.id}\n\n*[FEEDBACK]*\n${identifier}:\n${msg}`
     logger.warn('New feedback received!')
     console.log(feedback)
-    sendLogToAdmins(feedback)
+    await sendLogToAdmins(feedback)
     return await react(message, emojis.pray)
   }
 }

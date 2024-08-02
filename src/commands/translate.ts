@@ -81,7 +81,7 @@ export const command: StickerBotCommand = {
       logger.warn('API: translate is down!')
       await sendLogToAdmins('*[API]:* translate está offline!')
       const reply = '⚠ Desculpe, este serviço está indisponível no momento. Por favor, tente novamente mais tarde.'
-      await sendMessage(
+      return await sendMessage(
         { text: reply },
         message
       )

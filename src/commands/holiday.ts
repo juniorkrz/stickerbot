@@ -80,7 +80,7 @@ export const command: StickerBotCommand = {
       await sendLogToAdmins('*[API]:* BrasilAPI/Feriados error!')
       const reply = '⚠ Desculpe, não consegui obter informações sobre o próximo feriado. ' +
         'Por favor, tente novamente mais tarde.'
-      await sendMessage(
+      return await sendMessage(
         { text: reply },
         message
       )
