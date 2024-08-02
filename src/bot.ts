@@ -262,26 +262,19 @@ const connectToWhatsApp = async () => {
 
 
       // Handle simple text message
-      if (
-        message.message.extendedTextMessage ||
-        message.message.conversation ||
-        message.message.ephemeralMessage
-      ) {
-        // Body of message is different whether it's individual or group
-        const text = getBody(message) || getCaption(message)
-
-        if (text) {
-          try {
-            const result = await handleText(message, sender, text, group, isBotAdmin, isVip, isGroupAdmin, amAdmin)
-            if (result) continue
-          } catch (error: unknown) {
-            if (error instanceof Error) {
-              logger.error(`An error occurred while processing the message: ${error.message}`)
-            } else {
-              logger.error('An error occurred while processing the message: An unexpected error occurred')
-            }
-            continue
+      // Body of message is different whether it's individual or group
+      const text = getBody(message) || getCaption(message)
+      if (text) {
+        try {
+          const result = await handleText(message, sender, text, group, isBotAdmin, isVip, isGroupAdmin, amAdmin)
+          if (result) continue
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            logger.error(`An error occurred while processing the message: ${error}`)
+          } else {
+            logger.error('An error occurred while processing the message: An unexpected error occurred')
           }
+          continue
         }
       }
 
@@ -292,8 +285,7 @@ const connectToWhatsApp = async () => {
         // Is it an official bot group?
         const isBotGroup = bot.groups.includes(jid)
         // If the bot was not mentioned and it's not an official group, skip.
-        if (!(botMentioned || isBotGroup))
-          continue
+        if (!(botMentioned || isBotGroup)) continue
       }
 
       // get quoted message
@@ -306,7 +298,6 @@ const connectToWhatsApp = async () => {
 
       // Extract message content
       const content = extractMessageContent(targetMessage.message)
-
       if (!content) continue
 
       // Handle audio message
