@@ -1,7 +1,8 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
+import emojiRegex from 'emoji-regex'
 import path from 'path'
 
-import { emojiRegex, getEmojiData, getEmojiUnicode, getSupportedEmoji } from '../handlers/emojiMix'
+import { getEmojiData, getEmojiUnicode, getSupportedEmoji, removeSkinTones } from '../handlers/emojiMix'
 import { makeSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
@@ -47,11 +48,13 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
+    const regex = emojiRegex()
     const emojis = body
       .slice(command.needsPrefix ? 1 : 0)
       .replace(new RegExp(alias, 'i'), '')
       .trim()
-      .match(emojiRegex)
+      .match(regex)
+      ?.map(removeSkinTones)
       || []
 
     if (emojis.length !== 2) {

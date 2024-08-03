@@ -10,6 +10,11 @@ const logger = getLogger()
 const emojiMetadataPath = path.join(`/data/${bot.sessionId}/resources/emojis-metadata.json`)
 const emojiMetadataUrl = 'https://raw.githubusercontent.com/xsalazar/emoji-kitchen-backend/main/app/metadata.json'
 
+export const removeSkinTones = (emoji: string) => {
+  const skinToneModifiers = /[\u{1F3FB}-\u{1F3FF}]/u
+  return emoji.replace(skinToneModifiers, '')
+}
+
 async function downloadFile(url: string, destination: string): Promise<void> {
   const response = await axios.get(url, { responseType: 'stream' })
   const writer = fs.createWriteStream(destination)
@@ -47,9 +52,6 @@ let emojiMetadata: EmojiMetadata
 ensureEmojiMetadata().then(metadata => {
   emojiMetadata = metadata
 })
-
-// eslint-disable-next-line max-len
-export const emojiRegex = /[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F700}-\u{1F77F}]|[\u{1F780}-\u{1F7FF}]|[\u{1F800}-\u{1F8FF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F018}-\u{1F0F5}]|[\u{1F600}-\u{1F636}]|[\u{1F681}-\u{1F6C5}]|[\u{1F30D}-\u{1F567}]/gu
 
 export const getEmojiData = (emojiCodepoint: string): EmojiData => {
   return (emojiMetadata as EmojiMetadata).data[emojiCodepoint]
