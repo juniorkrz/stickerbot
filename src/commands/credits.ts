@@ -63,8 +63,9 @@ No início, o StickerBot passou 6 meses fritando meu notebook velho para criar s
 O StickerBot me trouxe muitas amizades, experiências positivas e muito conhecimento sobre novas tecnologias. Para quem é da área ou pretende entrar, super recomendo criar um projeto louco assim ou mexer em um projeto existente. Vale muito a pena.
 
 Como sabem, toda ideia boa é inspirada na ideia boa de alguém. Então, aqui cito algumas inspirações para o StickerBot:
-* wa-stickerbot do Helvio (https://github.com/helv-io/wa-stickerbot)
-* deadbyte-bot do Sergio (https://github.com/sergiooak/deadbyte-bot)
+* wa-stickerbot (https://github.com/helv-io/wa-stickerbot)
+* deadbyte-bot (https://github.com/sergiooak/deadbyte-bot)
+* lbot-whatsapp (https://github.com/victorsouzaleal/lbot-whatsapp)
 * ZeroBot (https://x.com/botzerobot)
 
 Gostaria de agradecer especialmente a algumas pessoas que me ajudaram com coisas relacionadas ao bot. São elas:
