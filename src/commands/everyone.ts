@@ -3,7 +3,7 @@ import path from 'path'
 
 import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
-import { react, sendMessage } from '../utils/baileysHelper'
+import { getBodyWithoutCommand, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, spintax } from '../utils/misc'
@@ -49,7 +49,7 @@ export const command: StickerBotCommand = {
     // Mentions all group members except the bot.
 
     const client = getClient()
-    const alert = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+    const alert = getBodyWithoutCommand(body, command.needsPrefix, alias)
 
     if (!group) {
       await react(message, emojis.error)

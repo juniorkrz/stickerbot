@@ -7,7 +7,7 @@ import { getLogger } from '../handlers/logger'
 import * as fipe from '../handlers/placafipe'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { getBodyWithoutCommand, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, spintax } from '../utils/misc'
@@ -53,7 +53,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    let licensePlate = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+    let licensePlate = getBodyWithoutCommand(body, command.needsPrefix, alias)
 
     if (!licensePlate) {
       return await sendMessage(

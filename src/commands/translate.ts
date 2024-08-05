@@ -5,7 +5,14 @@ import path from 'path'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { getBody, getCaption, getQuotedMessage, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import {
+  getBody,
+  getBodyWithoutCommand,
+  getCaption,
+  getQuotedMessage,
+  sendLogToAdmins,
+  sendMessage
+} from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -54,7 +61,7 @@ export const command: StickerBotCommand = {
     const quotedMsg = getQuotedMessage(message)
     const text = quotedMsg
       ? getBody(quotedMsg) || getCaption(quotedMsg)
-      : body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+      : getBodyWithoutCommand(body, command.needsPrefix, alias)
 
     if (!text) {
       return await sendMessage(

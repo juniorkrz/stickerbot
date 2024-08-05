@@ -4,7 +4,7 @@ import path from 'path'
 import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { getPhoneFromJid, react, sendMessage } from '../utils/baileysHelper'
+import { getBodyWithoutCommand, getPhoneFromJid, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
@@ -58,7 +58,7 @@ export const command: StickerBotCommand = {
     )
 
     const winner = getRandomItemFromArray(participants)
-    const raffleName = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+    const raffleName = getBodyWithoutCommand(body, command.needsPrefix, alias)
     const phrase = `@${getPhoneFromJid(winner.id)} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
       `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' +
         raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`

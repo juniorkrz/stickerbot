@@ -7,10 +7,10 @@ import { getCache } from '../handlers/cache'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { getBodyWithoutCommand, react, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
-import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
+import { capitalize, getRandomItemFromArray, removeAccents, spintax } from '../utils/misc'
 
 // Gets the logger
 const logger = getLogger()
@@ -61,10 +61,7 @@ export const command: StickerBotCommand = {
       z4: '🔴'
     }
 
-    const serie = body
-      .slice(command.needsPrefix ? 1 : 0)
-      .replace(new RegExp(alias, 'i'), '')
-      .trim()
+    const serie = getBodyWithoutCommand(removeAccents(body), command.needsPrefix, alias)
       .toUpperCase()
 
     if (!series.includes(serie)) return await sendMessage(

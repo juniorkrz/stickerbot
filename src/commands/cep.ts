@@ -6,7 +6,7 @@ import { bot } from '../config'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { getBodyWithoutCommand, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -51,7 +51,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const cep = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+    const cep = getBodyWithoutCommand(body, command.needsPrefix, alias)
 
     // Validate the CEP input
     if (!/^\d{8}$/.test(cep)) {

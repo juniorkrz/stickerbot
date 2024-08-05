@@ -5,7 +5,7 @@ import { getStore } from '../bot'
 import { bot } from '../config'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { getBody, getQuotedMessage, react, sendMessage } from '../utils/baileysHelper'
+import { getBody, getBodyWithoutCommand, getQuotedMessage, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, getRandomItemFromArray } from '../utils/misc'
@@ -73,7 +73,7 @@ export const command: StickerBotCommand = {
       if (!feedbackMsg) return await react(message, emojis.error)
 
       // Prepare the response message
-      let response = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+      let response = getBodyWithoutCommand(body, command.needsPrefix, alias)
       response += `\n\n_Mensagem enviada pelo administrador: ${message.pushName}_`
 
       // Send the response message

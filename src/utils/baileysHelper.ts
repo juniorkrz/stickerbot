@@ -429,3 +429,9 @@ export const isSenderBotMaster = (jid: string) => {
   const botMaster = bot.admins[0]
   return areJidsSameUser(jid, jidEncode(botMaster, 's.whatsapp.net'))
 }
+
+export const getBodyWithoutCommand = (body: string, needsPrefix: boolean, alias: string) => {
+  return body.slice(needsPrefix ? 1 : 0)
+    .replace(new RegExp(alias, 'i'), '')
+    .trim()
+}

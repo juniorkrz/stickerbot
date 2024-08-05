@@ -6,7 +6,7 @@ import { getLogger } from '../handlers/logger'
 import { makeSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
+import { getBodyWithoutCommand, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -52,7 +52,7 @@ export const command: StickerBotCommand = {
     if (!check) return
 
     const maxChars = 200
-    const text = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+    const text = getBodyWithoutCommand(body, command.needsPrefix, alias)
 
     if (!text) {
       return await sendMessage(

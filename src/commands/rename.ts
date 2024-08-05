@@ -7,6 +7,7 @@ import { makeSticker } from '../handlers/sticker'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import {
+  getBodyWithoutCommand,
   getImageMessageFromContent,
   getQuotedMessage,
   getStickerMessageFromContent,
@@ -96,7 +97,7 @@ export const command: StickerBotCommand = {
     // get custom author/pack
     let author, pack
 
-    const text = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(alias, 'i'), '').trim()
+    const text = getBodyWithoutCommand(body, command.needsPrefix, alias)
     const splittedText = text.split('|').length > 1
       ? text.split('|')
       : text.split('/').length > 1
