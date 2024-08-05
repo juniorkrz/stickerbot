@@ -62,7 +62,7 @@
     "@types/qrcode": "^1.5.5",
     "@types/qrcode-terminal": "^0.12.2",
     "@types/user-agents": "^1.0.4",
-    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^6.18.1",
     "eslint-plugin-autofix": "^2.0.0",
     "eslint-plugin-import": "^2.29.1",
