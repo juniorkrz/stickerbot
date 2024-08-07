@@ -51,7 +51,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const cep = getBodyWithoutCommand(body, command.needsPrefix, alias)
+    const cep = getBodyWithoutCommand(body, command.needsPrefix, alias).replace(/\D/g, '')
 
     // Validate the CEP input
     if (!/^\d{8}$/.test(cep)) {

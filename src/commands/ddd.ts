@@ -51,7 +51,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const ddd = getBodyWithoutCommand(body, command.needsPrefix, alias)
+    const ddd = getBodyWithoutCommand(body, command.needsPrefix, alias).replace(/\D/g, '')
 
     // Validate the DDD input
     if (!/^\d{2}$/.test(ddd)) {

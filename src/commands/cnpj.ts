@@ -51,7 +51,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    const cnpj = getBodyWithoutCommand(body, command.needsPrefix, alias)
+    const cnpj = getBodyWithoutCommand(body, command.needsPrefix, alias).replace(/\D/g, '')
 
     // Validate the CNPJ input
     if (!/^\d{14}$/.test(cnpj)) {
