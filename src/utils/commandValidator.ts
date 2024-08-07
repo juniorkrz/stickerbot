@@ -80,7 +80,8 @@ export const checkCommand = async (
 
   // Check if the command should run only for bot donors/vips
   if (command.onlyVip && bot.vipSystem && !(isDonor || isVip)) {
-    const reply = `⚠ O comando *${alias}* só funciona para *apoiadores do ${bot.name}*!`
+    const reply = `⚠ O comando *${alias}* só funciona para *apoiadores do ${bot.name}*!\n\n` +
+    'Digite *!pix* para saber como se tornar um apoiador.'
     await sendMessage(
       { text: spintax(reply) },
       message
