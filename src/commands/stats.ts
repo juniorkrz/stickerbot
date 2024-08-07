@@ -68,6 +68,7 @@ export const command: StickerBotCommand = {
       + await getCount('Ly')
       + await getCount('Tenor')
       + await getCount('Giphy')
+      + await getCount('Emojimix')
       + ((await getCount('Trends')) * bot.stickers)
 
     stats += `👥 *Usuários:* ${totalUsers.toLocaleString('pt-BR').toString()}\n`
