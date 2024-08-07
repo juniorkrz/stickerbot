@@ -54,7 +54,7 @@ export const command: StickerBotCommand = {
       `{Utilize|Use} a chave pix: ${bot.donationLink}|🤖 *{Colabore com qualquer valor! 💜|` +
       `Envie o que seu 💜 mandar!}*\n\nChave Pix: ${bot.donationLink}} (e-mail)\n\n ` +
       '⚠ *Importante:* para ser adicionado aos VIPs, envie seu DDD + número na descrição do pix.\n\n' +
-      '_Valores acima de R$2,00 serão adicionados aos VIPs por *30 dias*._\n\n' +
+      '_Valores a partir de R$2,00 serão adicionados aos VIPs por *30 dias*._\n\n' +
       `_Confira os benefícios VIPs digitando o comando *${chosenPrefix}vantagens*._`
 
     return await sendMessage(
