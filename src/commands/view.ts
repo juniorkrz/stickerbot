@@ -1,14 +1,12 @@
-import { downloadMediaMessage, extractMessageContent, GroupMetadata } from '@whiskeysockets/baileys'
+import { extractMessageContent, GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import {
-  getAudioMessageFromContent,
-  getImageMessageFromContent,
   getQuotedMessage,
-  getVideoMessageFromContent,
-  sendMessage
+  sendMessage,
+  viewOnceMessageRelay
 } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
@@ -67,17 +65,12 @@ export const command: StickerBotCommand = {
       message
     )
 
-    // Check for media type
-    const mediaType = getImageMessageFromContent(content)
-      ? 'image'
-      : getVideoMessageFromContent(content)
-        ? 'video'
-        : getAudioMessageFromContent(content)
-          ? 'audio'
-          : undefined
-
     // If media type is not allowed, send an error message
-    if (!mediaType) return await sendMessage(
+    if (
+      !content?.imageMessage?.viewOnce &&
+      !content?.videoMessage?.viewOnce &&
+      !content?.audioMessage?.viewOnce
+    ) return await sendMessage(
       {
         text: spintax(
           `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
@@ -87,35 +80,16 @@ export const command: StickerBotCommand = {
       message
     )
 
-    // download media
-    const buffer = <Buffer>await downloadMediaMessage(quotedMsg, 'buffer', {})
-
-    // generate message content
-    let responseContent
-    if (mediaType == 'image') {
-      responseContent = { image: buffer }
-    } else if (mediaType == 'video') {
-      responseContent = { video: buffer }
-    } else if (mediaType == 'audio') {
-      responseContent = {
-        audio: buffer,
-        ptt: true
-      }
-    }
+    // send message
+    const result = await viewOnceMessageRelay(quotedMsg, content, jid)
 
     // if something wrong, return an error message
-    if (!buffer || !responseContent) return await sendMessage(
+    if (!result) return await sendMessage(
       {
         text: spintax(
           '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, algo deu errado ao enviar a mensagem.'
         )
       },
-      message
-    )
-
-    // send message
-    return await sendMessage(
-      responseContent,
       message
     )
   }

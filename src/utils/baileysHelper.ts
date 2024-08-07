@@ -1,6 +1,7 @@
 import {
   AnyMessageContent,
   areJidsSameUser,
+  downloadMediaMessage,
   extractMessageContent,
   GroupMetadata,
   GroupMetadataParticipants,
@@ -279,7 +280,7 @@ export const isMentioned = (message: WAMessage, jid: string | undefined) => {
 export const getQuotedMessage = (message: WAMessage) => {
   const store = getStore()
   const quotedMsgId = message.message?.extendedTextMessage?.contextInfo?.stanzaId ||
-  message.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.stanzaId
+    message.message?.ephemeralMessage?.message?.extendedTextMessage?.contextInfo?.stanzaId
   const chatMessages = store.messages[message.key.remoteJid!]
   return chatMessages?.get(quotedMsgId!)
 }
@@ -434,4 +435,45 @@ export const getBodyWithoutCommand = (body: string, needsPrefix: boolean, alias:
   return body.slice(needsPrefix ? 1 : 0)
     .replace(new RegExp(alias, 'i'), '')
     .trim()
+}
+
+export const viewOnceMessageRelay = async (
+  viewOnceMessage: WAMessage,
+  content: WAMessageContent,
+  relayTo: string
+) => {
+  const client = getClient()
+  // Check for media type
+  const mediaType = getImageMessageFromContent(content)
+    ? 'image'
+    : getVideoMessageFromContent(content)
+      ? 'video'
+      : getAudioMessageFromContent(content)
+        ? 'audio'
+        : undefined
+
+  // download media
+  const buffer = <Buffer>await downloadMediaMessage(viewOnceMessage, 'buffer', {})
+
+  // generate message content
+  let responseContent
+  if (mediaType == 'image') {
+    responseContent = { image: buffer }
+  } else if (mediaType == 'video') {
+    responseContent = { video: buffer }
+  } else if (mediaType == 'audio') {
+    responseContent = {
+      audio: buffer,
+      ptt: true
+    }
+  }
+
+  if (buffer && responseContent) {
+    // send message
+    return await client.sendMessage(
+      relayTo,
+      responseContent as AnyMessageContent,
+      getMessageOptions(undefined, false)
+    )
+  }
 }

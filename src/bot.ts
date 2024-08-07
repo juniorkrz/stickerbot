@@ -19,6 +19,7 @@ import { baileys, bot } from './config'
 import { handleSenderParticipation } from './handlers/community'
 import { getAllBannedUsers, getVips, isUserBanned, senderIsVip } from './handlers/db'
 import { getLogger } from './handlers/logger'
+import { handleReactionMessage } from './handlers/reaction'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
   makeSticker
@@ -203,8 +204,7 @@ const connectToWhatsApp = async () => {
         message.key.fromMe ||
         !message.message ||
         !message.key.remoteJid ||
-        message.key.remoteJid === 'status@broadcast' ||
-        message.message.reactionMessage
+        message.key.remoteJid === 'status@broadcast'
       )
         continue
 
@@ -260,6 +260,11 @@ const connectToWhatsApp = async () => {
         continue
       }
 
+      // Handle reaction message
+      if (message.message.reactionMessage) {
+        await handleReactionMessage(message, jid, group, sender, isBotAdmin, isVip)
+        continue
+      }
 
       // Handle simple text message
       // Body of message is different whether it's individual or group
