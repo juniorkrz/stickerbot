@@ -74,7 +74,7 @@ export const command: StickerBotCommand = {
 
       // Prepare the response message
       let response = getBodyWithoutCommand(body, command.needsPrefix, alias)
-      response += `\n\n_Mensagem enviada pelo administrador: ${message.pushName}_`
+      response += `\n\n_Mensagem enviada pelo administrador ${message.pushName}._`
 
       // Send the response message
       await sendMessage({ text: response }, feedbackMsg)
