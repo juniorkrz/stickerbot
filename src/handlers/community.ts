@@ -4,6 +4,7 @@ import { getClient } from '../bot'
 import { bot } from '../config'
 import { getAllGroupsFromCommunity, logAction, sendMessage } from '../utils/baileysHelper'
 import { spintax } from '../utils/misc'
+import { getCache } from './cache'
 
 export const getCommunityAnnounceGroup = async (communityJid: string) => {
   const allGroups = await getAllGroupsFromCommunity(communityJid)
@@ -26,6 +27,17 @@ export const handleSenderParticipation = async (
 
   const isCmmMember = await isSenderCmmMember(sender)
   if (!isCmmMember) {
+    const cache = getCache()
+    const key = `communityInviteAlert_${sender}`
+    const data = cache.get(key)
+
+    // avoid sending the message again for 30 seconds
+    if (data) {
+      return false
+    } else {
+      cache.set(key, true, 30)
+    }
+
     const client = getClient()
     const cmmCode = await client.groupInviteCode(bot.community)
     logAction(message, jid, group, 'Community Invite Alert')
