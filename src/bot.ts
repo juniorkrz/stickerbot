@@ -332,7 +332,7 @@ const connectToWhatsApp = async () => {
         const source = quotedMsg ? getBody(message) : getCaption(message)
         const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
 
-        makeSticker(message, {
+        await makeSticker(message, {
           captions,
           quotedMsg: quotedMsg,
           animated: isAnimated
@@ -366,7 +366,7 @@ const connectToWhatsApp = async () => {
           const source = quotedMsg ? getBody(message) : getCaption(message)
           const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
 
-          makeSticker(message, {
+          await makeSticker(message, {
             captions,
             quotedMsg: quotedMsg
           })
@@ -394,7 +394,7 @@ const connectToWhatsApp = async () => {
 
           logAction(message, jid, group, 'Sticker with Caption')
 
-          makeSticker(message, {
+          await makeSticker(message, {
             captions,
             quotedMsg: quotedMsg,
             animated: isAnimated

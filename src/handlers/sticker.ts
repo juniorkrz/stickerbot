@@ -5,7 +5,7 @@ import Sticker from 'wa-sticker-formatter'
 import { externalEndpoints, stickerMeta } from '../config'
 import { getMediaMessage, react, sendMessage } from '../utils/baileysHelper'
 import { emojis } from '../utils/emojis'
-import { getExtensionFromMimetype, getRandomItemFromArray } from '../utils/misc'
+import { getExtensionFromMimetype, getRandomItemFromArray, spintax } from '../utils/misc'
 import { deleteUploadedFile, uploadFile } from './fileUploader'
 import { getLogger } from './logger'
 import { getCustomMemeUrl } from './memegen'
@@ -47,6 +47,21 @@ export const makeSticker = async (
   const mediaMessage = quotedMsg
     ? quotedMsg
     : message
+
+  // limit video duration to 10 seconds
+  if (animated) {
+    const seconds = mediaMessage.message?.videoMessage?.seconds
+    if (seconds && seconds > 10) {
+      return await sendMessage(
+        {
+          text: spintax(
+            '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, o vídeo {deve|precisa} ter no máximo *10* segundos de duração.'
+          )
+        },
+        message
+      )
+    }
+  }
 
   // get data
   let data: string | Buffer
