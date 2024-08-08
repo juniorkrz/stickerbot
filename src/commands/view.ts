@@ -59,7 +59,8 @@ export const command: StickerBotCommand = {
     if (!quotedMsg || !content) return await sendMessage(
       {
         text: spintax(
-          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível encontrar o conteúdo da mensagem.'
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível encontrar o conteúdo da mensagem,' +
+          ' {você|vc} deve citar uma mensagem de *visualização única*!'
         )
       },
       message
@@ -74,7 +75,7 @@ export const command: StickerBotCommand = {
       {
         text: spintax(
           `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
-          '{você|vc|tu} {deve|precisa} responder a uma imagem/vídeo/áudio com o comando.'
+          '{você|vc|tu} {deve|precisa} responder a uma imagem/vídeo/áudio de *visualização única* com o comando.'
         )
       },
       message
