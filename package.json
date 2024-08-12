@@ -46,7 +46,7 @@
     "normalize-text": "^2.5.0",
     "pino": "^9.2.0",
     "qr-image": "^3.2.0",
-    "qrcode": "^1.5.3",
+    "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
