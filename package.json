@@ -50,7 +50,7 @@
     "qrcode-terminal": "^0.12.0",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
-    "user-agents": "^1.1.294",
+    "user-agents": "^1.1.301",
     "wa-sticker-formatter": "github:juniorkrz/wa-sticker-formatter",
     "ytsr": "^3.8.4"
   },
