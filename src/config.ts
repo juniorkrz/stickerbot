@@ -63,15 +63,17 @@ export const bot = {
 // External APIs
 export const externalEndpoints = {
   // get your own api here: https://github.com/juniorkrz/simple-file-uploader
-  fileUploader: process.env.FILE_UPLOADER_API || 'http://localhost:5000',
+  fileUploader: process.env.FILE_UPLOADER_API || 'http://localhost:4000',
   // get your own api here: https://github.com/jacebrowning/memegen
-  memegen: process.env.MEMEGEN_API || 'http://localhost:6000',
+  memegen: process.env.MEMEGEN_API || 'http://localhost:5000',
   // get your own api here: https://github.com/helv-io/api
-  ttp: process.env.TTP_API || 'http://localhost:7000',
+  ttp: process.env.TTP_API || 'http://localhost:6000',
   // get your own api here: https://github.com/juniorkrz/placa-fipe-api
-  placaFipe: process.env.PLACA_FIPE_API || 'http://localhost:8000',
+  placaFipe: process.env.PLACA_FIPE_API || 'http://localhost:7000',
+  // get your own api here: https://github.com/juniorkrz/globo-programming-api
+  globoProgamming: process.env.GLOBO_PROGRAMMING_API || 'http://localhost:8000',
   // get your own api here: https://github.com/danielgatis/rembg
-  rembg: process.env.REMBG_API || 'http://localhost:9000',
+  rembg: process.env.REMBG_API || 'http://localhost:9000'
 }
 
 // https://developers.giphy.com/docs/api/endpoint#search
