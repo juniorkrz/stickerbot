@@ -5,7 +5,7 @@ import path from 'path'
 
 import { dev, getClient } from '../bot'
 import { getLogger } from '../handlers/logger'
-import { downloadAudioFromYoutubeVideo, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
+import { downloadAudioFromYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendAudio, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
@@ -24,9 +24,9 @@ const logger = getLogger()
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['mp3'],
+  aliases: ['play'],
   desc: 'Baixa música do vídeo no YouTube.',
-  example: 'link do vídeo no YouTube',
+  example: 'nome da música ou link do vídeo no YouTube',
   needsPrefix: true,
   inMaintenance: false,
   runInPrivate: true,
@@ -34,7 +34,7 @@ export const command: StickerBotCommand = {
   onlyInBotGroup: false,
   onlyBotAdmin: false,
   onlyAdmin: false,
-  onlyVip: false,
+  onlyVip: true,
   botMustBeAdmin: false,
   interval: 60,
   limiter: {}, // do not touch this
@@ -64,7 +64,7 @@ export const command: StickerBotCommand = {
     if (!check) return
 
     // Baixa música do YouTube
-    const url: string | undefined = body
+    let url: string | undefined = body
       .slice(command.needsPrefix ? 1 : 0)
       .replace(new RegExp(alias, 'i'), '')
       .trim()
@@ -73,7 +73,6 @@ export const command: StickerBotCommand = {
     const replies = {
       UNKNOWN_ERROR: `${emojis.error} {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!`,
       MISSING_NAME_OR_LINK: '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o nome da música ou o link do vídeo após o comando!',
-      INVALID_LINK: '⚠ {Foi mal|Ops|Eita|Ei|Opa}, o link fornecido deve ser de um vídeo do *YouTube*!',
       VIDEO_IS_TOO_LONG: `{Foi mal|Ops|Eita|Ei|Opa}, eu {posso|consigo} baixar músicas, não CDs completos ${getRandomItemFromArray(emojis.confused)}`,
       WAIT: [
         'Essa música é {boa|top|das boas|show}, {calma|espera|pera|aguenta} aí, já já te {envio|mando}...',
@@ -98,9 +97,7 @@ export const command: StickerBotCommand = {
     }
 
     if (!isYouTubeUrl(url)) {
-      await sendMessage({ text: spintax(replies.INVALID_LINK) }, message)
-      await react(message, emojis.error)
-      return
+      url = await getUrlByQuery(url)
     }
 
     if (!url) return
