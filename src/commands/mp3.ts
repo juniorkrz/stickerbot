@@ -72,8 +72,7 @@ export const command: StickerBotCommand = {
     // TODO: Load texts from JSON
     const replies = {
       UNKNOWN_ERROR: `${emojis.error} {Foi mal|Ops|Eita|Ei|Opa}, {um erro desconhecido aconteceu|algo deu errado}, tente novamente mais tarde!`,
-      MISSING_NAME_OR_LINK: '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o nome da música ou o link do vídeo após o comando!',
-      INVALID_LINK: '⚠ {Foi mal|Ops|Eita|Ei|Opa}, o link fornecido deve ser de um vídeo do *YouTube*!',
+      MISSING_NAME_OR_LINK: '⚠ {Foi mal|Ops|Eita|Ei|Opa}, {você|tu} deve enviar o link do vídeo após o comando!',
       VIDEO_IS_TOO_LONG: `{Foi mal|Ops|Eita|Ei|Opa}, eu {posso|consigo} baixar músicas, não CDs completos ${getRandomItemFromArray(emojis.confused)}`,
       WAIT: [
         'Essa música é {boa|top|das boas|show}, {calma|espera|pera|aguenta} aí, já já te {envio|mando}...',
@@ -98,7 +97,7 @@ export const command: StickerBotCommand = {
     }
 
     if (!isYouTubeUrl(url)) {
-      await sendMessage({ text: spintax(replies.INVALID_LINK) }, message)
+      await sendMessage({ text: spintax(replies.MISSING_NAME_OR_LINK) }, message)
       await react(message, emojis.error)
       return
     }
