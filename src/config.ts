@@ -1,4 +1,9 @@
-import { WAPrivacyOnlineValue, WAPrivacyValue, WAReadReceiptsValue } from '@whiskeysockets/baileys'
+import {
+  WAPrivacyGroupAddValue,
+  WAPrivacyOnlineValue,
+  WAPrivacyValue,
+  WAReadReceiptsValue
+} from '@whiskeysockets/baileys'
 import dotenv from 'dotenv'
 import { GiphySearch } from 'types/Giphy'
 import { TenorSearch } from 'types/Tenor'
@@ -38,7 +43,7 @@ export const bot = {
   profilePicPrivacy: process.env.SB_PROFILE_PIC_PRIVACY as WAPrivacyValue || 'all',
   statusPrivacyValue: process.env.SB_STATUS_PRIVACY as WAPrivacyValue || 'all',
   readReceiptsPrivacy: process.env.SB_READ_RECEIPTS_PRIVACY as WAReadReceiptsValue || 'all',
-  groupsAddPrivacy: process.env.SB_GROUPS_ADD_PRIVACY as WAPrivacyValue || 'contact_blacklist',
+  groupsAddPrivacy: process.env.SB_GROUPS_ADD_PRIVACY as WAPrivacyGroupAddValue || 'contact_blacklist',
   defaultDisappearingMode: parseInt(process.env.SB_DEFAULT_DISAPPEARING_MODE || '604800') as number,
   sendWarnings: JSON.parse(process.env.SB_SEND_WARNINGS || 'true') as boolean,
   refuseCalls: JSON.parse(process.env.SB_REFUSE_CALLS || 'false') as boolean,

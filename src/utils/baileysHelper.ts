@@ -188,7 +188,8 @@ export const getMessageExpiration = (message: WAMessage | undefined) => {
 
 export const getMessageOptions = (message: WAMessage | undefined, quote: boolean): MiscMessageGenerationOptions => {
   return {
-    cachedGroupMetadata: getCachedGroupMetadata,
+    // TODO: Fix this
+    //cachedGroupMetadata: getCachedGroupMetadata,
     quoted: quote ? message : undefined,
     ephemeralExpiration: getMessageExpiration(message) || WA_DEFAULT_EPHEMERAL
   }
