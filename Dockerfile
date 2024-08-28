@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:20
 ENV TZ=America/Sao_Paulo
 RUN apt update && \
     apt install -y \
