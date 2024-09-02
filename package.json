@@ -48,7 +48,7 @@
     "qr-image": "^3.2.0",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
-    "sharp": "^0.33.4",
+    "sharp": "^0.33.5",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "user-agents": "^1.1.301",
