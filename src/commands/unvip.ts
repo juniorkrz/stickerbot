@@ -98,7 +98,7 @@ export const command: StickerBotCommand = {
       }
     }
 
-    vips = vips?.filter(user => user.length > 0)// Remove empty entries
+    vips = vips?.filter(user => user?.length > 0)// Remove empty entries
     vips = Array.from(new Set(vips))// Remove duplicate entries
 
     if (vips?.length == 0) {
