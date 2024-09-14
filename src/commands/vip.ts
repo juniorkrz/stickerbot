@@ -1,12 +1,14 @@
 import { GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
 import path from 'path'
 
+import { getClient } from '../bot'
 import { addVip } from '../handlers/db'
 import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import {
   getMentionedJids,
+  getMessageOptions,
   getPhoneFromJid,
   getQuotedMessage,
   isSenderBotMaster,
@@ -68,6 +70,9 @@ export const command: StickerBotCommand = {
       message
     )
 
+    // Getting client
+    const client = getClient()
+
     // Getting jids to add
 
     // Trying to get by mentions
@@ -91,6 +96,7 @@ export const command: StickerBotCommand = {
         .slice(command.needsPrefix ? 1 : 0)
         .replace(new RegExp(alias, 'i'), '')
         .replace('perma', '')
+        .replace(/\*.*/, '')
         .trim()
         .replace(/\D/g, '')
 
@@ -115,15 +121,42 @@ export const command: StickerBotCommand = {
     }
 
     const permanent = body.includes('perma')
+    const monthsRegex = /\*\s*(\d+)/
+    const monthsMatch = body.match(monthsRegex)
+    const months = monthsMatch ? parseInt(monthsMatch[1]) : 1
 
     let logs = ''
     for (const vip of vips) {
-      await addVip(vip, permanent)
+      await addVip(vip, months, permanent)
 
-      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} adicionou ${getPhoneFromJid(vip)}` +
-        `${permanent ? ' *permanentemente*' : ''} aos vips!`
+      // period description
+      const period = permanent ? 'permanente' : `${months} ${months == 1 ? 'mês' : 'meses'}`
+
+      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} setou o VIP de ${getPhoneFromJid(vip)} ` +
+        `para *${period}*!`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
+
+      let expiration
+      if (permanent) {
+        expiration = 'Nunca'
+      } else {
+        const expiresInDateTime = new Date()
+        expiresInDateTime.setMonth(expiresInDateTime.getMonth() + months)
+        expiration = expiresInDateTime.toLocaleString()
+      }
+
+      await client.sendMessage(
+        vip,
+        {
+          text: spintax(
+            `Olá! 💜\n\nSeu status *VIP* foi atualizado para *${period}*!\n` +
+            'Confira o que você consegue fazer digitando o comando *!vantagens*\n\n' +
+            `*Data de expiração:* ${expiration}`
+          )
+        },
+        getMessageOptions(message, false)
+      )
     }
 
     await sendLogToAdmins(logs.slice(0, -1), [sender])

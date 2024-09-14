@@ -17,10 +17,9 @@ let db: Database<sqlite3.Database, sqlite3.Statement>
     filename: `${databaseDir}/database.sqlite`,
     driver: sqlite3.Database
   })
+
   await db.run('CREATE TABLE IF NOT EXISTS Usage (type TEXT, count NUM)')
-  await db.run(
-    'CREATE TABLE IF NOT EXISTS Vips (jid TEXT, last_donation TEXT, permanent INTEGER DEFAULT 0)'
-  )
+  await db.run('CREATE TABLE IF NOT EXISTS Vips (jid TEXT PRIMARY KEY, expires DATETIME, permanent INTEGER)')
   await db.run('CREATE TABLE IF NOT EXISTS Banned (user TEXT)')
 })()
 
@@ -40,59 +39,53 @@ export const addCount = async (type: string) => {
 }
 
 export const getVips = async (getPermanent: boolean = true) => {
-  const thirtyDaysAgo = new Date()
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-  const thirtyDaysAgoString = thirtyDaysAgo.toISOString()
+  let query = 'SELECT * FROM Vips WHERE expires >= CURRENT_TIMESTAMP'
+  query += getPermanent ? ' OR permanent = 1' : ''
+  query += ' ORDER BY expires DESC'
 
   const vips: {
     jid: string,
-    lastDonation: string,
+    expires: number,
     permanent: boolean
   }[] = []
-  await db.each(
-    getPermanent
-      ? 'SELECT * FROM Vips WHERE (last_donation >= ? OR permanent = 1) ORDER BY last_donation DESC'
-      : 'SELECT * FROM Vips WHERE last_donation >= ? ORDER BY last_donation DESC',
-    [thirtyDaysAgoString],
-    (err, row) => {
-      if (err) {
-        logger.error(err)
-        return
-      }
-      vips.push({
-        jid: row.jid,
-        lastDonation: row.last_donation,
-        permanent: !!row.permanent
-      })
+  await db.each(query, (err, row) => {
+    if (err) {
+      logger.error(err)
+      return
     }
-  )
+    vips.push({
+      jid: row.jid,
+      expires: row.expires,
+      permanent: !!row.permanent
+    })
+  })
   return vips
 }
 
 export const senderIsVip = async (sender: string): Promise<boolean> => {
   try {
-    const thirtyDaysAgo = new Date()
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-    const thirtyDaysAgoString = thirtyDaysAgo.toISOString()
-
     const vip = await db.get(
-      'SELECT 1 FROM Vips WHERE jid = ? AND (last_donation >= ? OR permanent = 1)',
-      sender,
-      thirtyDaysAgoString
+      'SELECT 1, expires FROM Vips WHERE jid = ? AND (expires >= CURRENT_TIMESTAMP OR permanent = 1)',
+      sender
     )
+
     return vip !== undefined
   } catch (error) {
     logger.error(`Error checking if jid is a vip: ${error}`)
     return false
   }
 }
-
-export const addVip = async (jid: string, permanent: boolean = false) => {
-  const timestamp = new Date().toISOString()
+export const addVip = async (
+  jid: string,
+  months: number,
+  permanent: boolean = false
+) => {
+  const now = new Date()
+  const expires = new Date(now.getTime() + (months * 30 * 24 * 60 * 60 * 1000))
   await db.run(
-    'INSERT INTO Vips (jid, last_donation, permanent) VALUES (?, ?, ?)',
+    'INSERT OR REPLACE INTO Vips (jid, expires, permanent) VALUES (?, ?, ?)',
     jid,
-    timestamp,
+    expires.toISOString(),
     permanent ? 1 : 0
   )
 }

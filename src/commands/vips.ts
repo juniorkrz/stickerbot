@@ -61,15 +61,30 @@ export const command: StickerBotCommand = {
     const vips = await getVips()
     let response = `👑 *VIPs do ${bot.name}*\n`
 
-    if (vips.length == 0) {
+    const permanentVips = vips.filter(vip => vip.permanent)
+    const nonPermanentVips = vips.filter(vip => !vip.permanent)
+
+    if (permanentVips.length == 0 && nonPermanentVips.length == 0) {
       response += '\nNenhum VIP encontrado! :('
     } else {
-      vips.forEach((vip, index) => {
+      permanentVips.forEach((vip, index) => {
         const phone = getPhoneFromJid(vip.jid)
         if (phone) {
-          response += `\n${index + 1} - ${phone}`
+          response += `\n${index + 1} - ${phone} - Permanente`
         }
       })
+
+      nonPermanentVips.forEach((vip, index) => {
+        const phone = getPhoneFromJid(vip.jid)
+        if (phone) {
+          // convert vip.expires to datetime
+          const expires = new Date(vip.expires)
+
+          response += `\n${index + permanentVips.length + 1} - ${phone} - ${expires.toLocaleString()}`
+        }
+      })
+
+      response += '\n\nTelefone - Data de expiração'
     }
 
     const client = getClient()
