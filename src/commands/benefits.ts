@@ -54,6 +54,7 @@ export const command: StickerBotCommand = {
     menu += `Digite *${chosenPrefix}pix* para saber como se tornar um apoiador.\n\n`
     menu += '* Limite de solicitações dobrado 🚀\n'
     menu += `* Tempo de espera reduzido pela metade ${getRandomItemFromArray(emojis.wait)}\n`
+    menu += '* Reaja mensagens de visualização única com 👀 e receba no seu privado!\n'
     menu += '* Adicionar o bot em um grupo (funciona apenas p/ apoiadores) 💥\n'
     menu += '* *{totalCommands}* comandos exclusivos. 👑\n\n'
     menu += `*${chosenPrefix}comando* - _Descrição_ (intervalo)\n\n`
