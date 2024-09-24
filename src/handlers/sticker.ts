@@ -52,6 +52,8 @@ export const makeSticker = async (
   if (animated) {
     const seconds = mediaMessage.message?.videoMessage?.seconds
     if (seconds && seconds > 10) {
+      // react error
+      if (needReact) await react(message, emojis.error)
       return await sendMessage(
         {
           text: spintax(
