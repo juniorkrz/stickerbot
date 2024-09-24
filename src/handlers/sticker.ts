@@ -125,6 +125,11 @@ export const makeSticker = async (
   }
 }
 
+/**
+ * Converts a sticker message to an image message and sends it.
+ * @param {WAMessage} message The sticker message to convert and send.
+ * @returns {Promise<WAMessageExtended>} The result of send message.
+ */
 export const sendStickerAsImage = async (message: WAMessage) => {
   try {
     const image = (await downloadMediaMessage(
