@@ -22,7 +22,7 @@ const commandName = capitalize(path.basename(__filename, extension))
 export const command: StickerBotCommand = {
   name: commandName,
   aliases: ['federal'],
-  desc: 'Envia uma bebida aleatória.',
+  desc: 'Envia o resultado da loteria federal.',
   example: undefined,
   needsPrefix: true,
   inMaintenance: false,
