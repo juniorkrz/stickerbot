@@ -1,11 +1,11 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
+import { getMilhar } from '../handlers/lottery'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { getMilhar } from '../utils/lottery'
 import { capitalize } from '../utils/misc'
 
 // Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production

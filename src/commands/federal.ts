@@ -2,11 +2,11 @@ import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getLogger } from '../handlers/logger'
+import { getFederal } from '../handlers/lottery'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
-import { getFederal } from '../utils/lottery'
 import { capitalize, spintax } from '../utils/misc'
 
 // Gets the logger

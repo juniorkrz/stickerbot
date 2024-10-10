@@ -4,10 +4,10 @@ import { FederalResponse } from 'types/Federal'
 
 import { getClient } from '../bot'
 import { bot } from '../config'
-import { getCache } from '../handlers/cache'
-import { getLogger } from '../handlers/logger'
-import { getPhoneFromJid } from './baileysHelper'
-import { getRandomInt, getRandomItemFromArray } from './misc'
+import { getPhoneFromJid } from '../utils/baileysHelper'
+import { getRandomInt, getRandomItemFromArray } from '../utils/misc'
+import { getCache } from './cache'
+import { getLogger } from './logger'
 
 const logger = getLogger()
 
