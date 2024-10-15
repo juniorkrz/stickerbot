@@ -81,6 +81,7 @@ Object.values(directories).forEach(async dir => {
 let inWarmup = true
 
 let client: ReturnType<typeof makeWASocket>
+let cmmAnnGroupJid: string | undefined
 let qr: string | undefined
 let pairingCode: string | undefined
 
@@ -109,6 +110,16 @@ export const startedAt: moment.Moment = moment()
 // exportable client
 export const getClient = (): ReturnType<typeof makeWASocket> => {
   return client
+}
+
+// exportable community announcement group jid setter
+export const setCommunityAnnounceGroupJid = (jid: string): void => {
+  cmmAnnGroupJid = jid
+}
+
+// exportable community announcement group jid
+export const getCommunityAnnounceGroupJid = (): string | undefined => {
+  return cmmAnnGroupJid
 }
 
 // exportable store

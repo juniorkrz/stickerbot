@@ -1,14 +1,33 @@
 import { areJidsSameUser, GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
 
-import { getClient } from '../bot'
+import { getClient, getCommunityAnnounceGroupJid } from '../bot'
 import { bot } from '../config'
-import { getAllGroupsFromCommunity, logAction, sendMessage } from '../utils/baileysHelper'
+import { getAllGroupsFromCommunity, getCachedGroupMetadata, logAction, sendMessage } from '../utils/baileysHelper'
 import { spintax } from '../utils/misc'
 import { getCache } from './cache'
 
-export const getCommunityAnnounceGroup = async (communityJid: string) => {
+export const getCachedCommunityAnnounceGroupJid = async (communityJid: string) => {
+  const jid = getCommunityAnnounceGroupJid()
+
+  if (jid) return jid
+
+  const cache = getCache()
+  const key = `communityAnnounceJid_${communityJid}`
+  const data = cache.get(key)
+
+  if (data) return data as string
+
   const allGroups = await getAllGroupsFromCommunity(communityJid)
-  return allGroups.filter(g => g.isCommunityAnnounce)[0]
+  const annGroupJid = allGroups.filter(g => g.isCommunityAnnounce)[0].id
+
+  cache.set(key, annGroupJid, 86400)// keep cache for a day
+
+  return annGroupJid
+}
+
+export const getCommunityAnnounceGroup = async (communityJid: string) => {
+  const announceGroupJid = await getCachedCommunityAnnounceGroupJid(communityJid)
+  return await getCachedGroupMetadata(announceGroupJid)
 }
 
 const isSenderCmmMember = async (sender: string) => {

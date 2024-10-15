@@ -16,7 +16,7 @@ import {
 } from '@whiskeysockets/baileys'
 import path from 'path'
 
-import { getClient, getStore } from '../bot'
+import { getClient, getStore, setCommunityAnnounceGroupJid } from '../bot'
 import { bot } from '../config'
 import { getCache } from '../handlers/cache'
 import { addCount } from '../handlers/db'
@@ -395,6 +395,9 @@ export const checkBotAdminStatus = async () => {
 
   const groups = await getAllGroupsFromCommunity(bot.community)
   const community = await getFullCachedGroupMetadata(bot.community)
+  const cmmAnnGroupJid = groups.find(g => g.isCommunityAnnounce)?.id
+
+  if (cmmAnnGroupJid) setCommunityAnnounceGroupJid(cmmAnnGroupJid)
 
   if (community) groups.push(community)
 
