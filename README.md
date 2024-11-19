@@ -9,7 +9,7 @@ StickerBot é um bot de figurinhas com uma vasta gama de comandos. Ele pode:
 
 ## 🤖 Showcase
 
-- Veja o bot em funcionamento [aqui](https://api.whatsapp.com/send/?phone=5581973241677&text=!menu).
+- Veja o bot em funcionamento [aqui](https://api.whatsapp.com/send/?phone=558194742944&text=!menu).
 
 ## 📝 Lista de Tarefas
 
