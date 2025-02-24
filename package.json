@@ -9,7 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "npx eslint ./src --ext .ts --fix",
     "lint": "npx eslint ./src --ext .ts",
-    "build": "npm i && npx tsc",
+    "build": "npm i --force && npm audit fix --force && npx tsc",
     "debug": "npx nodemon ./src/bot.ts --dev",
     "publish": "release-it",
     "update": "npx npm-check-updates -u -x pino,sharp"
