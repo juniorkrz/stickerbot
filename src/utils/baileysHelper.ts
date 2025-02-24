@@ -324,7 +324,8 @@ export const setupBot = async () => {
 
   const status = await client.fetchStatus(jidNormalizedUser(client?.user?.id))
   const botStatus = `${bot.status} | v${getProjectLocalVersion()}`
-  if (status?.status != botStatus) {
+  const statusMessage = status?.[0]?.status || null
+  if (statusMessage != botStatus) {
     logger.info(`${colors.green}[WA]${colors.reset} Setting profile status`)
     await client.updateProfileStatus(botStatus)
   }
