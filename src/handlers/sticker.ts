@@ -36,7 +36,7 @@ export const makeSticker = async (
   const meta = customMeta
     ? customMeta
     : {
-      author: message.pushName || undefined,
+      author: stickerMeta.author || undefined,
       pack: stickerMeta.pack
     }
 
