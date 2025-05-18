@@ -7,8 +7,8 @@ import { PartidaBrasileirao, ResultadoBrasileirao, RodadaBrasileirao, TimeBrasil
 import UserAgent from 'user-agents'
 
 export async function obterBrasileiraoA(rodadas: boolean = true): Promise<ResultadoBrasileirao> {
-  const URL_TABELA = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-light?idChampionship=1420&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
-  const URL_RODADAS = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-games-light?idChampionship=1420&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
+  const URL_TABELA = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-light?idChampionship=1436&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
+  const URL_RODADAS = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-games-light?idChampionship=1436&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
   const resultado: ResultadoBrasileirao = { tabela: await obterDadosTabela(URL_TABELA) }
   if (rodadas) {
     resultado.rodadas = await obterDadosRodadas(URL_RODADAS)
@@ -17,8 +17,8 @@ export async function obterBrasileiraoA(rodadas: boolean = true): Promise<Result
 }
 
 export async function obterBrasileiraoB(rodadas: boolean = true): Promise<ResultadoBrasileirao> {
-  const URL_TABELA = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-light?idChampionship=1419&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
-  const URL_RODADAS = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-games-light?idChampionship=1419&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
+  const URL_TABELA = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-light?idChampionship=1438&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
+  const URL_RODADAS = 'https://p1.trrsf.com/api/musa-soccer/ms-standings-games-light?idChampionship=1438&idPhase=&language=pt-BR&country=BR&nav=N&timezone=BR'
   const resultado: ResultadoBrasileirao = { tabela: await obterDadosTabela(URL_TABELA) }
   if (rodadas) {
     resultado.rodadas = await obterDadosRodadas(URL_RODADAS)
