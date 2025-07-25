@@ -73,7 +73,7 @@
     "eslint-plugin-jsdoc": "^48.4.0",
     "eslint-plugin-prefer-arrow": "^1.2.3",
     "eslint-plugin-simple-import-sort": "^12.1.1",
-    "release-it": "^18.1.2",
+    "release-it": "^19.0.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
