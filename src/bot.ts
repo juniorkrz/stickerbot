@@ -139,7 +139,7 @@ const connectToWhatsApp = async () => {
 
   client = makeWASocket({
     auth: state,
-    printQRInTerminal: baileys.useQrCode,
+    //printQRInTerminal: baileys.useQrCode,// The printQRInTerminal option has been deprecated.
     /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     logger: Pino({ level: 'silent' }) as any
   })
