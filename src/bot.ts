@@ -138,6 +138,7 @@ const connectToWhatsApp = async () => {
   client = makeWASocket({
     auth: state,
     printQRInTerminal: baileys.useQrCode,
+    version: [2, 3000, 1023223821],
     /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     logger: Pino({ level: 'silent' }) as any
   })
