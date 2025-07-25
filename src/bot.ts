@@ -5,7 +5,7 @@ import makeWASocket, {
   DisconnectReason,
   extractMessageContent,
   isJidGroup,
-  makeInMemoryStore,
+  //makeInMemoryStore,
   useMultiFileAuthState,
   WACallEvent,
   WACallUpdateType
@@ -16,6 +16,7 @@ import Pino from 'pino'
 import { imageSync } from 'qr-image'
 
 import { baileys, bot } from './config'
+import fakeStore from './fakeStore'
 import { handleSenderParticipation } from './handlers/community'
 import { getAllBannedUsers, getVips, isUserBanned, senderIsVip } from './handlers/db'
 import { getLogger } from './handlers/logger'
@@ -51,7 +52,7 @@ import { colors } from './utils/colors'
 import {
   checkForUpdates,
   createDirectoryIfNotExists,
-  deleteStoreIfFileIsTooLarge,
+  //deleteStoreIfFileIsTooLarge,
   getExtensionFromMimetype,
   getProjectHomepage,
   getProjectLocalVersion
@@ -68,7 +69,7 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 // directories to be created
 const directories = {
   creds: `/data/${bot.sessionId}/creds`,
-  store: `/data/${bot.sessionId}/store`,
+  //store: `/data/${bot.sessionId}/store`,
   resources: `/data/${bot.sessionId}/resources`
 }
 
@@ -85,18 +86,18 @@ let cmmAnnGroupJid: string | undefined
 let qr: string | undefined
 let pairingCode: string | undefined
 
-// store filepath
-const storeFilepath = `${directories.store}/baileys.json`
-// delete store file if it's too large
-if (baileys.storeAutoDelete) deleteStoreIfFileIsTooLarge(storeFilepath)
-// the store maintains the data of the WA connection in memory
-const store = makeInMemoryStore({})
-// read from a file
-store.readFromFile(storeFilepath)
-// saves the state to a file every 10s
-setInterval(() => {
-  store.writeToFile(storeFilepath)
-}, 10_000)
+// // store filepath
+// const storeFilepath = `${directories.store}/baileys.json`
+// // delete store file if it's too large
+// if (baileys.storeAutoDelete) deleteStoreIfFileIsTooLarge(storeFilepath)
+// // the store maintains the data of the WA connection in memory
+// const store = makeInMemoryStore({})
+// // read from a file
+// store.readFromFile(storeFilepath)
+// // saves the state to a file every 10s
+// setInterval(() => {
+//   store.writeToFile(storeFilepath)
+// }, 10_000)
 
 // to skip unread messages by environment variable or args
 const skipUnreadMessages = baileys.skipUnreadMessages || process.argv.includes('--skip-unread')
@@ -123,7 +124,8 @@ export const getCommunityAnnounceGroupJid = (): string | undefined => {
 }
 
 // exportable store
-export const getStore = (): ReturnType<typeof makeInMemoryStore> => {
+const store = fakeStore
+export const getStore = () => {
   return store
 }
 
@@ -149,7 +151,7 @@ const connectToWhatsApp = async () => {
   }
 
   // will listen from this client
-  store.bind(client.ev)
+  //store.bind(client.ev)
 
   client.ev.on('connection.update', (state) => (qr = state.qr))
   client.ev.on('creds.update', saveCreds)
