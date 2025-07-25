@@ -34,7 +34,7 @@
     "@distube/ytdl-core": "^4.16.8",
     "@hapi/boom": "^10.0.1",
     "@vitalets/google-translate-api": "^9.2.0",
-    "@whiskeysockets/baileys": "^6.7.13",
+    "@whiskeysockets/baileys": "^6.7.18",
     "compare-versions": "^6.1.1",
     "dotenv": "^16.4.5",
     "emoji-regex": "^10.3.0",
