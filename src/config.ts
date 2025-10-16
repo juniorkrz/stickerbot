@@ -2,7 +2,8 @@ import {
   WAPrivacyGroupAddValue,
   WAPrivacyOnlineValue,
   WAPrivacyValue,
-  WAReadReceiptsValue
+  WAReadReceiptsValue,
+  WAVersion
 } from '@whiskeysockets/baileys'
 import dotenv from 'dotenv'
 import { GiphySearch } from 'types/Giphy'
@@ -24,7 +25,8 @@ export const baileys = {
   useQrCode: JSON.parse(process.env.SB_USE_QR_CODE || 'true') as boolean,
   skipUnreadMessages: JSON.parse(process.env.SB_SKIP_UNREAD || 'false') as boolean,
   storeAutoDelete: JSON.parse(process.env.SB_STORE_AUTO_DELETE || 'true') as boolean,
-  storeMaxFileSize: +(process.env.SB_STORE_MAX_FILE_SIZE_IN_MB || 50)
+  storeMaxFileSize: +(process.env.SB_STORE_MAX_FILE_SIZE_IN_MB || 50),
+  version: (process.env.SB_WA_VERSION ? process.env.SB_WA_VERSION.split(';') : [2, 3000, 1025190524]) as WAVersion,
 }
 
 // Bot config
