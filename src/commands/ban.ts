@@ -121,7 +121,8 @@ export const command: StickerBotCommand = {
       // Is the user to be banned the sender himself?
       const hisSelf = areJidsSameUser(user, sender)
       // Is the user to be banned an admin of the bot?
-      const userIsBotAdmin = bot.admins.includes(getPhoneFromJid(user))
+      const userPhone = getPhoneFromJid(user)
+      const userIsBotAdmin = userPhone ? bot.admins.includes(userPhone) : false
 
       if (isMe || hisSelf) {
         return await sendMessage(
