@@ -9,7 +9,7 @@ const logger = getLogger()
 
 let db: Database<sqlite3.Database, sqlite3.Statement>
 
-(async () => {
+export const initializeDB = async () => {
   const databaseDir = `/data/${bot.sessionId}/db`
   await createDirectoryIfNotExists(databaseDir)
   // open the database
@@ -21,7 +21,7 @@ let db: Database<sqlite3.Database, sqlite3.Statement>
   await db.run('CREATE TABLE IF NOT EXISTS Usage (type TEXT, count NUM)')
   await db.run('CREATE TABLE IF NOT EXISTS Vips (jid TEXT PRIMARY KEY, expires DATETIME, permanent INTEGER)')
   await db.run('CREATE TABLE IF NOT EXISTS Banned (user TEXT)')
-})()
+}
 
 export const getCount = async (type: string) => {
   return (
