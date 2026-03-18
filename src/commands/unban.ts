@@ -114,7 +114,7 @@ export const command: StickerBotCommand = {
       // Is the user to be unbanned the sender himself?
       const hisSelf = areJidsSameUser(user, sender)
       // Is the user to be unbanned an admin of the bot?
-      const userPhone = getPhoneFromJid(user)
+      const userPhone = await getPhoneFromJid(user)
       const userIsBotAdmin = userPhone ? bot.admins.includes(userPhone) : false
 
       if (isMe || hisSelf) {
@@ -144,7 +144,7 @@ export const command: StickerBotCommand = {
       unban(user)
 
       // Log unbans
-      const currentMsg = `*[BANS]:* Admin @${getPhoneFromJid(sender)} desbaniu ${getPhoneFromJid(user)}`
+      const currentMsg = `*[BANS]:* Admin @${await getPhoneFromJid(sender)} desbaniu ${await getPhoneFromJid(user)}`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
 

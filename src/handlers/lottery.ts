@@ -120,7 +120,7 @@ export const getFederal = async (): Promise<string | undefined> => {
 
     const client = getClient()
     const botJid = jidNormalizedUser(client.user?.id)
-    const botPhone = getPhoneFromJid(botJid)
+    const botPhone = await getPhoneFromJid(botJid)
     response += `\n${getRandomItemFromArray(frases_sorte)}\n\n`
     response += `Créditos: ${bot.name} - https://wa.me/${botPhone}?text=!federal`
     //response += '\n\n_Os resultados geralmente são atualizados por volta das 21h_'

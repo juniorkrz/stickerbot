@@ -132,7 +132,7 @@ export const command: StickerBotCommand = {
       // period description
       const period = permanent ? 'permanente' : `${months} ${months == 1 ? 'mês' : 'meses'}`
 
-      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} setou o VIP de ${getPhoneFromJid(vip)} ` +
+      const currentMsg = `*[VIP]:* Admin @${await getPhoneFromJid(sender)} setou o VIP de ${await getPhoneFromJid(vip)} ` +
         `para *${period}*!`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`

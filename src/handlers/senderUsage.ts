@@ -62,7 +62,7 @@ export const handleLimitedSender = async (
   // Alert sender if necessary
   if (senderUsage.shouldAlertSender) {
     logAction(message, jid, group, 'Rate Limited Alert')
-    await sendLogToAdmins(`*[RATE LIMITED]:* Usuário ${getPhoneFromJid(sender)} foi limitado!`)
+    await sendLogToAdmins(`*[RATE LIMITED]:* Usuário ${await getPhoneFromJid(sender)} foi limitado!`)
     await sendMessage(
       {
         text: spintax(

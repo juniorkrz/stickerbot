@@ -180,7 +180,7 @@ const connectToWhatsApp = async () => {
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
       if (!dev) await setupBot()
       logger.info(`${bot.name} is ${colors.green}ready${colors.reset}!`)
-      if (dev) logger.warn('Development mode is active!2')
+      if (dev) logger.warn('Development mode is active!')
       if (!dev) sendLogToAdmins(`*[STATUS]*: ${bot.name} está online!`)
       if (!dev) checkBotAdminStatus()
     }
@@ -244,7 +244,7 @@ const connectToWhatsApp = async () => {
         ? await getFullCachedGroupMetadata(jid)
         : undefined
       // Get the sender phone
-      const phone = getPhoneFromJid(sender)
+      const phone = await getPhoneFromJid(sender)
       // Is the sender an bot admin?
       const isBotAdmin = phone ? bot.admins.includes(phone) : false
       // Is the sender an admin of the group?
@@ -353,7 +353,7 @@ const connectToWhatsApp = async () => {
         logAction(message, jid, group, commandName)
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
-        const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+        const captions = source ? await extractCaptionsFromBodyOrCaption(source) : undefined
 
         await makeSticker(message, {
           captions,
@@ -387,7 +387,7 @@ const connectToWhatsApp = async () => {
           logAction(message, jid, group, commandName)
 
           const source = quotedMsg ? getBody(message) : getCaption(message)
-          const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+          const captions = source ? await extractCaptionsFromBodyOrCaption(source) : undefined
 
           await makeSticker(message, {
             captions,
@@ -408,7 +408,7 @@ const connectToWhatsApp = async () => {
         if (!isCmmMember) return
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
-        const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+        const captions = source ? await extractCaptionsFromBodyOrCaption(source) : undefined
         if (source && captions && captions.length > 0) {
           // Send sticker with caption
           const isAnimated = content.stickerMessage?.isAnimated || content.videoMessage?.seconds

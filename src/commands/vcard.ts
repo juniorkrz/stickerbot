@@ -54,7 +54,7 @@ export const command: StickerBotCommand = {
     const clientJid = jidNormalizedUser(client.user?.id)
 
     // get the bot phone
-    const phone = getPhoneFromJid(clientJid)
+    const phone = await getPhoneFromJid(clientJid)
 
     // send a contact!
     const vcard = 'BEGIN:VCARD\n' // metadata of the contact card

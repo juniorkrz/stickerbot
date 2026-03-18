@@ -104,7 +104,7 @@ export const command: StickerBotCommand = {
 
     // get captions
     const captions = bodyWithoutCommand
-      ? extractCaptionsFromBodyOrCaption(bodyWithoutCommand)
+      ? await extractCaptionsFromBodyOrCaption(bodyWithoutCommand)
       : undefined
 
     // if the text is too large, send an error

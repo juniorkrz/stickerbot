@@ -252,9 +252,10 @@ export const logAction = (
   if (addToStatistics) addCount(action)
 }
 
-export const extractCaptionsFromBodyOrCaption = (source: string) => {
+export const extractCaptionsFromBodyOrCaption = async (source: string) => {
   const client = getClient()
-  const botMention = '@' + getPhoneFromJid(client.user?.id)
+  const botPhone = await getPhoneFromJid(client.user?.id)
+  const botMention = '@' + botPhone
   const caption = source.replaceAll(botMention, '')// Removes the bot mention
     .replaceAll('\n', '')
     .split(';')// Line splitter. ex: `Top text;Bottom text`
@@ -264,11 +265,13 @@ export const extractCaptionsFromBodyOrCaption = (source: string) => {
   return caption
 }
 
-export const getPhoneFromJid = (jid: string | undefined): string | undefined => {
+export const getPhoneFromJid = async (jid: string | undefined): Promise<string | undefined> => {
   if (!jid) return undefined
   const decoded = jidDecode(jid)
   if (decoded?.server === 'lid') {
-    return jidNormalizedUser(jid)
+    const client = getClient()
+    const pn = await client?.signalRepository?.lidMapping?.getPNForLID(jid)
+    if (pn) return jidNormalizedUser(pn).replace(/\D/g, '')
   }
   return jidNormalizedUser(jid).replace(/\D/g, '')
 }

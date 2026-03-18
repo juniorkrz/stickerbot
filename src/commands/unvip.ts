@@ -117,8 +117,8 @@ export const command: StickerBotCommand = {
     for (const vip of vips) {
       await removeVip(vip)
 
-      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} removeu ` +
-        `${getPhoneFromJid(vip)} dos VIPs!`
+      const currentMsg = `*[VIP]:* Admin @${await getPhoneFromJid(sender)} removeu ` +
+        `${await getPhoneFromJid(vip)} dos VIPs!`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
     }

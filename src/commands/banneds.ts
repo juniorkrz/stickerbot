@@ -54,12 +54,13 @@ export const command: StickerBotCommand = {
     if (banneds.length == 0) {
       response += '\nNenhum usuário banido'
     } else {
-      banneds.forEach((banned, index) => {
-        const phone = getPhoneFromJid(banned.user)
+      for (let index = 0; index < banneds.length; index++) {
+        const banned = banneds[index]
+        const phone = await getPhoneFromJid(banned.user)
         if (phone) {
           response += `\n${index + 1} - ${phone}`
         }
-      })
+      }
     }
 
     const client = getClient()
