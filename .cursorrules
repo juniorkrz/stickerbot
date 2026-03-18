@@ -1,0 +1,43 @@
+# StickerBot Project Rules
+
+You are an AI assistant working on the StickerBot project, a WhatsApp bot built with `@whiskeysockets/baileys` v7 in TypeScript. 
+Follow these guidelines strictly to ensure code quality, compatibility, and stability.
+
+## Core Directives
+1. **Never Break the Bot**: Provide clean, working code that actually compiles without errors. Before suggesting complex refactorings, ensure type compatibility.
+2. **ESM-Only Execution**: The project uses Baileys v7, which is an ESM-only library. The project runs through `tsx` (see `package.json` scripts). Do not break this setup.
+3. **Respect Types**: Do not use `any` unless absolutely necessary. Rely on exported types from Baileys or native types in `src/types/`.
+
+## Baileys v7 Specifics (`@whiskeysockets/baileys` v7.0.0-rc.9)
+1. **LID (Local Identifier) System**: WhatsApp has moved to a LID system rather than pure phone numbers. 
+   - When extracting phone numbers from a WhatsApp user JID, use the project's helper function `getPhoneFromJid(jid)`. Do not write raw regex matchers for this unless necessary.
+2. **Messages**: 
+   - The primary message interface object is now `WAMessage`. Do not use the deprecated `proto.WebMessageInfo` for command processing functions.
+   - Use `WAMessageExtended` defined in `src/types/Message.ts` when handling internal commands, as it includes the extra `messageLocalTimestamp`.
+3. **Store & QR**:
+   - `makeInMemoryStore` was removed from Baileys v7. We implemented it in `src/utils/store.ts` via `SimpleStore` class to keep backwards compatibility.
+   - `printQRInTerminal` is deprecated. We use `qrcode-terminal` in the `connection.update` event.
+4. **Auth State & Connections**:
+   - Do NOT try to change the session saving mechanism unless asked. It properly uses `useMultiFileAuthState`. 
+   - `fetchLatestBaileysVersion` is injected into `makeWASocket({ version })` to prevent WhatsApp from rejecting connection loops. Do not overwrite this.
+
+## Git Workflow & Commits
+We use the Conventional Commits specification. All your PRs or suggested Git commits must follow this pattern:
+`type(scope): message`
+
+**Types**: 
+- `feat`: A new feature
+- `fix`: A bug fix
+- `improvement`: Improve a current implementation without adding a new feature
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools and libraries such as documentation generation
+
+**Scope**: Usually the filename being changed (e.g., `bot.ts`, `handlers`, `deps`).
+
+## Building & Running
+- Always run `npx tsc --noEmit` to verify your TypeScript typings after writing a file or command.
+- To test the bot in development mode, advise the user to run `npm run dev`.
