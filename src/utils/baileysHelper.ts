@@ -264,7 +264,12 @@ export const extractCaptionsFromBodyOrCaption = (source: string) => {
   return caption
 }
 
-export const getPhoneFromJid = (jid: string | undefined) => {
+export const getPhoneFromJid = (jid: string | undefined): string | undefined => {
+  if (!jid) return undefined
+  const decoded = jidDecode(jid)
+  if (decoded?.server === 'lid') {
+    return jidNormalizedUser(jid)
+  }
   return jidNormalizedUser(jid).replace(/\D/g, '')
 }
 
