@@ -14,8 +14,10 @@ RUN apt update && \
     libxcb1 \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /usr/src/app
-COPY . .
+COPY package*.json ./
 RUN npm install -g npm@latest
+RUN npm install --force
+COPY . .
 RUN npm run build
 EXPOSE 3000
 VOLUME ["/data"]
