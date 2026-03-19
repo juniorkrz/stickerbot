@@ -3,3 +3,6 @@
 
 #Ignoring dot files and folders
 .*
+node_modules
+dist
+npm-debug.log

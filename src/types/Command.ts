@@ -21,7 +21,7 @@ export interface CommandRunFunction {
     isVip: boolean,
     isGroupAdmin: boolean,
     amAdmin: boolean
-  ): Promise<proto.WebMessageInfo | undefined>
+  ): Promise<WAMessage | undefined>
 }
 
 export interface StickerBotCommand {

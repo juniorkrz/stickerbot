@@ -1,4 +1,4 @@
-import { areJidsSameUser, GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
+import { GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getClient } from '../bot'
@@ -8,11 +8,14 @@ import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import {
+  amAdminOfGroup,
+  compareJids,
   getAllGroupsFromCommunity,
   getMentionedJids,
   getMessageOptions,
   getPhoneFromJid,
   getQuotedMessage,
+  isJidInParticipantList,
   react,
   sendLogToAdmins,
   sendMessage
@@ -117,11 +120,12 @@ export const command: StickerBotCommand = {
 
     for (const user of bannedUsers) {
       // Is the user being banned the bot?
-      const isMe = areJidsSameUser(user, client.user?.id)
+      const isMe = await compareJids(user, client.user?.id)
       // Is the user to be banned the sender himself?
-      const hisSelf = areJidsSameUser(user, sender)
+      const hisSelf = await compareJids(user, sender)
       // Is the user to be banned an admin of the bot?
-      const userIsBotAdmin = bot.admins.includes(getPhoneFromJid(user))
+      const userPhone = await getPhoneFromJid(user)
+      const userIsBotAdmin = userPhone ? bot.admins.includes(userPhone) : false
 
       if (isMe || hisSelf) {
         return await sendMessage(
@@ -149,7 +153,7 @@ export const command: StickerBotCommand = {
       ban(user)
 
       // Log bans
-      const currentMsg = `*[BANS]:* Admin @${getPhoneFromJid(sender)} baniu ${getPhoneFromJid(user)}`
+      const currentMsg = `*[BANS]:* Admin @${await getPhoneFromJid(sender)} baniu ${await getPhoneFromJid(user)}`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
 
@@ -158,16 +162,13 @@ export const command: StickerBotCommand = {
       if (bot.community && allCommunityGroups) {
         for (const group of allCommunityGroups) {
           // Is the user an member of this group?
-          const isMember = group.participants.find(p => areJidsSameUser(p.id, user))
+          const isMember = await isJidInParticipantList(user, group.participants)
 
           // If not, skip
           if (!isMember) continue
 
           // Is the bot an admin of this group?
-          const amGroupAdmin = group.participants
-            .find(p => areJidsSameUser(p.id, client.user?.id))
-            ?.admin
-            ?.endsWith('admin') !== undefined
+          const amGroupAdmin = await amAdminOfGroup(group)
 
           // If you are not an admin, send an alert from the respective group
           if (!amGroupAdmin) {

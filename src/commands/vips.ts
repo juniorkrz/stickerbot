@@ -49,7 +49,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    if (!isSenderBotMaster(sender)) return await sendMessage(
+    if (!await isSenderBotMaster(sender)) return await sendMessage(
       {
         text: spintax(
           '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, você não tem acesso a esse comando.'
@@ -67,22 +67,24 @@ export const command: StickerBotCommand = {
     if (permanentVips.length == 0 && nonPermanentVips.length == 0) {
       response += '\nNenhum VIP encontrado! :('
     } else {
-      permanentVips.forEach((vip, index) => {
-        const phone = getPhoneFromJid(vip.jid)
+      for (let index = 0; index < permanentVips.length; index++) {
+        const vip = permanentVips[index]
+        const phone = await getPhoneFromJid(vip.jid)
         if (phone) {
           response += `\n${index + 1} - ${phone} - Permanente`
         }
-      })
+      }
 
-      nonPermanentVips.forEach((vip, index) => {
-        const phone = getPhoneFromJid(vip.jid)
+      for (let index = 0; index < nonPermanentVips.length; index++) {
+        const vip = nonPermanentVips[index]
+        const phone = await getPhoneFromJid(vip.jid)
         if (phone) {
           // convert vip.expires to datetime
           const expires = new Date(vip.expires)
 
           response += `\n${index + permanentVips.length + 1} - ${phone} - ${expires.toLocaleString()}`
         }
-      })
+      }
 
       response += '\n\nTelefone - Data de expiração'
     }

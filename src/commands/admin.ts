@@ -1,0 +1,55 @@
+/* Comando base - StickerBot */
+import { GroupMetadata } from '@whiskeysockets/baileys'
+import path from 'path'
+
+import { bot } from '../config'
+import { StickerBotCommand } from '../types/Command'
+import { WAMessageExtended } from '../types/Message'
+import { react, sendMessage } from '../utils/baileysHelper'
+import { checkCommand } from '../utils/commandValidator'
+import { emojis } from '../utils/emojis'
+import { capitalize, getRandomItemFromArray, spintax } from '../utils/misc'
+//import { getClient } from '../bot'
+
+// Gets the extension of this file, to dynamically import '.ts' if in development and '.js' if in production
+const extension = __filename.endsWith('.js') ? '.js' : '.ts'
+
+// Gets the file name without the .ts/.js extension
+const commandName = capitalize(path.basename(__filename, extension))
+
+// Configurações do comando:
+export const command: StickerBotCommand = {
+  name: commandName,
+  aliases: ['amadmin'], // * Tudo que estiver aqui será aceito como comando, precisa ser um array com no mínimo um comando.
+  desc: 'Verifica se o sender é admin do bot.', // * Descrição do comando, será exibido no menu.
+  example: undefined, // Exemplo do comando, deve ser uma string ou false
+  needsPrefix: true, // O comando precisa de um prefixo para ser executado?
+  inMaintenance: false, // O comando está em manutenção?
+  runInPrivate: true, // O comando deve funcionar nos privados?
+  runInGroups: true, // O comando deve funcionar em qualquer grupo?
+  onlyInBotGroup: false, // O comando deve funcionar apenas nos grupos oficiais do bot?
+  onlyBotAdmin: true, // O comando deve funcionar apenas para administradores do bot?
+  onlyAdmin: false, // O comando deve funcionar apenas para administradores do grupo?
+  onlyVip: false, // O comando deve funcionar apenas para apoiadores do bot?
+  botMustBeAdmin: false, // O bot precisa ser administrador do grupo para executar o comando?
+  interval: 5, // Intervalo para executar esse comando novamente (em segundos)
+  limiter: {}, // Não mecha nisso!
+  run: async (
+    jid: string, // ID do chat
+    sender: string,// JID do sender
+    message: WAMessageExtended, // Mensagem (WAMessage)
+    alias: string, // O alias que o usuário escolheu
+    body: string, // Corpo da mensagem
+    group: GroupMetadata | undefined, // Informações do grupo | Será undefined caso não seja um grupo
+    isBotAdmin: boolean, // É um administrador do bot?
+    isVip: boolean,
+    isGroupAdmin: boolean, // É um administrador do grupo?
+    amAdmin: boolean// O bot é admin no grupo?
+  ) => {
+    // Não modifique
+    const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
+    if (!check) return
+
+    return await react(message, isBotAdmin ? '🤙' : '❌')
+  }
+}

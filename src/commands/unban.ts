@@ -1,4 +1,4 @@
-import { areJidsSameUser, GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
+import { GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getClient } from '../bot'
@@ -8,6 +8,7 @@ import { getLogger } from '../handlers/logger'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import {
+  compareJids,
   getMentionedJids,
   getPhoneFromJid,
   getQuotedMessage,
@@ -110,11 +111,12 @@ export const command: StickerBotCommand = {
 
     for (const user of unbannedUsers) {
       // Is the user being unbanned the bot?
-      const isMe = areJidsSameUser(user, client.user?.id)
+      const isMe = await compareJids(user, client.user?.id)
       // Is the user to be unbanned the sender himself?
-      const hisSelf = areJidsSameUser(user, sender)
+      const hisSelf = await compareJids(user, sender)
       // Is the user to be unbanned an admin of the bot?
-      const userIsBotAdmin = bot.admins.includes(getPhoneFromJid(user))
+      const userPhone = await getPhoneFromJid(user)
+      const userIsBotAdmin = userPhone ? bot.admins.includes(userPhone) : false
 
       if (isMe || hisSelf) {
         return await sendMessage(
@@ -143,7 +145,7 @@ export const command: StickerBotCommand = {
       unban(user)
 
       // Log unbans
-      const currentMsg = `*[BANS]:* Admin @${getPhoneFromJid(sender)} desbaniu ${getPhoneFromJid(user)}`
+      const currentMsg = `*[BANS]:* Admin @${await getPhoneFromJid(sender)} desbaniu ${await getPhoneFromJid(user)}`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
 

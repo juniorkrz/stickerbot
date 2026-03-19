@@ -59,7 +59,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    if (!isSenderBotMaster(sender)) return await sendMessage(
+    if (!await isSenderBotMaster(sender)) return await sendMessage(
       {
         text: spintax(
           '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, você não tem acesso a esse comando.'
@@ -117,8 +117,8 @@ export const command: StickerBotCommand = {
     for (const vip of vips) {
       await removeVip(vip)
 
-      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} removeu ` +
-        `${getPhoneFromJid(vip)} dos VIPs!`
+      const currentMsg = `*[VIP]:* Admin @${await getPhoneFromJid(sender)} removeu ` +
+        `${await getPhoneFromJid(vip)} dos VIPs!`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
     }

@@ -1,10 +1,10 @@
 import {
   AnyMessageContent,
-  areJidsSameUser,
   downloadMediaMessage,
   extractMessageContent,
   GroupMetadata,
   GroupMetadataParticipants,
+  GroupParticipant,
   isJidGroup,
   jidDecode,
   jidEncode,
@@ -116,12 +116,49 @@ export const getFullCachedGroupMetadata = async (
   return metadata
 }
 
-export const amAdminOfGroup = (group: GroupMetadata | undefined) => {
+export const isJidInParticipantList = async (
+  jid: string | undefined,
+  participants: GroupParticipant[] | undefined,
+): Promise<boolean> => {
+  if (!jid || !participants) return false
+  const phone = await getPhoneFromJid(jid)
+  if (!phone) return false
+
+  for (const p of participants) {
+    const pPhone = await getPhoneFromJid(p.id)
+    if (phone === pPhone) return true
+  }
+  return false
+}
+
+export const isJidAdminOfGroup = async (
+  jid: string | undefined,
+  group: GroupMetadata | undefined,
+): Promise<boolean> => {
+  if (!jid || !group) return false
+  const phone = await getPhoneFromJid(jid)
+  if (!phone) return false
+
+  for (const p of group.participants) {
+    if (p.admin?.endsWith('admin')) {
+      const pPhone = await getPhoneFromJid(p.id)
+      if (pPhone === phone) return true
+    }
+  }
+  return false
+}
+
+export const amAdminOfGroup = async (group: GroupMetadata | undefined) => {
   const client = getClient()
-  return group ? group.participants
-    .find((p) => areJidsSameUser(p.id, client.user?.id))
-    ?.admin?.endsWith('admin') !== undefined
-    : false
+  return await isJidAdminOfGroup(client.user?.id, group)
+}
+
+export const compareJids = async (jid1: string | undefined, jid2: string | undefined): Promise<boolean> => {
+  if (!jid1 || !jid2) return false
+  if (jid1 === jid2) return true
+  const phone1 = await getPhoneFromJid(jid1)
+  const phone2 = await getPhoneFromJid(jid2)
+  return phone1 === phone2
 }
 
 export const getBody = (message: WAMessage) => {
@@ -252,9 +289,10 @@ export const logAction = (
   if (addToStatistics) addCount(action)
 }
 
-export const extractCaptionsFromBodyOrCaption = (source: string) => {
+export const extractCaptionsFromBodyOrCaption = async (source: string) => {
   const client = getClient()
-  const botMention = '@' + getPhoneFromJid(client.user?.id)
+  const botPhone = await getPhoneFromJid(client.user?.id)
+  const botMention = '@' + botPhone
   const caption = source.replaceAll(botMention, '')// Removes the bot mention
     .replaceAll('\n', '')
     .split(';')// Line splitter. ex: `Top text;Bottom text`
@@ -264,7 +302,14 @@ export const extractCaptionsFromBodyOrCaption = (source: string) => {
   return caption
 }
 
-export const getPhoneFromJid = (jid: string | undefined) => {
+export const getPhoneFromJid = async (jid: string | undefined): Promise<string | undefined> => {
+  if (!jid) return undefined
+  const decoded = jidDecode(jid)
+  if (decoded?.server === 'lid') {
+    const client = getClient()
+    const pn = await client?.signalRepository?.lidMapping?.getPNForLID(jid)
+    if (pn) return jidNormalizedUser(pn).replace(/\D/g, '')
+  }
   return jidNormalizedUser(jid).replace(/\D/g, '')
 }
 
@@ -272,10 +317,19 @@ export const getMentionedJids = (message: WAMessage) => {
   return getMessage(message)?.contextInfo?.mentionedJid
 }
 
-export const isMentioned = (message: WAMessage, jid: string | undefined) => {
+export const isMentioned = async (message: WAMessage, jid: string | undefined) => {
   if (!jid) return false
   const mentionedJids = getMentionedJids(message)
-  return mentionedJids?.includes(jidNormalizedUser(jid))
+  if (!mentionedJids) return false
+
+  const phone = await getPhoneFromJid(jid)
+  if (!phone) return false
+
+  for (const mJid of mentionedJids) {
+    const mPhone = await getPhoneFromJid(mJid)
+    if (mPhone === phone) return true
+  }
+  return false
 }
 
 export const getQuotedMessage = (message: WAMessage) => {
@@ -322,71 +376,75 @@ export const setupBot = async () => {
   logger.info(`${colors.green}[WA]${colors.reset} Setting up...`)
   const client = getClient()
 
-  const status = await client.fetchStatus(jidNormalizedUser(client?.user?.id))
-  const botStatus = `${bot.status} | v${getProjectLocalVersion()}`
-  const statusMessage = status?.[0]?.status || null
-  if (statusMessage != botStatus) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile status`)
-    await client.updateProfileStatus(botStatus)
-  }
+  try {
+    const status = await client.fetchStatus(jidNormalizedUser(client?.user?.id))
+    const botStatus = `${bot.status} | v${getProjectLocalVersion()}`
+    const statusMessage = status?.[0]?.status || null
+    if (statusMessage != botStatus) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile status`)
+      await client.updateProfileStatus(botStatus)
+    }
 
-  const privacySettings = await client.fetchPrivacySettings(true)
+    const privacySettings = await client.fetchPrivacySettings(true)
 
-  // Profile Name
-  if (client.user?.name != bot.name) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile name`)
-    await client.updateProfileName(bot.name)
-  }
+    // Profile Name
+    if (client.user?.name != bot.name) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile name`)
+      await client.updateProfileName(bot.name)
+    }
 
-  // Last seen Privacy
-  if (privacySettings.last != bot.lastSeenPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting last seen privacy`)
-    await client.updateLastSeenPrivacy(bot.lastSeenPrivacy)
-  }
+    // Last seen Privacy
+    if (privacySettings.last != bot.lastSeenPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting last seen privacy`)
+      await client.updateLastSeenPrivacy(bot.lastSeenPrivacy)
+    }
 
-  // Online Privacy
-  if (privacySettings.online != bot.onlinePrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting online privacy`)
-    await client.updateOnlinePrivacy(bot.onlinePrivacy)
-  }
+    // Online Privacy
+    if (privacySettings.online != bot.onlinePrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting online privacy`)
+      await client.updateOnlinePrivacy(bot.onlinePrivacy)
+    }
 
-  // Profile Pic Privacy
-  if (privacySettings.profile != bot.profilePicPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic privacy`)
-    await client.updateProfilePicturePrivacy(bot.profilePicPrivacy)
-  }
+    // Profile Pic Privacy
+    if (privacySettings.profile != bot.profilePicPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic privacy`)
+      await client.updateProfilePicturePrivacy(bot.profilePicPrivacy)
+    }
 
-  // Profile Pic
-  if (bot.setProfilePic) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic`)
-    const imgDir = path.resolve(__dirname, '../../src/img/profilePic')
-    const randomImage = getRandomFile(imgDir)
-    const botJid = client.user?.id
-    if (botJid) await client.updateProfilePicture(botJid, { url: randomImage })
-  }
+    // Profile Pic
+    if (bot.setProfilePic) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic`)
+      const imgDir = path.resolve(__dirname, '../../src/img/profilePic')
+      const randomImage = getRandomFile(imgDir)
+      const botJid = client.user?.id
+      if (botJid) await client.updateProfilePicture(botJid, { url: randomImage })
+    }
 
-  // Status Privacy
-  if (privacySettings.status != bot.statusPrivacyValue) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting status privacy value`)
-    await client.updateStatusPrivacy(bot.statusPrivacyValue)
-  }
+    // Status Privacy
+    if (privacySettings.status != bot.statusPrivacyValue) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting status privacy value`)
+      await client.updateStatusPrivacy(bot.statusPrivacyValue)
+    }
 
-  // Read Receipts Privacy
-  if (privacySettings.readreceipts != bot.readReceiptsPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting read receipts privacy`)
-    await client.updateReadReceiptsPrivacy(bot.readReceiptsPrivacy)
-  }
+    // Read Receipts Privacy
+    if (privacySettings.readreceipts != bot.readReceiptsPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting read receipts privacy`)
+      await client.updateReadReceiptsPrivacy(bot.readReceiptsPrivacy)
+    }
 
-  // Groups Add Privacy
-  if (privacySettings.groupadd != bot.groupsAddPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting groups add privacy`)
-    await client.updateGroupsAddPrivacy(bot.groupsAddPrivacy)
-  }
+    // Groups Add Privacy
+    if (privacySettings.groupadd != bot.groupsAddPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting groups add privacy`)
+      await client.updateGroupsAddPrivacy(bot.groupsAddPrivacy)
+    }
 
-  // Default Disappearing Mode
-  if (WA_DEFAULT_EPHEMERAL != bot.defaultDisappearingMode) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting default disappearing mode`)
-    await client.updateDefaultDisappearingMode(bot.defaultDisappearingMode)
+    // Default Disappearing Mode
+    if (WA_DEFAULT_EPHEMERAL != bot.defaultDisappearingMode) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting default disappearing mode`)
+      await client.updateDefaultDisappearingMode(bot.defaultDisappearingMode)
+    }
+  } catch (error) {
+    logger.error(`${colors.red}[WA]${colors.reset} Error during setup (probably keys not ready yet): ${error}`)
   }
 }
 
@@ -404,7 +462,7 @@ export const checkBotAdminStatus = async () => {
 
   let logs = ''
   for (const group of groups) {
-    const amAdmin = amAdminOfGroup(group)
+    const amAdmin = await amAdminOfGroup(group)
     if (!amAdmin) {
       const log = `*[MOD]* ${bot.name} não é um admin do ${group.subject} (${group.id})`
       logger.warn(log.replaceAll('*', ''))
@@ -431,9 +489,9 @@ export const getQuotedMessageAuthor = (message: WAMessage) => {
   if (quotedMsg) return getMessageAuthor(quotedMsg)
 }
 
-export const isSenderBotMaster = (jid: string) => {
+export const isSenderBotMaster = async (jid: string) => {
   const botMaster = bot.admins[0]
-  return areJidsSameUser(jid, jidEncode(botMaster, 's.whatsapp.net'))
+  return await compareJids(jid, jidEncode(botMaster, 's.whatsapp.net'))
 }
 
 export const getBodyWithoutCommand = (body: string, needsPrefix: boolean, alias: string) => {

@@ -44,7 +44,7 @@ export const handleText = async (
   isVip: boolean,
   isGroupAdmin: boolean,
   amAdmin: boolean
-): Promise<proto.WebMessageInfo | undefined> => {
+): Promise<WAMessage | undefined> => {
   const client = getClient()
 
   // Mark all messages as read

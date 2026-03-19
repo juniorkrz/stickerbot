@@ -59,7 +59,7 @@ export const command: StickerBotCommand = {
 
     const winner = getRandomItemFromArray(participants)
     const raffleName = getBodyWithoutCommand(body, command.needsPrefix, alias)
-    const phrase = `@${getPhoneFromJid(winner.id)} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
+    const phrase = `@${await getPhoneFromJid(winner.id)} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
       `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' +
         raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`
 

@@ -27,10 +27,8 @@ async function downloadFile(url: string, destination: string): Promise<void> {
       writer.close()
       reject(err)
     })
-    writer.on('close', () => {
-      if (!error) {
-        resolve()
-      }
+    writer.on('finish', () => {
+      resolve()
     })
   })
 }
@@ -49,9 +47,9 @@ async function ensureEmojiMetadata(): Promise<EmojiMetadata> {
 // Use the emoji metadata
 let emojiMetadata: EmojiMetadata
 
-ensureEmojiMetadata().then(metadata => {
-  emojiMetadata = metadata
-})
+export const initializeEmojiMix = async () => {
+  emojiMetadata = await ensureEmojiMetadata()
+}
 
 export const getEmojiData = (emojiCodepoint: string): EmojiData => {
   return (emojiMetadata as EmojiMetadata).data[emojiCodepoint]

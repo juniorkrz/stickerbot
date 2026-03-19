@@ -1,11 +1,10 @@
 import { Boom } from '@hapi/boom'
 import makeWASocket, {
-  areJidsSameUser,
   delay,
   DisconnectReason,
   extractMessageContent,
+  fetchLatestBaileysVersion,
   isJidGroup,
-  makeInMemoryStore,
   useMultiFileAuthState,
   WACallEvent,
   WACallUpdateType
@@ -14,10 +13,14 @@ import express from 'express'
 import moment from 'moment'
 import Pino from 'pino'
 import { imageSync } from 'qr-image'
+import qrcode from 'qrcode-terminal'
+
+import { makeInMemoryStore } from './utils/store'
 
 import { baileys, bot } from './config'
 import { handleSenderParticipation } from './handlers/community'
-import { getAllBannedUsers, getVips, isUserBanned, senderIsVip } from './handlers/db'
+import { getAllBannedUsers, getVips, initializeDB, isUserBanned, senderIsVip } from './handlers/db'
+import { initializeEmojiMix } from './handlers/emojiMix'
 import { getLogger } from './handlers/logger'
 import { handleReactionMessage } from './handlers/reaction'
 import { handleLimitedSender } from './handlers/senderUsage'
@@ -29,6 +32,7 @@ import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
+  isJidAdminOfGroup,
   checkBotAdminStatus,
   deleteMessage,
   extractCaptionsFromBodyOrCaption,
@@ -90,7 +94,7 @@ const storeFilepath = `${directories.store}/baileys.json`
 // delete store file if it's too large
 if (baileys.storeAutoDelete) deleteStoreIfFileIsTooLarge(storeFilepath)
 // the store maintains the data of the WA connection in memory
-const store = makeInMemoryStore({})
+const store = makeInMemoryStore()
 // read from a file
 store.readFromFile(storeFilepath)
 // saves the state to a file every 10s
@@ -134,10 +138,11 @@ export const botStartedAt = (): moment.Moment => {
 
 const connectToWhatsApp = async () => {
   const { state, saveCreds } = await useMultiFileAuthState(directories.creds)
+  const { version, isLatest } = await fetchLatestBaileysVersion()
 
   client = makeWASocket({
+    version,
     auth: state,
-    printQRInTerminal: baileys.useQrCode,
     /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     logger: Pino({ level: 'silent' }) as any
   })
@@ -151,7 +156,14 @@ const connectToWhatsApp = async () => {
   // will listen from this client
   store.bind(client.ev)
 
-  client.ev.on('connection.update', (state) => (qr = state.qr))
+  client.ev.on('connection.update', (state) => {
+    if (state.qr) {
+      qr = state.qr
+      if (baileys.useQrCode) {
+        qrcode.generate(qr, { small: true })
+      }
+    }
+  })
   client.ev.on('creds.update', saveCreds)
   client.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update
@@ -232,17 +244,13 @@ const connectToWhatsApp = async () => {
         ? await getFullCachedGroupMetadata(jid)
         : undefined
       // Get the sender phone
-      const phone = getPhoneFromJid(sender)
+      const phone = await getPhoneFromJid(sender)
       // Is the sender an bot admin?
-      const isBotAdmin = bot.admins.includes(phone)
+      const isBotAdmin = phone ? bot.admins.includes(phone) : false
       // Is the sender an admin of the group?
-      const isGroupAdmin = group
-        ? group.participants
-          .find((p) => areJidsSameUser(p.id, sender))
-          ?.admin?.endsWith('admin') !== undefined
-        : false
+      const isGroupAdmin = await isJidAdminOfGroup(sender, group)
       // Is the Bot an admin of the group?
-      const amAdmin = amAdminOfGroup(group)
+      const amAdmin = await amAdminOfGroup(group)
       // Is sender banned?
       const isBanned = phone
         ? await isUserBanned(phone)
@@ -295,7 +303,7 @@ const connectToWhatsApp = async () => {
       }
 
       // Was the bot mentioned?
-      const botMentioned = isGroup ? isMentioned(message, client.user?.id) : false
+      const botMentioned = isGroup ? await isMentioned(message, client.user?.id) : false
 
       if (isGroup) {
         // Is it an official bot group?
@@ -341,7 +349,7 @@ const connectToWhatsApp = async () => {
         logAction(message, jid, group, commandName)
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
-        const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+        const captions = source ? await extractCaptionsFromBodyOrCaption(source) : undefined
 
         await makeSticker(message, {
           captions,
@@ -375,7 +383,7 @@ const connectToWhatsApp = async () => {
           logAction(message, jid, group, commandName)
 
           const source = quotedMsg ? getBody(message) : getCaption(message)
-          const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+          const captions = source ? await extractCaptionsFromBodyOrCaption(source) : undefined
 
           await makeSticker(message, {
             captions,
@@ -396,7 +404,7 @@ const connectToWhatsApp = async () => {
         if (!isCmmMember) return
 
         const source = quotedMsg ? getBody(message) : getCaption(message)
-        const captions = source ? extractCaptionsFromBodyOrCaption(source) : undefined
+        const captions = source ? await extractCaptionsFromBodyOrCaption(source) : undefined
         if (source && captions && captions.length > 0) {
           // Send sticker with caption
           const isAnimated = content.stickerMessage?.isAnimated || content.videoMessage?.seconds
@@ -457,6 +465,9 @@ const stickerBot = async () => {
   drawHeader()
 
   await checkForUpdates()
+
+  await initializeDB()
+  await initializeEmojiMix()
 
   connectToWhatsApp()
 

@@ -61,7 +61,7 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    if (!isSenderBotMaster(sender)) return await sendMessage(
+    if (!await isSenderBotMaster(sender)) return await sendMessage(
       {
         text: spintax(
           '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, você não tem acesso a esse comando.'
@@ -132,7 +132,7 @@ export const command: StickerBotCommand = {
       // period description
       const period = permanent ? 'permanente' : `${months} ${months == 1 ? 'mês' : 'meses'}`
 
-      const currentMsg = `*[VIP]:* Admin @${getPhoneFromJid(sender)} setou o VIP de ${getPhoneFromJid(vip)} ` +
+      const currentMsg = `*[VIP]:* Admin @${await getPhoneFromJid(sender)} setou o VIP de ${await getPhoneFromJid(vip)} ` +
         `para *${period}*!`
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`

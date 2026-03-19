@@ -53,11 +53,11 @@ export const command: StickerBotCommand = {
     // TODO - improvement: Replace mentioned numbers with pushname?
     const mentionedJids = getMentionedJids(message)
     if (mentionedJids) {
-      mentionedJids.forEach(mentionedJid => {
-        const phone = getPhoneFromJid(mentionedJid)
+      for (const mentionedJid of mentionedJids) {
+        const phone = await getPhoneFromJid(mentionedJid)
         const mentionPattern = new RegExp('@' + phone, 'g')
         query = query.replace(mentionPattern, '')
-      })
+      }
     }
 
     // Remove extra spaces
