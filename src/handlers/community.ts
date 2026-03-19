@@ -1,8 +1,8 @@
-import { areJidsSameUser, GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
+import { GroupMetadata, WAMessage } from '@whiskeysockets/baileys'
 
 import { getClient, getCommunityAnnounceGroupJid } from '../bot'
 import { bot } from '../config'
-import { getAllGroupsFromCommunity, getCachedGroupMetadata, logAction, sendMessage } from '../utils/baileysHelper'
+import { getAllGroupsFromCommunity, getCachedGroupMetadata, isJidInParticipantList, logAction, sendMessage } from '../utils/baileysHelper'
 import { spintax } from '../utils/misc'
 import { getCache } from './cache'
 
@@ -33,7 +33,7 @@ export const getCommunityAnnounceGroup = async (communityJid: string) => {
 const isSenderCmmMember = async (sender: string) => {
   const annGroup = await getCommunityAnnounceGroup(bot.community!)
   if (!annGroup) return true
-  return annGroup.participants.find(p => areJidsSameUser(p.id, sender)) !== undefined
+  return await isJidInParticipantList(sender, annGroup.participants)
 }
 
 export const handleSenderParticipation = async (

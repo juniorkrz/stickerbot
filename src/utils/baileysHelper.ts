@@ -1,10 +1,10 @@
 import {
   AnyMessageContent,
-  areJidsSameUser,
   downloadMediaMessage,
   extractMessageContent,
   GroupMetadata,
   GroupMetadataParticipants,
+  GroupParticipant,
   isJidGroup,
   jidDecode,
   jidEncode,
@@ -116,6 +116,21 @@ export const getFullCachedGroupMetadata = async (
   return metadata
 }
 
+export const isJidInParticipantList = async (
+  jid: string | undefined,
+  participants: GroupParticipant[] | undefined,
+): Promise<boolean> => {
+  if (!jid || !participants) return false
+  const phone = await getPhoneFromJid(jid)
+  if (!phone) return false
+
+  for (const p of participants) {
+    const pPhone = await getPhoneFromJid(p.id)
+    if (phone === pPhone) return true
+  }
+  return false
+}
+
 export const isJidAdminOfGroup = async (
   jid: string | undefined,
   group: GroupMetadata | undefined,
@@ -136,6 +151,14 @@ export const isJidAdminOfGroup = async (
 export const amAdminOfGroup = async (group: GroupMetadata | undefined) => {
   const client = getClient()
   return await isJidAdminOfGroup(client.user?.id, group)
+}
+
+export const compareJids = async (jid1: string | undefined, jid2: string | undefined): Promise<boolean> => {
+  if (!jid1 || !jid2) return false
+  if (jid1 === jid2) return true
+  const phone1 = await getPhoneFromJid(jid1)
+  const phone2 = await getPhoneFromJid(jid2)
+  return phone1 === phone2
 }
 
 export const getBody = (message: WAMessage) => {
@@ -294,10 +317,19 @@ export const getMentionedJids = (message: WAMessage) => {
   return getMessage(message)?.contextInfo?.mentionedJid
 }
 
-export const isMentioned = (message: WAMessage, jid: string | undefined) => {
+export const isMentioned = async (message: WAMessage, jid: string | undefined) => {
   if (!jid) return false
   const mentionedJids = getMentionedJids(message)
-  return mentionedJids?.includes(jidNormalizedUser(jid))
+  if (!mentionedJids) return false
+
+  const phone = await getPhoneFromJid(jid)
+  if (!phone) return false
+
+  for (const mJid of mentionedJids) {
+    const mPhone = await getPhoneFromJid(mJid)
+    if (mPhone === phone) return true
+  }
+  return false
 }
 
 export const getQuotedMessage = (message: WAMessage) => {
@@ -457,9 +489,9 @@ export const getQuotedMessageAuthor = (message: WAMessage) => {
   if (quotedMsg) return getMessageAuthor(quotedMsg)
 }
 
-export const isSenderBotMaster = (jid: string) => {
+export const isSenderBotMaster = async (jid: string) => {
   const botMaster = bot.admins[0]
-  return areJidsSameUser(jid, jidEncode(botMaster, 's.whatsapp.net'))
+  return await compareJids(jid, jidEncode(botMaster, 's.whatsapp.net'))
 }
 
 export const getBodyWithoutCommand = (body: string, needsPrefix: boolean, alias: string) => {

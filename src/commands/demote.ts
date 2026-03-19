@@ -1,10 +1,10 @@
-import { areJidsSameUser, GroupMetadata, jidNormalizedUser } from '@whiskeysockets/baileys'
+import { GroupMetadata, jidNormalizedUser } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import { getMentionedJids, react, sendMessage } from '../utils/baileysHelper'
+import { compareJids, getMentionedJids, isJidInParticipantList, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { emojis } from '../utils/emojis'
 import { capitalize, spintax } from '../utils/misc'
@@ -66,11 +66,11 @@ export const command: StickerBotCommand = {
     const clientJid = jidNormalizedUser(client.user?.id)
     for (const mentionedJid of mentionedJids) {
       // Is the user an member of this group?
-      const isMember = group.participants.find(p => areJidsSameUser(p.id, mentionedJid))
+      const isMember = await isJidInParticipantList(mentionedJid, group.participants)
       // Is the user being kicked the bot?
-      const isMe = areJidsSameUser(mentionedJid, clientJid)
+      const isMe = await compareJids(mentionedJid, clientJid)
       // Is the user to be kicked the sender himself?
-      const hisSelf = areJidsSameUser(mentionedJid, sender)
+      const hisSelf = await compareJids(mentionedJid, sender)
 
       if (isMe || hisSelf) {
         return await sendMessage(

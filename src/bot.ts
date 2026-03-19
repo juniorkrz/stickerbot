@@ -303,7 +303,7 @@ const connectToWhatsApp = async () => {
       }
 
       // Was the bot mentioned?
-      const botMentioned = isGroup ? isMentioned(message, client.user?.id) : false
+      const botMentioned = isGroup ? await isMentioned(message, client.user?.id) : false
 
       if (isGroup) {
         // Is it an official bot group?
