@@ -10,16 +10,25 @@ Follow these guidelines strictly to ensure code quality, compatibility, and stab
 
 ## Baileys v7 Specifics (`@whiskeysockets/baileys` v7.0.0-rc.9)
 1. **LID (Local Identifier) System**: WhatsApp has moved to a LID system rather than pure phone numbers. 
-   - When extracting phone numbers from a WhatsApp user JID, use the project's helper function `getPhoneFromJid(jid)`. Do not write raw regex matchers for this unless necessary.
+   - **DO NOT** use `areJidsSameUser` from Baileys. It only compares internal strings and fails when comparing a PN-JID with an LID.
+   - Use the project's robust helpers in `src/utils/baileysHelper.ts`:
+     - `compareJids(jid1, jid2)`: Async. Safely compares two JIDs/LIDs using phone number resolution.
+     - `getPhoneFromJid(jid)`: Async. Resolves proper phone strings (digits only), avoiding Baileys v7 LID/DDI formatting bugs.
+     - `isJidInParticipantList(jid, participants)`: Async. Checks if a user is in a group member list.
+     - `isJidAdminOfGroup(jid, group)`: Async. Checks if a specific user is an admin.
+     - `amAdminOfGroup(group)`: Async. Checks if the bot is an admin.
 2. **Messages**: 
    - The primary message interface object is now `WAMessage`. Do not use the deprecated `proto.WebMessageInfo` for command processing functions.
    - Use `WAMessageExtended` defined in `src/types/Message.ts` when handling internal commands, as it includes the extra `messageLocalTimestamp`.
+   - **Bot Mention**: When checking if the bot was mentioned, always `await isMentioned(message, client.user?.id)`.
 3. **Store & QR**:
    - `makeInMemoryStore` was removed from Baileys v7. We implemented it in `src/utils/store.ts` via `SimpleStore` class to keep backwards compatibility.
    - `printQRInTerminal` is deprecated. We use `qrcode-terminal` in the `connection.update` event.
 4. **Auth State & Connections**:
    - Do NOT try to change the session saving mechanism unless asked. It properly uses `useMultiFileAuthState`. 
    - `fetchLatestBaileysVersion` is injected into `makeWASocket({ version })` to prevent WhatsApp from rejecting connection loops. Do not overwrite this.
+5. **Admin & Sender Checks**:
+   - Always `await` the admin check variables (`isGroupAdmin`, `amAdmin`, etc.) in `bot.ts` as they are now asynchronous to handle LID resolutions.
 
 ## Git Workflow & Commits
 We use the Conventional Commits specification. All your PRs or suggested Git commits must follow this pattern:

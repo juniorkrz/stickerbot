@@ -92,7 +92,11 @@ Use the existing helper functions in `src/utils/baileysHelper.ts` instead of rei
 - `react(message, emojiString)`: Adds a reaction directly to the sender's message.
 - `getMentionedJids(message)`: Extracts mentioned tags for commands that target others.
 - `getQuotedMessage(message)`: Returns the message that the user is quoting/replying to.
-- `getPhoneFromJid(jid)`: Resolves proper phone strings, avoiding Baileys v7 LID/DDI formatting bugs.
+- `getPhoneFromJid(jid)`: Async. Resolves proper phone strings, avoiding Baileys v7 LID/DDI formatting bugs.
+- `compareJids(jid1, jid2)`: Async. Robustly compares two users, regardless of LID vs JID status.
+- `isJidInParticipantList(jid, participants)`: Async. Checks membership safely.
+- `isJidAdminOfGroup(jid, group)`: Async. Checks if a user is admin safely.
+- `amAdminOfGroup(group)`: Async. Checks if the bot is admin safely.
 
 ## 4. Error Handling
 - Do not let the bot crash on unexpected user input.
