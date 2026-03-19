@@ -116,12 +116,26 @@ export const getFullCachedGroupMetadata = async (
   return metadata
 }
 
-export const amAdminOfGroup = (group: GroupMetadata | undefined) => {
+export const isJidAdminOfGroup = async (
+  jid: string | undefined,
+  group: GroupMetadata | undefined,
+): Promise<boolean> => {
+  if (!jid || !group) return false
+  const phone = await getPhoneFromJid(jid)
+  if (!phone) return false
+
+  for (const p of group.participants) {
+    if (p.admin?.endsWith('admin')) {
+      const pPhone = await getPhoneFromJid(p.id)
+      if (pPhone === phone) return true
+    }
+  }
+  return false
+}
+
+export const amAdminOfGroup = async (group: GroupMetadata | undefined) => {
   const client = getClient()
-  return group ? group.participants
-    .find((p) => areJidsSameUser(p.id, client.user?.id))
-    ?.admin?.endsWith('admin') !== undefined
-    : false
+  return await isJidAdminOfGroup(client.user?.id, group)
 }
 
 export const getBody = (message: WAMessage) => {
@@ -416,7 +430,7 @@ export const checkBotAdminStatus = async () => {
 
   let logs = ''
   for (const group of groups) {
-    const amAdmin = amAdminOfGroup(group)
+    const amAdmin = await amAdminOfGroup(group)
     if (!amAdmin) {
       const log = `*[MOD]* ${bot.name} não é um admin do ${group.subject} (${group.id})`
       logger.warn(log.replaceAll('*', ''))

@@ -1,6 +1,5 @@
 import { Boom } from '@hapi/boom'
 import makeWASocket, {
-  areJidsSameUser,
   delay,
   DisconnectReason,
   extractMessageContent,
@@ -33,6 +32,7 @@ import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
+  isJidAdminOfGroup,
   checkBotAdminStatus,
   deleteMessage,
   extractCaptionsFromBodyOrCaption,
@@ -248,13 +248,9 @@ const connectToWhatsApp = async () => {
       // Is the sender an bot admin?
       const isBotAdmin = phone ? bot.admins.includes(phone) : false
       // Is the sender an admin of the group?
-      const isGroupAdmin = group
-        ? group.participants
-          .find((p) => areJidsSameUser(p.id, sender))
-          ?.admin?.endsWith('admin') !== undefined
-        : false
+      const isGroupAdmin = await isJidAdminOfGroup(sender, group)
       // Is the Bot an admin of the group?
-      const amAdmin = amAdminOfGroup(group)
+      const amAdmin = await amAdminOfGroup(group)
       // Is sender banned?
       const isBanned = phone
         ? await isUserBanned(phone)
