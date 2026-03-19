@@ -330,71 +330,75 @@ export const setupBot = async () => {
   logger.info(`${colors.green}[WA]${colors.reset} Setting up...`)
   const client = getClient()
 
-  const status = await client.fetchStatus(jidNormalizedUser(client?.user?.id))
-  const botStatus = `${bot.status} | v${getProjectLocalVersion()}`
-  const statusMessage = status?.[0]?.status || null
-  if (statusMessage != botStatus) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile status`)
-    await client.updateProfileStatus(botStatus)
-  }
+  try {
+    const status = await client.fetchStatus(jidNormalizedUser(client?.user?.id))
+    const botStatus = `${bot.status} | v${getProjectLocalVersion()}`
+    const statusMessage = status?.[0]?.status || null
+    if (statusMessage != botStatus) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile status`)
+      await client.updateProfileStatus(botStatus)
+    }
 
-  const privacySettings = await client.fetchPrivacySettings(true)
+    const privacySettings = await client.fetchPrivacySettings(true)
 
-  // Profile Name
-  if (client.user?.name != bot.name) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile name`)
-    await client.updateProfileName(bot.name)
-  }
+    // Profile Name
+    if (client.user?.name != bot.name) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile name`)
+      await client.updateProfileName(bot.name)
+    }
 
-  // Last seen Privacy
-  if (privacySettings.last != bot.lastSeenPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting last seen privacy`)
-    await client.updateLastSeenPrivacy(bot.lastSeenPrivacy)
-  }
+    // Last seen Privacy
+    if (privacySettings.last != bot.lastSeenPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting last seen privacy`)
+      await client.updateLastSeenPrivacy(bot.lastSeenPrivacy)
+    }
 
-  // Online Privacy
-  if (privacySettings.online != bot.onlinePrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting online privacy`)
-    await client.updateOnlinePrivacy(bot.onlinePrivacy)
-  }
+    // Online Privacy
+    if (privacySettings.online != bot.onlinePrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting online privacy`)
+      await client.updateOnlinePrivacy(bot.onlinePrivacy)
+    }
 
-  // Profile Pic Privacy
-  if (privacySettings.profile != bot.profilePicPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic privacy`)
-    await client.updateProfilePicturePrivacy(bot.profilePicPrivacy)
-  }
+    // Profile Pic Privacy
+    if (privacySettings.profile != bot.profilePicPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic privacy`)
+      await client.updateProfilePicturePrivacy(bot.profilePicPrivacy)
+    }
 
-  // Profile Pic
-  if (bot.setProfilePic) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic`)
-    const imgDir = path.resolve(__dirname, '../../src/img/profilePic')
-    const randomImage = getRandomFile(imgDir)
-    const botJid = client.user?.id
-    if (botJid) await client.updateProfilePicture(botJid, { url: randomImage })
-  }
+    // Profile Pic
+    if (bot.setProfilePic) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting profile pic`)
+      const imgDir = path.resolve(__dirname, '../../src/img/profilePic')
+      const randomImage = getRandomFile(imgDir)
+      const botJid = client.user?.id
+      if (botJid) await client.updateProfilePicture(botJid, { url: randomImage })
+    }
 
-  // Status Privacy
-  if (privacySettings.status != bot.statusPrivacyValue) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting status privacy value`)
-    await client.updateStatusPrivacy(bot.statusPrivacyValue)
-  }
+    // Status Privacy
+    if (privacySettings.status != bot.statusPrivacyValue) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting status privacy value`)
+      await client.updateStatusPrivacy(bot.statusPrivacyValue)
+    }
 
-  // Read Receipts Privacy
-  if (privacySettings.readreceipts != bot.readReceiptsPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting read receipts privacy`)
-    await client.updateReadReceiptsPrivacy(bot.readReceiptsPrivacy)
-  }
+    // Read Receipts Privacy
+    if (privacySettings.readreceipts != bot.readReceiptsPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting read receipts privacy`)
+      await client.updateReadReceiptsPrivacy(bot.readReceiptsPrivacy)
+    }
 
-  // Groups Add Privacy
-  if (privacySettings.groupadd != bot.groupsAddPrivacy) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting groups add privacy`)
-    await client.updateGroupsAddPrivacy(bot.groupsAddPrivacy)
-  }
+    // Groups Add Privacy
+    if (privacySettings.groupadd != bot.groupsAddPrivacy) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting groups add privacy`)
+      await client.updateGroupsAddPrivacy(bot.groupsAddPrivacy)
+    }
 
-  // Default Disappearing Mode
-  if (WA_DEFAULT_EPHEMERAL != bot.defaultDisappearingMode) {
-    logger.info(`${colors.green}[WA]${colors.reset} Setting default disappearing mode`)
-    await client.updateDefaultDisappearingMode(bot.defaultDisappearingMode)
+    // Default Disappearing Mode
+    if (WA_DEFAULT_EPHEMERAL != bot.defaultDisappearingMode) {
+      logger.info(`${colors.green}[WA]${colors.reset} Setting default disappearing mode`)
+      await client.updateDefaultDisappearingMode(bot.defaultDisappearingMode)
+    }
+  } catch (error) {
+    logger.error(`${colors.red}[WA]${colors.reset} Error during setup (probably keys not ready yet): ${error}`)
   }
 }
 
