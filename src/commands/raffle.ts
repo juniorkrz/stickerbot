@@ -67,7 +67,6 @@ export const command: StickerBotCommand = {
       `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' +
         raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`
 
-        console.log(phrase)
     return await sendMessage(
       {
         text: spintax(phrase),
