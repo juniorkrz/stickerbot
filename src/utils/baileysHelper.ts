@@ -291,14 +291,33 @@ export const logAction = (
 
 export const extractCaptionsFromBodyOrCaption = async (source: string) => {
   const client = getClient()
-  const botPhone = await getPhoneFromJid(client.user?.id)
-  const botMention = '@' + botPhone
-  const caption = source.replaceAll(botMention, '')// Removes the bot mention
+  const botId = client.user?.id
+  const botLid = client.user?.lid
+  const botPhone = await getPhoneFromJid(botId)
+
+  let cleanedSource = source
+
+  // Potential mentions to remove (based on JID, LID and Phone)
+  const mentionsToRemove = new Set<string>()
+  if (botPhone) mentionsToRemove.add('@' + botPhone)
+
+  const idUser = botId ? jidDecode(botId)?.user : undefined
+  if (idUser) mentionsToRemove.add('@' + idUser)
+
+  const lidUser = botLid ? jidDecode(botLid)?.user : undefined
+  if (lidUser) mentionsToRemove.add('@' + lidUser)
+
+  for (const mention of mentionsToRemove) {
+    cleanedSource = cleanedSource.replaceAll(mention, '')
+  }
+
+  const caption = cleanedSource
     .replaceAll('\n', '')
-    .split(';')// Line splitter. ex: `Top text;Bottom text`
+    .split(';') // Line splitter. ex: `Top text;Bottom text`
     .map(phrase => phrase.trim())
-    .filter(phrase => phrase.length > 0)// Removes empty strings
+    .filter(phrase => phrase.length > 0) // Removes empty strings
     .slice(0, 2)
+
   return caption
 }
 
