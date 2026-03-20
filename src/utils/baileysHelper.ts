@@ -377,11 +377,20 @@ export const sendLogToAdmins = async (text: string, mentions: string[] | undefin
   if (!bot.logsGroup) return
 
   const client = getClient()
+  const finalMentions = mentions ? [...mentions] : []
+
+  if (mentions) {
+    for (const mention of mentions) {
+      const phone = await getPhoneFromJid(mention)
+      if (phone) finalMentions.push(jidEncode(phone, 's.whatsapp.net'))
+    }
+  }
+
   return await client.sendMessage(
     bot.logsGroup,
     {
       text: text,
-      mentions: mentions
+      mentions: Array.from(new Set(finalMentions))
     },
     getMessageOptions(undefined, false)
   )
