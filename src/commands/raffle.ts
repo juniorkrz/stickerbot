@@ -1,4 +1,4 @@
-import { GroupMetadata, GroupParticipant, jidNormalizedUser } from '@whiskeysockets/baileys'
+import { GroupMetadata, GroupParticipant, jidEncode, jidNormalizedUser } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getClient } from '../bot'
@@ -58,15 +58,19 @@ export const command: StickerBotCommand = {
     )
 
     const winner = getRandomItemFromArray(participants)
+    const winnerPhone = await getPhoneFromJid(winner.id)
+    const mentions = [winner.id]
+    if (winnerPhone) mentions.push(jidEncode(winnerPhone, 's.whatsapp.net'))
+
     const raffleName = getBodyWithoutCommand(body, command.needsPrefix, alias)
-    const phrase = `@${await getPhoneFromJid(winner.id)} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
+    const phrase = `@${winnerPhone} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
       `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' +
         raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`
 
     return await sendMessage(
       {
         text: spintax(phrase),
-        mentions: [winner.id]
+        mentions: Array.from(new Set(mentions))
       },
       message
     )

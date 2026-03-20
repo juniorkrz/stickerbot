@@ -133,8 +133,8 @@ export const getTempFilePath = (filename: string): string => {
 
 export const getRandomFile = (dir: string): string => {
   const files = fs.readdirSync(dir)
-  const randomIndex = Math.floor(Math.random() * files.length)
-  return path.join(dir, files[randomIndex])
+  const file = getRandomItemFromArray(files)
+  return path.join(dir, file)
 }
 
 export const getRandomInt = (min: number, max: number): number => {
