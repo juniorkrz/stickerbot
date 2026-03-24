@@ -17,7 +17,7 @@ const commandName = capitalize(path.basename(__filename, extension))
 // Command settings:
 export const command: StickerBotCommand = {
   name: commandName,
-  aliases: ['pix', 'donate'],
+  aliases: ['pix'],
   desc: `Mostra a chave Pix para colaborar com o ${bot.name}.`,
   example: undefined,
   needsPrefix: true,
@@ -53,8 +53,9 @@ export const command: StickerBotCommand = {
       'e vai nos ajudar a {cobrir|manter} os {custos|gastos} de desenvolvimento e manutenção.\n\n' +
       `{Utilize|Use} a chave pix: ${bot.donationLink}|🤖 *{Colabore com qualquer valor! 💜|` +
       `Envie o que seu 💜 mandar!}*\n\nChave Pix: ${bot.donationLink}} (e-mail)\n\n ` +
-      '⚠ *Importante:* para ser adicionado aos VIPs, envie seu DDD + número na descrição do pix.\n\n' +
-      '_Valores a partir de R$2,00 serão adicionados aos VIPs por *30 dias*._\n\n' +
+      '⚠ *Importante:* para ser adicionado aos VIPs manualmente, envie seu DDD + número na descrição do pix.\n\n' +
+      `💡 *Dica:* Você também pode usar o comando *${chosenPrefix}doar* para gerar um PIX e ter seu VIP liberado automaticamente!\n\n` +
+      `_Valores a partir de R$${bot.vipMonthlyPrice.toFixed(2).replace('.', ',')} serão adicionados aos VIPs por *30 dias*._\n\n` +
       `_Confira os benefícios VIPs digitando o comando *${chosenPrefix}vantagens*._`
 
     return await sendMessage(
