@@ -28,7 +28,7 @@ export const command: StickerBotCommand = {
   desc: 'Baixa música do vídeo no YouTube.',
   example: 'nome da música ou link do vídeo no YouTube',
   needsPrefix: true,
-  inMaintenance: false,
+  inMaintenance: true,
   runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,
