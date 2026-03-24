@@ -2,6 +2,7 @@ import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { bot } from '../config'
+import { getClient } from '../bot'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
@@ -47,7 +48,6 @@ export const command: StickerBotCommand = {
     if (!check) return
 
     const chosenPrefix = body.trim()[0]
-
     const response = `{{Apoie|Ajude|Colabore com} o *${bot.name}* 💜\n\n` +
       '{Qualquer valor é super bem-vindo|Qualquer quantia é super bem-vinda} ' +
       'e vai nos ajudar a {cobrir|manter} os {custos|gastos} de desenvolvimento e manutenção.\n\n' +
@@ -58,9 +58,46 @@ export const command: StickerBotCommand = {
       `_Valores a partir de R$${bot.vipMonthlyPrice.toFixed(2).replace('.', ',')} serão adicionados aos VIPs por *30 dias*._\n\n` +
       `_Confira os benefícios VIPs digitando o comando *${chosenPrefix}vantagens*._`
 
-    return await sendMessage(
-      { text: spintax(response) },
-      message
-    )
+    const client = getClient()
+    const interactiveMessage = {
+      interactiveMessage: {
+        body: { text: spintax(response) },
+        footer: { text: `${bot.name} VIP System` },
+        nativeFlowMessage: {
+          buttons: [
+            {
+              name: 'cta_copy',
+              buttonParamsJson: JSON.stringify({
+                display_text: 'Copiar Chave PIX (E-mail)',
+                copy_code: bot.donationLink
+              })
+            }
+          ]
+        }
+      }
+    }
+
+    await client.relayMessage(jid, interactiveMessage, {
+      messageId: message.key.id + 'PIX',
+      additionalNodes: [
+        {
+          tag: 'biz',
+          attrs: {},
+          content: [
+            {
+              tag: 'interactive',
+              attrs: { type: 'native_flow', v: '1' },
+              content: [
+                {
+                  tag: 'native_flow',
+                  attrs: { v: '9', name: 'mixed' }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    })
+    return undefined
   }
 }

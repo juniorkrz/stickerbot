@@ -1,6 +1,7 @@
 import path from 'path'
-import { GroupMetadata } from '@whiskeysockets/baileys'
+import { GroupMetadata, prepareWAMessageMedia, proto } from '@whiskeysockets/baileys'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
+import { getClient } from '../bot'
 
 import { bot } from '../config'
 import { StickerBotCommand } from '../types/Command'
@@ -109,17 +110,65 @@ export const command: StickerBotCommand = {
         durationText = `Isso adicionará uma fração de mês de VIP à sua conta!`
       }
 
-      // Send the image with caption
-      await sendMessage({
-        image: Buffer.from(qrCodeBase64, 'base64'),
-        caption: `💜 *StickerBot VIP - Doação*\n\n` +
-          `Valor: R$ ${amount.toFixed(2)}\n\nLeia o QR Code acima no app do seu banco ou utilize a chave PIX Copia e Cola abaixo.\n\n${durationText}\n\nO bot confirmará automaticamente quando o pagamento for aprovado!`
-      }, message)
+      // Send the interactive message with Copy Button
+      const client = getClient()
+      const img = await prepareWAMessageMedia(
+        { image: Buffer.from(qrCodeBase64, 'base64') },
+        { upload: client.waUploadToServer }
+      )
 
-      // Send the Copia e Cola in a separate message for easy copying
-      return await sendMessage({
-        text: `${qrCodeText}`
-      }, message)
+      const interactiveMessage = {
+        interactiveMessage: {
+          header: { 
+            hasMediaAttachment: true, 
+            imageMessage: img.imageMessage,
+            title: 'StickerBot VIP',
+            subtitle: 'Pagamento via PIX'
+          },
+          body: { 
+            text: `💜 *StickerBot VIP - Doação*\n\n` +
+              `*Valor:* R$ ${amount.toFixed(2)}\n\n` +
+              `Leia o QR Code acima no app do seu banco ou utilize o botão copiar abaixo.\n\n` +
+              `${durationText}\n\n` +
+              `O bot confirmará automaticamente quando o pagamento for aprovado!` 
+          },
+          footer: { text: `${bot.name} VIP System` },
+          nativeFlowMessage: {
+            buttons: [
+              {
+                name: 'cta_copy',
+                buttonParamsJson: JSON.stringify({
+                  display_text: 'Copiar Chave PIX',
+                  copy_code: qrCodeText
+                })
+              }
+            ]
+          }
+        }
+      }
+
+      await client.relayMessage(jid, interactiveMessage, {
+        messageId: message.key.id + 'MP',
+        additionalNodes: [
+          {
+            tag: 'biz',
+            attrs: {},
+            content: [
+              {
+                tag: 'interactive',
+                attrs: { type: 'native_flow', v: '1' },
+                content: [
+                  {
+                    tag: 'native_flow',
+                    attrs: { v: '9', name: 'mixed' }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      })
+      return undefined
 
     } catch (error) {
       logger.error(`Error in ${commandName}: ${error}`)
