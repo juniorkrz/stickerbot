@@ -62,7 +62,10 @@ export const bot = {
   ) || [],
   groups: process.env.SB_GROUPS?.replaceAll(' ', '').split(
     ';'
-  ) || []// TODO - Get from community?
+  ) || [],// TODO - Get from community?
+  mpAccessToken: process.env.MERCADOPAGO_ACCESS_TOKEN?.replace(/"/g, '') || '',
+  mpWebhookSecret: process.env.MERCADOPAGO_WEBHOOK_SECRET?.replace(/"/g, '') || '',
+  vipMonthlyPrice: parseFloat(process.env.VIP_MONTHLY_PRICE?.replace(/"/g, '') || '10.00')
 }
 
 // External APIs
