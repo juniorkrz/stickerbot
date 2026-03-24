@@ -1,4 +1,5 @@
 import { GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
+import moment from 'moment'
 import path from 'path'
 
 import { getClient } from '../bot'
@@ -127,7 +128,7 @@ export const command: StickerBotCommand = {
 
     let logs = ''
     for (const vip of vips) {
-      await addVip(vip, months, permanent)
+      const newExpirationDate = await addVip(vip, months, permanent)
 
       // period description
       const period = permanent ? 'permanente' : `${months} ${months == 1 ? 'mês' : 'meses'}`
@@ -137,13 +138,9 @@ export const command: StickerBotCommand = {
       logger.warn(currentMsg.replaceAll('*', ''))
       logs += `${currentMsg}\n`
 
-      let expiration
-      if (permanent) {
-        expiration = 'Nunca'
-      } else {
-        const expiresInDateTime = new Date()
-        expiresInDateTime.setMonth(expiresInDateTime.getMonth() + months)
-        expiration = expiresInDateTime.toLocaleString()
+      let expiration = 'Nunca'
+      if (!permanent && newExpirationDate) {
+        expiration = moment(newExpirationDate).format('DD/MM/YY [às] HH:mm:ss')
       }
 
       await client.sendMessage(
