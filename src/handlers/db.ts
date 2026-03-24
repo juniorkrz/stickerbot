@@ -81,13 +81,26 @@ export const addVip = async (
   permanent: boolean = false
 ) => {
   const now = new Date()
-  const expires = new Date(now.getTime() + (months * 30 * 24 * 60 * 60 * 1000))
+  let baseDate = now
+
+  // Check if already VIP
+  const existingVip = await db.get('SELECT expires, permanent FROM Vips WHERE jid = ?', jid)
+  if (existingVip && !existingVip.permanent) {
+    const currentExpires = new Date(existingVip.expires)
+    if (currentExpires > now) {
+      baseDate = currentExpires
+    }
+  }
+
+  const expires = new Date(baseDate.getTime() + (months * 30 * 24 * 60 * 60 * 1000))
   await db.run(
     'INSERT OR REPLACE INTO Vips (jid, expires, permanent) VALUES (?, ?, ?)',
     jid,
     expires.toISOString(),
     permanent ? 1 : 0
   )
+  
+  return expires
 }
 
 export const removeVip = async (jid: string) => {
