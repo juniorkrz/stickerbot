@@ -1,4 +1,5 @@
 import { Boom } from '@hapi/boom'
+import crypto from 'crypto'
 import makeWASocket, {
   delay,
   DisconnectReason,
@@ -10,6 +11,7 @@ import makeWASocket, {
   WACallUpdateType
 } from '@whiskeysockets/baileys'
 import express from 'express'
+import { MercadoPagoConfig, Payment } from 'mercadopago'
 import moment from 'moment'
 import Pino from 'pino'
 import { imageSync } from 'qr-image'
@@ -19,7 +21,7 @@ import { makeInMemoryStore } from './utils/store'
 
 import { baileys, bot } from './config'
 import { handleSenderParticipation } from './handlers/community'
-import { getAllBannedUsers, getVips, initializeDB, isUserBanned, senderIsVip } from './handlers/db'
+import { addVip, getAllBannedUsers, getVips, initializeDB, isUserBanned, senderIsVip } from './handlers/db'
 import { initializeEmojiMix } from './handlers/emojiMix'
 import { getLogger } from './handlers/logger'
 import { handleReactionMessage } from './handlers/reaction'
@@ -245,6 +247,13 @@ const connectToWhatsApp = async () => {
         : undefined
       // Get the sender phone
       const phone = await getPhoneFromJid(sender)
+
+      // Response only to bot master
+      if (dev && (bot.admins.length > 0 && phone !== bot.admins[0])) {
+        logger.info(`[MASTER ONLY]: Skipping message from ${phone}`)
+        continue
+      }
+
       // Is the sender an bot admin?
       const isBotAdmin = phone ? bot.admins.includes(phone) : false
       // Is the sender an admin of the group?
@@ -459,6 +468,75 @@ app.post('/api/webhook', (req, res) => {
     status: 'ok',
     data: req.body
   })
+})
+
+const mpConfig = new MercadoPagoConfig({ accessToken: bot.mpAccessToken })
+const mpPayment = new Payment(mpConfig)
+
+app.post('/api/mercadopago-webhook', async (req, res) => {
+  try {
+    // If the secret is set, we must verify the signature
+    if (bot.mpWebhookSecret) {
+      const xSignature = req.headers['x-signature'] as string
+      const xRequestId = req.headers['x-request-id'] as string
+
+      if (!xSignature) {
+        logger.warn('[VIP] MP Webhook received without x-signature header')
+        return res.status(401).send('Unauthorized')
+      }
+
+      // Extract ts and v1 from x-signature: "ts=...,v1=..."
+      const parts = xSignature.split(',')
+      let ts = ''
+      let v1 = ''
+      for (const part of parts) {
+        const [key, value] = part.split('=')
+        if (key === 'ts') ts = value
+        if (key === 'v1') v1 = value
+      }
+
+      const id = req.query['data.id'] || req.query.id
+      // manifest: id:[id];request-id:[request-id];ts:[ts];
+      const manifest = `id:${id};request-id:${xRequestId};ts:${ts};`
+
+      const hmac = crypto.createHmac('sha256', bot.mpWebhookSecret)
+      hmac.update(manifest)
+      const digest = hmac.digest('hex')
+
+      if (digest !== v1) {
+        logger.error(`[VIP] MP Webhook signature mismatch for ID ${id}!`)
+        return res.status(401).send('Unauthorized')
+      }
+    }
+
+    const topic = req.query.topic || req.query.type
+    const id = req.query['data.id'] || req.query.id
+
+    if (topic === 'payment' && id) {
+      const paymentInfo = await mpPayment.get({ id: id as string })
+      if (paymentInfo.status === 'approved') {
+        const amount = paymentInfo.transaction_amount || 0
+        const jid = paymentInfo.external_reference
+
+        if (jid && amount > 0 && bot.vipMonthlyPrice > 0) {
+          const months = amount / bot.vipMonthlyPrice
+          await addVip(jid, months)
+
+          const client = getClient()
+          await client.sendMessage(jid, {
+            text: `🎉 *Pagamento Aprovado!*\n\nRecebemos sua doação de R$ ${amount.toFixed(2)}.\nForam adicionados *${months.toFixed(1)}* meses ao seu status VIP! Obrigado pelo apoio 💜`
+          })
+          
+          logger.info(`[VIP] Processed MP payment of R$ ${amount.toFixed(2)} for ${jid} (${months.toFixed(1)} months added)`)
+        }
+      }
+    }
+  } catch (error) {
+    logger.error(`Error processing MP Webhook: ${error}`)
+  }
+  
+  // MP requires a 2xx response quickly
+  res.status(200).send('ok')
 })
 
 const stickerBot = async () => {

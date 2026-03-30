@@ -24,7 +24,7 @@ export const command: StickerBotCommand = {
   desc: 'Mostra a imagem/vídeo/áudio mais uma vez.',
   example: undefined,
   needsPrefix: true,
-  inMaintenance: false,
+  inMaintenance: true,
   runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,

@@ -1,4 +1,5 @@
 import { GroupMetadata } from '@whiskeysockets/baileys'
+import moment from 'moment'
 import path from 'path'
 
 import { getClient } from '../bot'
@@ -80,9 +81,9 @@ export const command: StickerBotCommand = {
         const phone = await getPhoneFromJid(vip.jid)
         if (phone) {
           // convert vip.expires to datetime
-          const expires = new Date(vip.expires)
+          const expires = moment(vip.expires).format('DD/MM/YY [às] HH:mm:ss')
 
-          response += `\n${index + permanentVips.length + 1} - ${phone} - ${expires.toLocaleString()}`
+          response += `\n${index + permanentVips.length + 1} - ${phone} - ${expires}`
         }
       }
 
