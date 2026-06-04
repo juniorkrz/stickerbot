@@ -66,11 +66,43 @@ export const initializeDB = async () => {
       PRIMARY KEY (\`key\`)
     )
   `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`Lists\` (
+      \`id\` INT(11) NOT NULL AUTO_INCREMENT,
+      \`groupJid\` VARCHAR(255) NOT NULL,
+      \`title\` TEXT NOT NULL,
+      \`subtitle\` TEXT,
+      \`mainCap\` INT(11) NOT NULL,
+      \`gkLabel\` VARCHAR(255),
+      \`gkCap\` INT(11) NOT NULL DEFAULT 0,
+      \`status\` VARCHAR(20) NOT NULL DEFAULT 'open',
+      \`createdBy\` VARCHAR(255),
+      \`createdAt\` DATETIME NOT NULL,
+      \`updatedAt\` DATETIME NOT NULL,
+      PRIMARY KEY (\`id\`),
+      KEY \`group_status\` (\`groupJid\`, \`status\`)
+    )
+  `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`ListEntries\` (
+      \`id\` INT(11) NOT NULL AUTO_INCREMENT,
+      \`listId\` INT(11) NOT NULL,
+      \`section\` VARCHAR(10) NOT NULL,
+      \`name\` VARCHAR(255) NOT NULL,
+      \`jid\` VARCHAR(255),
+      \`addedBy\` VARCHAR(255),
+      \`present\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`createdAt\` DATETIME NOT NULL,
+      PRIMARY KEY (\`id\`),
+      KEY \`listId\` (\`listId\`)
+    )
+  `)
 
   // Idempotent column migrations for tables created before a column existed.
   // Uses information_schema so it works on both MySQL and MariaDB (no ADD COLUMN IF NOT EXISTS).
   await ensureColumn('Ads', 'sentCount', 'INT(11) NOT NULL DEFAULT 0')
   await ensureColumn('Ads', 'lastSentAt', 'DATETIME NULL')
+  await ensureColumn('ListEntries', 'present', 'TINYINT(1) NOT NULL DEFAULT 0')
 }
 
 /**

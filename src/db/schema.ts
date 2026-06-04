@@ -31,3 +31,30 @@ export const settings = mysqlTable('Settings', {
   key: varchar('key', { length: 191 }).primaryKey(),
   value: text('value').notNull(),
 })
+
+// Group lists (e.g. pelada): one active (status 'open') list per group.
+export const lists = mysqlTable('Lists', {
+  id: int('id').primaryKey().autoincrement(),
+  groupJid: varchar('groupJid', { length: 255 }).notNull(),
+  title: text('title').notNull(),
+  subtitle: text('subtitle'),
+  mainCap: int('mainCap').notNull(),
+  gkLabel: varchar('gkLabel', { length: 255 }),
+  gkCap: int('gkCap').default(0).notNull(),
+  status: varchar('status', { length: 20 }).default('open').notNull(),
+  createdBy: varchar('createdBy', { length: 255 }),
+  createdAt: datetime('createdAt').notNull(),
+  updatedAt: datetime('updatedAt').notNull(),
+})
+
+// Entries of a list. Render order = insertion order (id). Reserves = 'main' rows beyond mainCap.
+export const listEntries = mysqlTable('ListEntries', {
+  id: int('id').primaryKey().autoincrement(),
+  listId: int('listId').notNull(),
+  section: varchar('section', { length: 10 }).notNull(), // 'main' | 'gk'
+  name: varchar('name', { length: 255 }).notNull(),
+  jid: varchar('jid', { length: 255 }), // null = guest (added by someone)
+  addedBy: varchar('addedBy', { length: 255 }), // display name of who added a guest
+  present: tinyint('present').default(0).notNull(),
+  createdAt: datetime('createdAt').notNull(),
+})
