@@ -20,6 +20,7 @@ import qrcode from 'qrcode-terminal'
 import { makeInMemoryStore } from './utils/store'
 
 import { baileys, bot } from './config'
+import { loadAdsConfig } from './handlers/ads'
 import { handleSenderParticipation } from './handlers/community'
 import { addVip, getAllBannedUsers, getVips, initializeDB, isUserBanned, senderIsVip } from './handlers/db'
 import { initializeEmojiMix } from './handlers/emojiMix'
@@ -545,6 +546,7 @@ const stickerBot = async () => {
   await checkForUpdates()
 
   await initializeDB()
+  await loadAdsConfig()
   await initializeEmojiMix()
 
   connectToWhatsApp()
