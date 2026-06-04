@@ -6,6 +6,7 @@ import { externalEndpoints, stickerMeta } from '../config'
 import { getMediaMessage, react, sendMessage } from '../utils/baileysHelper'
 import { emojis } from '../utils/emojis'
 import { getExtensionFromMimetype, getRandomItemFromArray, spintax } from '../utils/misc'
+import { maybeSendAd } from './ads'
 import { deleteUploadedFile, uploadFile } from './fileUploader'
 import { getLogger } from './logger'
 import { getCustomMemeUrl } from './memegen'
@@ -114,6 +115,9 @@ export const makeSticker = async (
 
     // react success
     if (needReact) await react(message, getRandomItemFromArray(emojis.success))
+
+    // maybe send an ad to the same chat (fire-and-forget, never breaks the sticker)
+    void maybeSendAd(message.key.remoteJid)
 
     // return result
     return result
