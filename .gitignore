@@ -131,3 +131,6 @@ dist
 
 # Docker
 docker-compose.yml
+
+# Claude Code — local settings/permissions (machine-specific, not shared)
+.claude/settings.local.json
