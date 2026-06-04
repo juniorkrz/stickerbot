@@ -70,7 +70,10 @@ export const bot = {
   dbUser: process.env.DB_USER || 'root',
   dbPassword: process.env.DB_PASSWORD || '',
   dbName: process.env.DB_NAME || 'stickerbot',
-  dbPort: parseInt(process.env.DB_PORT || '3306')
+  dbPort: parseInt(process.env.DB_PORT || '3306'),
+  adsSystem: JSON.parse(process.env.SB_ADS_SYSTEM || 'false') as boolean,
+  adsEvery: parseInt(process.env.SB_ADS_EVERY || '10'),
+  adsChatCooldown: parseInt(process.env.SB_ADS_CHAT_COOLDOWN || '1800')
 }
 
 // External APIs

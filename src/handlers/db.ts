@@ -3,7 +3,7 @@ import { drizzle } from 'drizzle-orm/mysql2'
 import mysql from 'mysql2/promise'
 
 import { bot } from '../config'
-import { banned, usage, vips } from '../db/schema'
+import { banned, settings, usage, vips } from '../db/schema'
 import { getLogger } from './logger'
 
 const logger = getLogger()
@@ -45,6 +45,49 @@ export const initializeDB = async () => {
       \`user\` VARCHAR(191) PRIMARY KEY
     )
   `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`Ads\` (
+      \`id\` INT(11) NOT NULL AUTO_INCREMENT,
+      \`content\` TEXT NOT NULL,
+      \`imageBase64\` LONGTEXT,
+      \`active\` TINYINT(1) NOT NULL DEFAULT 1,
+      \`sentCount\` INT(11) NOT NULL DEFAULT 0,
+      \`lastSentAt\` DATETIME NULL,
+      \`createdAt\` DATETIME NOT NULL,
+      \`updatedAt\` DATETIME NOT NULL,
+      PRIMARY KEY (\`id\`)
+    )
+  `)
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`Settings\` (
+      \`key\` VARCHAR(191) NOT NULL,
+      \`value\` TEXT NOT NULL,
+      PRIMARY KEY (\`key\`)
+    )
+  `)
+
+  // Idempotent column migrations for tables created before a column existed.
+  // Uses information_schema so it works on both MySQL and MariaDB (no ADD COLUMN IF NOT EXISTS).
+  await ensureColumn('Ads', 'sentCount', 'INT(11) NOT NULL DEFAULT 0')
+  await ensureColumn('Ads', 'lastSentAt', 'DATETIME NULL')
+}
+
+/**
+ * Adds a column to a table only if it does not already exist.
+ * Cross-compatible with MySQL and MariaDB (avoids ADD COLUMN IF NOT EXISTS).
+ */
+const ensureColumn = async (table: string, column: string, definition: string): Promise<void> => {
+  const [rows] = await pool.query(
+    `SELECT COUNT(0) AS n FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+    [bot.dbName, table, column]
+  )
+  // @ts-ignore
+  const exists = Number(rows[0].n) > 0
+  if (exists) return
+  await pool.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`)
+  logger.info(`[DB] Migration: added column ${column} to ${table}`)
 }
 
 export const getCount = async (type: string) => {
@@ -57,6 +100,17 @@ export const addCount = async (type: string) => {
     .values({ type,
       count: 1 })
     .onDuplicateKeyUpdate({ set: { count: sql`${usage.count} + 1` } })
+}
+
+export const getSetting = async (key: string): Promise<string | null> => {
+  const rows = await db.select().from(settings).where(eq(settings.key, key)).limit(1)
+  return rows.length > 0 ? rows[0].value : null
+}
+
+export const setSetting = async (key: string, value: string): Promise<void> => {
+  await db.insert(settings)
+    .values({ key, value })
+    .onDuplicateKeyUpdate({ set: { value } })
 }
 
 export const getVips = async (getPermanent: boolean = true) => {
@@ -80,7 +134,7 @@ export const senderIsVip = async (sender: string): Promise<boolean> => {
     const result = await db.select({ expires: vips.expires })
       .from(vips)
       .where(sql`${vips.jid} = ${sender} AND (${vips.expires} >= CURRENT_TIMESTAMP OR ${vips.permanent} = 1)`)
-
+    
     return result.length > 0
   } catch (error) {
     logger.error(`Error checking if jid is a vip: ${error}`)
@@ -108,7 +162,7 @@ export const addVip = async (
   }
 
   const expires = new Date(baseDate.getTime() + (months * 30 * 24 * 60 * 60 * 1000))
-
+  
   await db.insert(vips)
     .values({
       jid,
