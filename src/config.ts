@@ -65,7 +65,12 @@ export const bot = {
   ) || [],// TODO - Get from community?
   mpAccessToken: process.env.MERCADOPAGO_ACCESS_TOKEN?.replace(/"/g, '') || '',
   mpWebhookSecret: process.env.MERCADOPAGO_WEBHOOK_SECRET?.replace(/"/g, '') || '',
-  vipMonthlyPrice: parseFloat(process.env.VIP_MONTHLY_PRICE?.replace(/"/g, '') || '10.00')
+  vipMonthlyPrice: parseFloat(process.env.VIP_MONTHLY_PRICE?.replace(/"/g, '') || '10.00'),
+  dbHost: process.env.DB_HOST || 'localhost',
+  dbUser: process.env.DB_USER || 'root',
+  dbPassword: process.env.DB_PASSWORD || '',
+  dbName: process.env.DB_NAME || 'stickerbot',
+  dbPort: parseInt(process.env.DB_PORT || '3306')
 }
 
 // External APIs
