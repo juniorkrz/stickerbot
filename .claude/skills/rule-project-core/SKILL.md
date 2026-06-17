@@ -27,6 +27,7 @@ description: "StickerBot — leis always-on do sistema. TRIGGER ao mexer com: ba
   - `onlyBotAdmin: true` → exige **operador do bot** (`isBotAdmin`, lista `SB_ADMINS`).
   - Features de comunidade/multi-grupo (ex.: lista de pelada) gateiam ações de gestão no **admin do grupo**, não no admin do bot.
   - Comando com subcomandos mistos (parte pública, parte admin): deixe o comando aberto (`onlyAdmin: false`) e gateie cada subcomando admin por dentro com `if (!isGroupAdmin) { reply; return }`.
+- **Anúncios por comando:** todo comando que passa no `checkCommand` (legítimo: permissão/cooldown/escopo/manutenção ok) dispara `void maybeSendAd(jid)` no **success path do `checkCommand`** (`src/utils/commandValidator.ts`). Logo, **comando novo conta pro "1 a cada N" por padrão**; comando negado/rate-limited **não** conta (mata o vetor de abuso). Opt-out = `skipAds: true` no `StickerBotCommand`: use nos comandos de **figurinha** (já contam via `makeSticker`, senão contariam 2×) e no `ads`. Respeita `adsSystem` global + cooldown por chat.
 
 ## ⚙️ 3. Concorrência & fire-and-forget
 

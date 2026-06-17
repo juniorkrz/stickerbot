@@ -1,6 +1,7 @@
 import { GroupMetadata, isJidGroup, WAMessage } from '@whiskeysockets/baileys'
 
 import { bot } from '../config'
+import { maybeSendAd } from '../handlers/ads'
 import { getLogger } from '../handlers/logger'
 import { CommandLimiter, StickerBotCommand } from '../types/Command'
 import { sendMessage } from './baileysHelper'
@@ -154,5 +155,11 @@ export const checkCommand = async (
       return false
     }
   }
+
+  // Comando legítimo (passou em permissão/rate-limit/manutenção/escopo): dispara o contador
+  // de anúncios — a menos que o comando opte por não contar (skipAds, ex.: figurinhas que já
+  // contam via makeSticker). Fire-and-forget; maybeSendAd respeita lock/cooldown/adsSystem.
+  if (jid && !command.skipAds) void maybeSendAd(jid)
+
   return true
 }
