@@ -42,6 +42,7 @@ Para tarefas complexas/ambíguas: **pare e pergunte** — mínimo 3 perguntas es
 
 - **Banco/migração:** Drizzle + MySQL, **sem framework de migração** — `initializeDB` só faz `CREATE TABLE IF NOT EXISTS`. Coluna nova em tabela existente → helper idempotente `ensureColumn` (via `information_schema`). Atualize sempre `schema.ts` + o `CREATE TABLE` em `db.ts`.
 - **Comandos/permissão:** auto-loader (`handlers/text.ts`); `checkCommand` no início. `onlyAdmin` = admin do **grupo**; `onlyBotAdmin` = operador do bot. Multi-grupo → gateie no admin do grupo.
+- **Anúncios por comando:** comando legítimo dispara `maybeSendAd` no success path do `checkCommand` → **comando novo conta pro "1 a cada N" por padrão**; `skipAds: true` é o opt-out (figurinhas, que já contam via `makeSticker`, e `ads`).
 - **Concorrência:** handlers fire-and-forget (`void ...`) rodam concorrentes em rajadas — reserve estado em memória de forma **síncrona antes do `await`**; nunca deixe exceção vazar.
 - **Destrutivo em prod:** `DROP`/delete em massa → **backup antes** (`mysqldump`).
 - **Config em runtime:** tabela `Settings` + cache em memória (seed = ENV); hot path lê o cache, não o banco.
@@ -58,6 +59,7 @@ src/
 ├─ commands/         # 1 arquivo = 1 comando (auto-loaded por handlers/text.ts)
 ├─ handlers/         # db (Drizzle), text (dispatcher), sticker, ads, lists, community,
 │                    #   reaction, senderUsage, logger, emojiMix, fileUploader, memegen...
+├─ data/             # datasets estáticos (ex.: copa2026.ts — fixture + bandeiras + ranking FIFA)
 ├─ db/schema.ts      # schema Drizzle (fonte da verdade dos tipos)
 ├─ scripts/          # migrate-db (SQLite → MySQL, one-off)
 ├─ utils/            # baileysHelper, misc (spintax/getRandomItemFromArray), commandValidator,

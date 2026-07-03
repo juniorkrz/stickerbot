@@ -46,6 +46,7 @@ export const command: StickerBotCommand = {
   botMustBeAdmin: false,    // o bot precisa ser admin do grupo?
   interval: 5,              // cooldown (s)
   limiter: {},              // não mexer
+  // skipAds: true,         // opcional: NÃO conta pro contador de anúncios (ex.: figurinhas)
   run: async (
     jid, sender, message: WAMessageExtended, alias, body,
     group: GroupMetadata | undefined,
@@ -101,6 +102,14 @@ Convenção útil: **com nome no argumento = age sobre aquela pessoa/valor; sem 
 - **Menção**: `mentions: [jid, jidEncode(phone, 's.whatsapp.net')]` + `@${phone}` no texto (padrão em `raffle.ts`).
 - Nome do remetente: `message.pushName`.
 - `compareJids`, `isJidAdminOfGroup`, `amAdminOfGroup` — comparação/checagem robusta de jids.
+
+## Anúncios (ads)
+
+Comando que passa no `checkCommand` dispara o contador de anúncios automaticamente (hook no **success path do `checkCommand`**). Ou seja: **comando novo conta pro "1 a cada N" por padrão — não precisa fazer nada.** Para NÃO contar, adicione `skipAds: true` ao objeto do comando:
+- comandos de **figurinha** (já contam via `makeSticker` → senão contariam 2×);
+- gestão de anúncios (`ads`).
+
+Comando negado/rate-limited **não** conta (o hook só roda quando `checkCommand` aprova). Detalhe autoritativo: skill `rule-project-core`.
 
 ## Verificação
 
