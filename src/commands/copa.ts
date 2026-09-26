@@ -55,6 +55,9 @@ export const command: StickerBotCommand = {
   botMustBeAdmin: false,
   interval: 0,
   limiter: {}, // do not touch this
+  // Desativado após a Copa 2026. Para a Copa 2030: atualizar src/data (fixture/bandeiras/ranking),
+  // as fases/URL da API em handlers/copa.ts e trocar para `false`
+  disabled: true,
   run: async (
     jid: string,
     sender: string,

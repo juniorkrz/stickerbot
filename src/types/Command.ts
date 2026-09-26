@@ -41,6 +41,7 @@ export interface StickerBotCommand {
   interval: number
   limiter: CommandLimiter
   skipAds?: boolean // quando true, este comando NÃO incrementa o contador de anúncios
+  disabled?: boolean // quando true, o comando não é carregado (fica fora do menu e os aliases ficam livres)
   run: CommandRunFunction
 }
 

@@ -23,6 +23,7 @@ fs.readdirSync(commandsDir).forEach(file => {
   if (file.endsWith(extension)) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const commandModule = require(path.join(commandsDir, file))
+    if (commandModule.command.disabled) return
     actions[commandModule.command.name.toUpperCase()] = commandModule.command
   }
 })

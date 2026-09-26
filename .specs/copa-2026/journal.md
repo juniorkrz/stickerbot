@@ -25,3 +25,7 @@ Diário vivo: desvios, erros+soluções, pedidos extras. Plano aprovado nos 3 ga
 ## Débito técnico a registrar (não corrigir aqui)
 - `everyone.ts`: params `isVip`/`isBotAdmin` trocados no `run`.
 - Semântica do `stickerCounter`/log `[ADS]`/texto do `!ads` fica imprecisa com comandos contando.
+
+## Desativação (26/09/2026)
+- Copa acabou: `!copa` e atalhos ficam com `disabled: true` (novo campo do `StickerBotCommand`; o loader em `handlers/text.ts` não registra comando desativado, então some do menu e libera os aliases).
+- Código, dataset e spec mantidos para a **Copa 2030**: atualizar `src/data/copa2026.ts` (times/bandeiras/ranking), `PHASES`/API em `handlers/copa.ts` e voltar `disabled` para `false`.
