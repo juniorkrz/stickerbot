@@ -71,6 +71,7 @@ export const command: StickerBotCommand = {
   botMustBeAdmin: false,
   interval: 0,
   limiter: {}, // do not touch this
+  skipAds: true, // não anuncia enquanto gerencia anúncios
   run: async (
     jid: string,
     sender: string,
