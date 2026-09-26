@@ -266,7 +266,7 @@ const connectToWhatsApp = async () => {
         ? await isUserBanned(phone)
         : false
       // Is sender VIP?
-      const isVip = await senderIsVip(sender)
+      const isVip = await senderIsVip(sender, phone)
 
       // Message local timestamp
       message.messageLocalTimestamp = Date.now()
