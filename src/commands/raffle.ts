@@ -1,4 +1,11 @@
-import { GroupMetadata, GroupParticipant, jidEncode, jidNormalizedUser } from '@whiskeysockets/baileys'
+import {
+  GroupMetadata,
+  GroupParticipant,
+  isLidUser,
+  jidDecode,
+  jidEncode,
+  jidNormalizedUser,
+} from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { getClient } from '../bot'
@@ -52,27 +59,50 @@ export const command: StickerBotCommand = {
     }
 
     const client = getClient()
-    const botJid = jidNormalizedUser(client.user?.id)
+    // In LID groups participant ids are @lid, so the bot must be matched by both its PN and LID
+    const botJids = [client.user?.id, client.user?.lid]
+      .filter((id): id is string => !!id)
+      .map(id => jidNormalizedUser(id))
     const participants: GroupParticipant[] = group.participants.filter(
-      participant => participant.id !== botJid
+      participant => ![participant.id, participant.phoneNumber, participant.lid]
+        .some(id => id && botJids.includes(jidNormalizedUser(id)))
     )
 
     const winner = getRandomItemFromArray(participants)
-    const winnerPhone = await getPhoneFromJid(winner.id)
-    const mentions = [winner.id]
-    if (winnerPhone) mentions.push(jidEncode(winnerPhone, 's.whatsapp.net'))
+    const winnerTag = await getMentionTag(winner)
 
     const raffleName = getBodyWithoutCommand(body, command.needsPrefix, alias)
-    const phrase = `@${winnerPhone} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
+    const phrase = `@${winnerTag.user} {{meus |}parabéns|boa}! {Você|Tu|Vc} ` +
       `{ganhou |venceu |é o vencedor d}o {sorteio|concurso}${raffleName ? ' *' +
         raffleName + '*' : ''}! {🎉|🏆|🏅|🎖|🥇|⭐|✨}`
 
     return await sendMessage(
       {
         text: spintax(phrase),
-        mentions: Array.from(new Set(mentions))
+        mentions: [winnerTag.jid]
       },
       message
     )
   }
+}
+
+// Mentions by phone number when it is known, otherwise by LID (WhatsApp renders a LID mention as the contact name).
+// Never builds a @s.whatsapp.net jid from LID digits: that is what made the raffle show the raw id.
+const getMentionTag = async (participant: GroupParticipant) => {
+  if (participant.phoneNumber) {
+    const jid = jidNormalizedUser(participant.phoneNumber)
+    return { jid, user: jidDecode(jid)!.user }
+  }
+
+  if (isLidUser(participant.id)) {
+    const phone = await getPhoneFromJid(participant.id)
+    const lidUser = jidDecode(participant.id)!.user
+    if (phone && phone !== lidUser) {
+      return { jid: jidEncode(phone, 's.whatsapp.net'), user: phone }
+    }
+    return { jid: jidNormalizedUser(participant.id), user: lidUser }
+  }
+
+  const jid = jidNormalizedUser(participant.id)
+  return { jid, user: jidDecode(jid)!.user }
 }
