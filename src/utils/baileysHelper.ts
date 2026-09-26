@@ -259,12 +259,12 @@ export const react = async (message: WAMessage, emoji: string) => {
   )
 }
 
-export const sendAudio = async (message: WAMessage, path: string) => {
+export const sendAudio = async (message: WAMessage, path: string, mimetype: string = 'audio/aac') => {
   return await sendMessage(
     {
       audio: { url: path },
       //ptt: true, // false prevents automatic audio download
-      mimetype: 'audio/aac'
+      mimetype
     },
     message
   )

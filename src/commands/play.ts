@@ -1,11 +1,10 @@
 /* eslint-disable max-len */
 import { GroupMetadata } from '@whiskeysockets/baileys'
-import fs from 'fs'
 import path from 'path'
 
 import { dev, getClient } from '../bot'
 import { getLogger } from '../handlers/logger'
-import { downloadAudioFromYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
+import { cleanupDownload, downloadAudioFromYoutubeVideo, getUrlByQuery, getYoutubeVideo, isYouTubeUrl } from '../handlers/youtube'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { react, sendAudio, sendLogToAdmins, sendMessage } from '../utils/baileysHelper'
@@ -28,7 +27,7 @@ export const command: StickerBotCommand = {
   desc: 'Baixa música do vídeo no YouTube.',
   example: 'nome da música ou link do vídeo no YouTube',
   needsPrefix: true,
-  inMaintenance: true,
+  inMaintenance: false,
   runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,
@@ -100,31 +99,26 @@ export const command: StickerBotCommand = {
       url = await getUrlByQuery(url)
     }
 
-    if (!url) return
+    if (!url) {
+      await sendMessage({ text: spintax(replies.UNKNOWN_ERROR) }, message)
+      return await react(message, emojis.error)
+    }
 
-    const videoResult = await getYoutubeVideo(url)
-    if (!videoResult) {
+    const video = await getYoutubeVideo(url)
+    if (!video) {
       await sendMessage({ text: spintax(replies.MISSING_NAME_OR_LINK) }, message)
       await react(message, emojis.error)
       return
     }
 
-    const audio = videoResult.audio
-    if (!audio.approxDurationMs) {
-      return
-    }
-
-    const duration = audio ? parseInt(audio.approxDurationMs!) : 0
-
-
-    if (!audio || !duration) {
-      await sendLogToAdmins('*[ERROR]:* YouTube error!')
+    if (!video.duration) {
+      await sendLogToAdmins(`*[ERROR]:* YouTube error! Unknown duration for ${url}`)
       await sendMessage({ text: spintax(replies.UNKNOWN_ERROR) }, message)
       return await react(message, emojis.error)
     }
 
     // test duration
-    if (duration > (10 * 60000)) { // maximum video duration is 10 minutes
+    if (video.duration > (10 * 60)) { // maximum video duration is 10 minutes
       await sendMessage({ text: spintax(replies.VIDEO_IS_TOO_LONG) }, message)
       return react(message, emojis.error)
     }
@@ -142,27 +136,24 @@ export const command: StickerBotCommand = {
     const client = getClient()
     await client.sendPresenceUpdate('recording', jid)
 
-    // download audio from video as MP4 and convert audio to AAC
-    const filename = `${message.key.id}_${message.messageTimestamp}.mp4`
-    const filePath = getTempFilePath(filename)
-    const output = await downloadAudioFromYoutubeVideo(url, audio, filePath)
+    // download audio from video as M4A (AAC)
+    const fileBasePath = getTempFilePath(`${message.key.id}_${message.messageTimestamp}`)
+    const output = await downloadAudioFromYoutubeVideo(video.url, fileBasePath)
 
     // if something wrong, react with an error
-    if (!output) return await react(message, emojis.error)
+    if (!output) {
+      await client.sendPresenceUpdate('available', jid)
+      await sendMessage({ text: spintax(replies.UNKNOWN_ERROR) }, message)
+      return await react(message, emojis.error)
+    }
 
     // send audio
-    if (dev) logger.info(`[YTDL] Sending audio ${output}`)
+    if (dev) logger.info(`[YTDLP] Sending audio ${output}`)
     await client.sendPresenceUpdate('available', jid)
-    const result = await sendAudio(message, output)
+    const result = await sendAudio(message, output, 'audio/mp4')
 
-    // delete file
-    fs.unlink(output, (err) => {
-      if (err) {
-        logger.error(`[YTDL] An error occurred while deleting the file: ${err}`)
-        return
-      }
-      if (dev) logger.info(`[YTDL] File deleted successfully: ${output}`)
-    })
+    // delete files
+    cleanupDownload(fileBasePath)
 
     if (result?.status == 1) {
       // react success
