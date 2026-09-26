@@ -19,7 +19,14 @@ RUN apt update && \
     libu2f-udev \
     libxcb1 \
     python3 \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
+
+# yt-dlp (comandos mp3/play) + Deno, o runtime JS que o yt-dlp usa para resolver os desafios do YouTube
+RUN curl -fsSL -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux && \
+    chmod +x /usr/local/bin/yt-dlp && \
+    curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh -s -- -y && \
+    yt-dlp --version && deno --version
 
 WORKDIR /usr/src/app
 

@@ -1,38 +1,57 @@
-import ytdl from '@distube/ytdl-core'
-import ffmpeg from 'fluent-ffmpeg'
+import { execFile } from 'child_process'
 import fs from 'fs'
-import ytsr from 'ytsr'
+import path from 'path'
 
 import { dev } from '../bot'
-import { ytsrItem } from '../types/Youtube'
+import { YoutubeVideoInfo } from '../types/Youtube'
 import { getLogger } from './logger'
 
 const logger = getLogger()
 
+// yt-dlp is installed in the Docker image (see Dockerfile). YouTube changes often, so it is kept up to date at runtime.
+const YTDLP_BIN = process.env.YTDLP_BIN || 'yt-dlp'
+const YTDLP_TIMEOUT_MS = 3 * 60 * 1000
+const YTDLP_UPDATE_INTERVAL_MS = 24 * 60 * 60 * 1000
+const FIELD_SEPARATOR = '|||'
+
+const runYtDlp = (args: string[], timeout = YTDLP_TIMEOUT_MS): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    execFile(YTDLP_BIN, args, { timeout, maxBuffer: 10 * 1024 * 1024 }, (error, stdout, stderr) => {
+      if (error) return reject(new Error(`${error.message} ${stderr}`.trim()))
+      resolve(stdout.trim())
+    })
+  })
+}
+
+const updateYtDlp = async () => {
+  try {
+    const output = await runYtDlp(['-U'], 60 * 1000)
+    logger.info(`[YTDLP] ${output.split('\n').pop()}`)
+  } catch (error) {
+    logger.warn(`[YTDLP] Could not update yt-dlp: ${error}`)
+  }
+}
+
+void updateYtDlp()
+setInterval(() => void updateYtDlp(), YTDLP_UPDATE_INTERVAL_MS).unref()
+
 export const isYouTubeUrl = (url: string) => {
-  const youtubeUrlPattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/).+$/
+  const youtubeUrlPattern = /^(https?:\/\/)?(www\.|m\.|music\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/).+$/
   return youtubeUrlPattern.test(url)
+}
+
+const getInfo = async (target: string): Promise<YoutubeVideoInfo | undefined> => {
+  const fields = ['%(id)s', '%(title)s', '%(duration|0)s', '%(webpage_url)s'].join(FIELD_SEPARATOR)
+  const output = await runYtDlp(['--no-playlist', '--skip-download', '--no-warnings', '--print', fields, target])
+  const [id, title, duration, url] = output.split('\n')[0].split(FIELD_SEPARATOR)
+  if (!id || !url) return
+  return { id, title, duration: parseInt(duration) || 0, url }
 }
 
 export async function getUrlByQuery(query: string) {
   try {
-    // Perform a search on YouTube
-    const filters = await ytsr.getFilters(query)
-    const filter = filters.get('Type')?.get('Video')
-    const options = {
-      limit: 1, // Limit results to just 1 video
-    }
-
-    if (!filter?.url) return
-
-    const searchResults = await ytsr(filter.url, options)
-
-    // Get the first result
-    const firstVideo = searchResults.items[0] as ytsrItem | undefined
-
-    if (!firstVideo?.url) return
-
-    return firstVideo.url
+    const video = await getInfo(`ytsearch1:${query}`)
+    return video?.url
   } catch (error) {
     logger.error(`An error occurred during the search: ${error}`)
   }
@@ -41,58 +60,45 @@ export async function getUrlByQuery(query: string) {
 
 export const getYoutubeVideo = async (url: string) => {
   try {
-    const info = await ytdl.getInfo(url)
-    const audioFormats = ytdl.filterFormats(info.formats, 'audioonly')
-
-    if (audioFormats.length === 0) {
-      logger.warn('This video does not have an audio format available for download.')
-      return
-    }
-
-    const audioFormat = ytdl.chooseFormat(audioFormats, { quality: 'highestaudio' })
-    return { info: info,
-      audio: audioFormat }
+    return await getInfo(url)
   } catch (error) {
     logger.error(`An error occurred while getting information from the video: ${error}`)
     return
   }
 }
 
-export const downloadAudioFromYoutubeVideo = async (
-  url: string, audioFormat: ytdl.videoFormat, filePath: string
-): Promise<string | undefined> => {
-  return new Promise((resolve, reject) => {
-    if (dev) logger.info(`[YTDL] Downloading audio to: ${filePath}`)
-    const videoStream = ytdl(url, { format: audioFormat })
+// Downloads the best audio stream and converts it to M4A (AAC), returning the final file path
+export const downloadAudioFromYoutubeVideo = async (url: string, fileBasePath: string): Promise<string | undefined> => {
+  const output = `${fileBasePath}.m4a`
+  try {
+    if (dev) logger.info(`[YTDLP] Downloading audio to: ${output}`)
+    await runYtDlp([
+      '--no-playlist',
+      '--no-warnings',
+      '--no-part',
+      '-f', 'bestaudio[ext=m4a]/bestaudio/best',
+      '-x', '--audio-format', 'm4a',
+      '-o', `${fileBasePath}.%(ext)s`,
+      url
+    ])
+    if (!fs.existsSync(output)) throw new Error(`output file not found: ${output}`)
+    if (dev) logger.info(`[YTDLP] Audio successfully downloaded: ${output}`)
+    return output
+  } catch (error) {
+    logger.error(`[YTDLP] Error downloading audio: ${error}`)
+    cleanupDownload(fileBasePath)
+    return
+  }
+}
 
-    videoStream.on('error', (error) => {
-      reject(error)
+// Removes the final file and any leftovers from yt-dlp (original stream before conversion)
+export const cleanupDownload = (fileBasePath: string) => {
+  const dir = path.dirname(fileBasePath)
+  const prefix = path.basename(fileBasePath)
+  for (const file of fs.readdirSync(dir)) {
+    if (!file.startsWith(`${prefix}.`)) continue
+    fs.unlink(path.join(dir, file), (err) => {
+      if (err) logger.error(`[YTDLP] An error occurred while deleting the file: ${err}`)
     })
-
-    const fileWriteStream = fs.createWriteStream(filePath)
-    fileWriteStream.on('error', (error) => {
-      reject(error)
-    })
-
-    const output = filePath.replace('mp4', 'aac')
-    if (dev) logger.info(`[YTDL] Audio successfully downloaded: ${filePath}`)
-    if (dev) logger.info(`[YTDL] Converting audio to AAC: ${output}`)
-    videoStream.pipe(fileWriteStream)
-      .on('finish', () => {
-        // Conversion to AAC using ffmpeg
-        ffmpeg(filePath)
-          .output(output)
-          .on('end', function() {
-            if (dev) logger.info(`[YTDL] Audio successfully converted to AAC: ${output}`)
-            resolve(output)
-          }).on('error', function(error){
-            logger.error(`[YTDL] Error converting audio to AAC: ${error}`)
-            resolve(undefined)
-          }).run()
-      })
-      .on('error', (error) => {
-        logger.error(`[YTDL] Error converting audio to AAC: ${error}`)
-        reject(error)
-      })
-  })
+  }
 }

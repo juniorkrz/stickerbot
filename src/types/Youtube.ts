@@ -1,10 +1,6 @@
-import ytdl from '@distube/ytdl-core'
-
-export interface ytsrItem {
+export interface YoutubeVideoInfo {
+  id: string
+  title: string
+  duration: number // seconds (0 when unknown, e.g. live streams)
   url: string
-}
-
-export interface VideoAudioInfo {
-  info: ytdl.videoInfo
-  audio: ytdl.videoFormat
 }
