@@ -36,6 +36,7 @@ export const command: StickerBotCommand = {
   botMustBeAdmin: false,
   interval: 5,
   limiter: {}, // do not touch this
+  skipAds: true, // já conta via makeSticker
   run: async (
     jid: string,
     sender: string,
