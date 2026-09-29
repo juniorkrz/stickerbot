@@ -516,10 +516,19 @@ app.post('/api/mercadopago-webhook', async (req, res) => {
         if (key === 'ts') ts = value
         if (key === 'v1') v1 = value
       }
-      const manifest = `id:${id.toLowerCase()};request-id:${req.headers['x-request-id'] || ''};ts:${ts};`
+      // Template oficial: id:[data.id da URL];request-id:[x-request-id];ts:[ts];
+      // Cada parte só entra se existir (o aviso no formato antigo, ?id=&topic=, não tem data.id na URL)
+      const dataIdQuery = req.query['data.id'] ? String(req.query['data.id']) : ''
+      const requestId = req.headers['x-request-id'] ? String(req.headers['x-request-id']) : ''
+      const manifest = (dataIdQuery ? `id:${/^[a-z0-9]+$/i.test(dataIdQuery) ? dataIdQuery.toLowerCase() : dataIdQuery};` : '') +
+        (requestId ? `request-id:${requestId};` : '') +
+        `ts:${ts};`
       const digest = crypto.createHmac('sha256', bot.mpWebhookSecret).update(manifest).digest('hex')
-      if (digest !== v1) {
-        logger.error(`[VIP] Assinatura inválida no webhook do MP (pagamento ${id})`)
+      const valid = v1.length === digest.length && crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(v1))
+      if (!valid) {
+        logger.error(`[VIP] Assinatura inválida no webhook do MP (pagamento ${id}) — ` +
+          `query: ${Object.keys(req.query).join(',') || '-'}, data.id na URL: ${dataIdQuery ? 'sim' : 'não'}, ` +
+          `x-request-id: ${requestId ? 'sim' : 'não'}, ts: ${ts || '-'}`)
         return
       }
     }
