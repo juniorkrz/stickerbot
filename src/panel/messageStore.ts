@@ -234,7 +234,15 @@ export const parseContent = (message: proto.IMessage | null | undefined): Parsed
   case 'keepInChatMessage':
   case 'pinInChatMessage':
   case 'encReactionMessage':
+  case 'secretEncryptedMessage': // edição/voto criptografado (o conteúdo chega por outro evento)
+  case 'associatedChildMessage':
+  case 'albumMessage': // só o "envelope" do álbum; as fotos chegam uma a uma
+  case 'placeholderMessage':
+  case 'callLogMesssage':
+  case 'botInvokeMessage':
     return undefined
+  case 'lottieStickerMessage':
+    return { type: 'sticker', meta: { animated: true } }
   default:
     return { type: 'unknown',
       text: `[${contentType}]`,

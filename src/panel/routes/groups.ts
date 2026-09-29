@@ -41,7 +41,7 @@ const amAdminOf = async (group: GroupMetadata, me?: string) => {
 
 const groupSummary = async (g: GroupMetadata, me?: string) => ({
   jid: g.id,
-  subject: g.subject,
+  subject: g.subject || 'Grupo sem nome',
   desc: g.desc,
   size: g.participants.length,
   admins: g.participants.filter(p => p.admin).length,

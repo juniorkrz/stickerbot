@@ -103,7 +103,9 @@ export const initials = (name: string) => {
   const clean = name.replace(/[^\p{L}\p{N} ]/gu, '').trim()
   if (!clean) return '?'
   const parts = clean.split(/\s+/)
-  return ((parts[0]?.[0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase()
+  // Array.from: pega o caractere inteiro (letras "estilizadas" ocupam 2 posições na string)
+  const first = (w?: string) => (w ? Array.from(w)[0] : '')
+  return (first(parts[0]) + (parts.length > 1 ? first(parts[parts.length - 1]) : '')).toUpperCase()
 }
 
 // Cor estável por pessoa (nomes nos grupos, avatares)
