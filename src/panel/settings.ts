@@ -191,9 +191,10 @@ export const configFields: ConfigField[] = [
   },
   {
     key: 'bot.mpWebhookSecret',
-    label: 'Segredo do webhook do Mercado Pago',
+    label: 'Assinatura secreta do webhook',
     section: S.vip,
     type: 'secret',
+    help: 'Mercado Pago > Suas integrações > sua aplicação > Webhooks > Assinatura secreta. Opcional, mas recomendado.',
     ...prop(bot, 'mpWebhookSecret')
   },
   {

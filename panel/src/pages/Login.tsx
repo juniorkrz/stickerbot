@@ -86,7 +86,7 @@ export const LoginPage = () => {
         <div className="mb-8 flex flex-col items-center text-center">
           <img src="/painel/favicon.svg" alt="" className="mb-4 size-14" />
           <h1 className="text-2xl font-semibold tracking-tight">Painel do StickerBot</h1>
-          <p className="mt-1 text-sm text-text-3">Acesso restrito aos admins do bot</p>
+          <p className="mt-1 text-sm text-text-3">Acesso exclusivo do dono do bot</p>
         </div>
 
         <div className="rounded-2xl border border-border bg-surface p-6 shadow-card">
@@ -102,7 +102,7 @@ export const LoginPage = () => {
                   value={phone}
                   onChange={e => setPhone(e.target.value)}
                 />
-                <span className="block text-xs text-text-3">Com DDI (55) e DDD. Vamos mandar um código pelo WhatsApp do bot.</span>
+                <span className="block text-xs text-text-3">Com DDI (55) e DDD. O bot manda um PIN para o seu WhatsApp.</span>
               </label>
               {error && <p className="text-sm text-danger">{error}</p>}
               <Button type="submit" variant="primary" className="w-full" loading={loading} icon={<MessageCircle className="size-4" />}>
@@ -116,7 +116,7 @@ export const LoginPage = () => {
               </button>
               {delivery === 'whatsapp' ? (
                 <p className="text-sm text-text-2">
-                  Se <b className="text-text">{formatPhone(digits)}</b> for admin do bot, o código chegou no WhatsApp agora.
+                  Se <b className="text-text">{formatPhone(digits)}</b> tiver acesso, o PIN chegou no WhatsApp agora.
                 </p>
               ) : (
                 <div className="flex gap-3 rounded-lg bg-warning-soft p-3 text-sm text-warning">

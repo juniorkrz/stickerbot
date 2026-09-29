@@ -1,13 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { Pause, Play, RotateCw, Trash2 } from 'lucide-react'
+import { LogOut, Monitor, Pause, Play, RotateCw, Smartphone, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { Badge, Button, Card, Loading, Page, PageHeader, SearchInput, Tabs, useUi } from '../components/ui'
-import { API_BASE, get, post } from '../lib/api'
+import { API_BASE, del, get, post } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useLiveState } from '../lib/events'
-import { formatDateTime, formatDuration, formatPhone, formatTime } from '../lib/format'
+import { formatDateTime, formatDuration, formatPhone, formatTime, timeAgo } from '../lib/format'
 import type { LogEntry, SystemStatus } from '../lib/types'
 
 type Level = 'all' | 'warn' | 'error'
@@ -75,6 +75,64 @@ const Logs = () => {
   )
 }
 
+interface Session {
+  id: string
+  current: boolean
+  ip: string | null
+  userAgent: string | null
+  createdAt: number
+  lastSeenAt: number
+  expiresAt: number
+}
+
+const deviceName = (ua: string | null) => {
+  const u = ua || ''
+  const os = /iphone|ipad/i.test(u) ? 'iPhone/iPad' : /android/i.test(u) ? 'Android' : /windows/i.test(u) ? 'Windows'
+    : /mac os/i.test(u) ? 'Mac' : /linux/i.test(u) ? 'Linux' : 'Dispositivo'
+  const browser = /edg\//i.test(u) ? 'Edge' : /chrome\//i.test(u) ? 'Chrome' : /firefox\//i.test(u) ? 'Firefox'
+    : /safari\//i.test(u) ? 'Safari' : ''
+  return { label: [browser, os].filter(Boolean).join(' · '), mobile: /iphone|android|mobile/i.test(u) }
+}
+
+const Sessions = () => {
+  const { toast, confirm } = useUi()
+  const query = useQuery({ queryKey: ['sessions'], queryFn: () => get<Session[]>('/auth/sessions') })
+  const refresh = () => query.refetch()
+  const others = (query.data || []).filter(s => !s.current).length
+  return (
+    <Card title="Sessões ativas do painel" padded={false} action={others > 0 && (
+      <Button size="sm" variant="ghost" className="text-danger" icon={<LogOut className="size-4" />} onClick={async () => {
+        if (await confirm({ title: 'Encerrar as outras sessões?', message: 'Todos os outros aparelhos saem do painel na hora.', confirmLabel: 'Encerrar', danger: true })) {
+          await post('/auth/sessions/revoke-others').then(() => { toast('Outras sessões encerradas'); refresh() }, e => toast(e.message, 'error'))
+        }
+      }}>Encerrar as outras</Button>
+    )}>
+      {query.isLoading ? <Loading /> : (
+        <ul className="divide-y divide-border">
+          {(query.data || []).map(s => {
+            const d = deviceName(s.userAgent)
+            return (
+              <li key={s.id} className="flex items-center gap-3 px-4 py-3">
+                {d.mobile ? <Smartphone className="size-5 text-text-3" /> : <Monitor className="size-5 text-text-3" />}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 text-sm font-medium">{d.label}{s.current && <Badge tone="accent">Esta sessão</Badge>}</div>
+                  <div className="text-xs text-text-3">{s.ip || 'IP desconhecido'} · entrou em {formatDateTime(s.createdAt)} · ativo {timeAgo(s.lastSeenAt)}</div>
+                </div>
+                {!s.current && (
+                  <Button size="sm" variant="ghost" className="text-danger" onClick={() =>
+                    del(`/auth/sessions/${s.id}`).then(() => { toast('Sessão encerrada'); refresh() }, e => toast(e.message, 'error'))}>
+                    Encerrar
+                  </Button>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </Card>
+  )
+}
+
 export default function SystemPage() {
   const { user } = useAuth()
   const { toast, confirm } = useUi()
@@ -133,6 +191,7 @@ export default function SystemPage() {
                 <dd className="flex flex-wrap justify-end gap-1">{s.onlineAdmins.map(a => <Badge key={a} tone="accent">{formatPhone(a)}</Badge>)}</dd></div>
             </dl>
           </Card>
+          <div className="lg:col-span-3"><Sessions /></div>
           <div className="lg:col-span-3"><Logs /></div>
         </div>
       )}

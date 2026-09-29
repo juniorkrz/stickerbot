@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { AlertTriangle, Check, Lock, RotateCw, X } from 'lucide-react'
-import { KeyboardEvent, useMemo, useState } from 'react'
+import { KeyboardEvent, ReactNode, useMemo, useState } from 'react'
 
 import { get, post, put } from '../lib/api'
 import { useAuth } from '../lib/auth'
@@ -128,7 +128,7 @@ const FieldInput = ({ field, value, onChange, groups }: {
   }
 }
 
-export const ConfigSection = ({ title, fields }: { title: string, fields: ConfigField[] }) => {
+export const ConfigSection = ({ title, fields, extra }: { title: string, fields: ConfigField[], extra?: ReactNode }) => {
   const queryClient = useQueryClient()
   const { toast, confirm } = useUi()
   const { user } = useAuth()
@@ -200,6 +200,7 @@ export const ConfigSection = ({ title, fields }: { title: string, fields: Config
           )
         ))}
       </div>
+      {extra}
       {(dirty || needsRestart) && (
         <div className="mt-5 flex flex-wrap items-center justify-end gap-2 border-t border-border pt-4">
           {needsRestart && (

@@ -25,6 +25,7 @@ import {
   editableCommandFields,
   getCommandDefaults
 } from '../../handlers/text'
+import { isMercadoPagoConfigured } from '../../handlers/vipPayments'
 import { adminName } from '../auth'
 import { configFields, isSecretSet, publicValue, saveCommandOverride, saveField } from '../settings'
 import { forgetAvatar } from './chats'
@@ -259,6 +260,29 @@ configRouter.put('/', h(async (req, res) => {
   res.status(Object.keys(errors).length && !saved.length ? 400 : 200).json({ saved,
     errors,
     restart })
+}))
+
+// Confere se o access token do Mercado Pago é válido (consulta a conta dona do token)
+configRouter.post('/mercadopago/test', h(async (_req, res) => {
+  const token = bot.mpAccessToken
+  if (!isMercadoPagoConfigured()) {
+    return res.json({ ok: false, error: 'Access token não configurado.' })
+  }
+  const response = await fetch('https://api.mercadopago.com/users/me', { headers: { Authorization: `Bearer ${token}` } })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = await response.json().catch(() => ({}))
+  if (!response.ok) {
+    return res.json({ ok: false, error: data?.message || `O Mercado Pago recusou o token (HTTP ${response.status})` })
+  }
+  const email = String(data.email || '')
+  res.json({
+    ok: true,
+    account: data.nickname || data.first_name || String(data.id),
+    email: email.replace(/^(.{2}).*(@.*)$/, '$1***$2'),
+    production: token.startsWith('APP_USR-'),
+    webhookSecret: !!bot.mpWebhookSecret,
+    notificationUrl: bot.mpNotificationUrl || null
+  })
 }))
 
 // ================= Perfil do bot =================

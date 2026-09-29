@@ -55,7 +55,7 @@ export default function Admins() {
     <Page>
       <PageHeader
         title="Admins"
-        subtitle="Admins usam os comandos restritos do bot e entram neste painel pelo número"
+        subtitle="Admins usam os comandos restritos do bot no WhatsApp. O painel é só do dono."
         actions={user?.isOwner && <Button variant="primary" icon={<Plus className="size-4" />} onClick={() => setAddOpen(true)}>Adicionar admin</Button>}
       />
       <Card padded={false}>

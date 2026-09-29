@@ -5,7 +5,17 @@ import path from 'path'
 import { panel } from '../config'
 import { getLogger } from '../handlers/logger'
 import { colors } from '../utils/colors'
-import { logout, requestCode, requireAuth, toPanelUser, verifyCode } from './auth'
+import {
+  listSessions,
+  logout,
+  requestCode,
+  requireAuth,
+  requireCsrfHeader,
+  revokeOtherSessions,
+  revokeSession,
+  toPanelUser,
+  verifyCode
+} from './auth'
 import { chatsRouter, mediaRouter } from './routes/chats'
 import { groupsRouter } from './routes/groups'
 import { adsRouter, commandsRouter, configRouter, profileRouter } from './routes/manage'
@@ -26,6 +36,33 @@ const staticDir = path.resolve(__dirname, '../../panel/dist')
 export const mountPanel = (app: Express) => {
   if (!panel.enabled) return
 
+  // Cabeçalhos de segurança de todo o painel (página e API)
+  app.use('/painel', (_req, res, next) => {
+    res.set({
+      'Content-Security-Policy': [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        // fotos de perfil vêm dos servidores do WhatsApp (redirect do /media/avatar)
+        "img-src 'self' data: blob: https://*.whatsapp.net https://*.fbcdn.net",
+        "media-src 'self' blob:",
+        "connect-src 'self'",
+        "font-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'"
+      ].join('; '),
+      'X-Frame-Options': 'DENY',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'no-referrer',
+      'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'X-Robots-Tag': 'noindex, nofollow'
+    })
+    next()
+  })
+
   const api = Router()
   api.use((_req, res, next) => {
     res.set('Cache-Control', 'no-store')
@@ -33,13 +70,16 @@ export const mountPanel = (app: Express) => {
   })
 
   // rotas públicas (login)
-  api.post('/auth/request', h(requestCode))
-  api.post('/auth/verify', h(verifyCode))
-  api.post('/auth/logout', h(logout))
+  api.post('/auth/request', requireCsrfHeader, h(requestCode))
+  api.post('/auth/verify', requireCsrfHeader, h(verifyCode))
+  api.post('/auth/logout', requireCsrfHeader, h(logout))
 
   // daqui para baixo, só admin logado
   api.use(requireAuth)
   api.get('/auth/me', (req, res) => res.json(toPanelUser(req.panelUser!.phone)))
+  api.get('/auth/sessions', h(listSessions))
+  api.delete('/auth/sessions/:id', h(revokeSession))
+  api.post('/auth/sessions/revoke-others', h(revokeOtherSessions))
   api.use('/system', systemRouter)
   api.use('/stats', statsRouter)
   api.use('/chats', chatsRouter)

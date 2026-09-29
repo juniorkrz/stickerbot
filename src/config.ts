@@ -90,7 +90,7 @@ export const panel = {
   // assinar as mensagens enviadas pelo painel com o nome do admin
   signature: JSON.parse(process.env.SB_PANEL_SIGNATURE || 'false') as boolean,
   // validade do login, em dias
-  sessionDays: parseInt(process.env.SB_PANEL_SESSION_DAYS || '30'),
+  sessionDays: parseInt(process.env.SB_PANEL_SESSION_DAYS || '7'),
   // dias que o log de uso (estatísticas) fica guardado
   usageRetentionDays: parseInt(process.env.SB_PANEL_USAGE_RETENTION_DAYS || '180'),
   // nomes de exibição dos admins no painel { telefone: nome }

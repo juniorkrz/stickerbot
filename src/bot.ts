@@ -73,6 +73,15 @@ app.use(express.json({ limit: '80mb' })) // for parsing application/json (the pa
 app.use(express.urlencoded({ extended: true,
   limit: '1mb' })) // for parsing application/x-www-form-urlencoded
 
+// Requests coming through Cloudflare (public tunnel) may only reach the panel and the Mercado Pago webhook.
+// /qr, /code and /api/* would let anyone pair a device with the bot or list its groups.
+app.use((req, res, next) => {
+  const viaCloudflare = !!req.headers['cf-ray'] || !!req.headers['cf-connecting-ip']
+  if (!viaCloudflare) return next()
+  if (req.path === '/painel' || req.path.startsWith('/painel/') || req.path === '/api/mercadopago-webhook') return next()
+  res.status(404).send('Not found')
+})
+
 // directories to be created
 const directories = {
   creds: `/data/${bot.sessionId}/creds`,
