@@ -1,3 +1,11 @@
+# Painel de administração (React/Vite): compilado à parte e copiado para panel/dist
+FROM node:20-bookworm AS panel
+WORKDIR /panel
+COPY panel/package*.json ./
+RUN npm install --no-audit --no-fund
+COPY panel/ ./
+RUN npm run build
+
 FROM node:20-bookworm
 
 ENV TZ=America/Sao_Paulo
@@ -41,6 +49,8 @@ RUN npm install
 RUN npm rebuild sqlite3 --build-from-source
 
 COPY . .
+
+COPY --from=panel /panel/dist ./panel/dist
 
 RUN npm run build
 
