@@ -256,7 +256,19 @@ export const parseContent = (message: proto.IMessage | null | undefined): Parsed
 
 // Mensagens de sistema dos grupos (entrou, saiu, promovido...)
 const stubText = (message: WAMessage): string | undefined => {
-  const params = (message.messageStubParameters || []).map((p: string) => `@${p.split('@')[0]}`).join(', ')
+  // no Baileys v7 cada parâmetro pode vir como JSON ({"id":"...@lid","phoneNumber":"...@s.whatsapp.net"})
+  const who = (p: string) => {
+    if (p.startsWith('{')) {
+      try {
+        const parsed = JSON.parse(p) as { id?: string, phoneNumber?: string }
+        return `@${(parsed.phoneNumber || parsed.id || '').split('@')[0]}`
+      } catch {
+        return p
+      }
+    }
+    return `@${p.split('@')[0]}`
+  }
+  const params = (message.messageStubParameters || []).map(who).join(', ')
   switch (message.messageStubType) {
   case WAMessageStubType.GROUP_CREATE: return 'Grupo criado'
   case WAMessageStubType.GROUP_PARTICIPANT_ADD: return `${params} foi adicionado`
