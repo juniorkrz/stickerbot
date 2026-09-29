@@ -103,6 +103,24 @@ export const addAd = async (content: string, imageBase64?: string | null): Promi
   })
 }
 
+export const updateAd = async (
+  id: number,
+  data: { content?: string, imageBase64?: string | null, active?: boolean }
+): Promise<void> => {
+  const set: Partial<typeof ads.$inferInsert> = { updatedAt: new Date() }
+  if (data.content !== undefined) set.content = data.content
+  if (data.imageBase64 !== undefined) set.imageBase64 = data.imageBase64
+  if (data.active !== undefined) set.active = data.active ? 1 : 0
+  await db.update(ads).set(set).where(eq(ads.id, id))
+}
+
+// Envia um anúncio específico (teste pelo painel). Não conta como envio real.
+export const sendAdPreviewById = async (jid: string, id: number): Promise<boolean> => {
+  const ad = await getAdById(id)
+  if (!ad) return false
+  return await dispatchAd(jid, ad)
+}
+
 export const removeAd = async (id: number): Promise<void> => {
   await db.delete(ads).where(eq(ads.id, id))
 }

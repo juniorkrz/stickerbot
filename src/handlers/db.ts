@@ -98,6 +98,84 @@ export const initializeDB = async () => {
     )
   `)
 
+  // ---- Painel de administração ----
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`PanelSessions\` (
+      \`tokenHash\` VARCHAR(64) NOT NULL,
+      \`phone\` VARCHAR(32) NOT NULL,
+      \`userAgent\` VARCHAR(255),
+      \`ip\` VARCHAR(64),
+      \`createdAt\` DATETIME NOT NULL,
+      \`lastSeenAt\` DATETIME NOT NULL,
+      \`expiresAt\` DATETIME NOT NULL,
+      PRIMARY KEY (\`tokenHash\`)
+    )
+  `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`PanelChats\` (
+      \`jid\` VARCHAR(191) NOT NULL,
+      \`name\` VARCHAR(255),
+      \`isGroup\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`lastMessageAt\` DATETIME(3) NULL,
+      \`lastMessage\` TEXT,
+      \`lastFromMe\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`unread\` INT(11) NOT NULL DEFAULT 0,
+      \`status\` VARCHAR(20) NOT NULL DEFAULT 'open',
+      \`assignedTo\` VARCHAR(32),
+      \`pinned\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`archived\` TINYINT(1) NOT NULL DEFAULT 0,
+      PRIMARY KEY (\`jid\`),
+      KEY \`lastMessageAt\` (\`lastMessageAt\`)
+    ) DEFAULT CHARSET=utf8mb4
+  `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`PanelMessages\` (
+      \`jid\` VARCHAR(191) NOT NULL,
+      \`id\` VARCHAR(128) NOT NULL,
+      \`fromMe\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`sender\` VARCHAR(191),
+      \`senderPhone\` VARCHAR(32),
+      \`pushName\` VARCHAR(255),
+      \`type\` VARCHAR(32) NOT NULL,
+      \`text\` TEXT,
+      \`meta\` TEXT,
+      \`reactions\` TEXT,
+      \`status\` TINYINT NOT NULL DEFAULT 0,
+      \`deleted\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`edited\` TINYINT(1) NOT NULL DEFAULT 0,
+      \`sentBy\` VARCHAR(32),
+      \`raw\` LONGTEXT,
+      \`timestamp\` DATETIME(3) NOT NULL,
+      PRIMARY KEY (\`jid\`, \`id\`),
+      KEY \`jid_ts\` (\`jid\`, \`timestamp\`),
+      KEY \`ts\` (\`timestamp\`)
+    ) DEFAULT CHARSET=utf8mb4
+  `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`PanelContacts\` (
+      \`jid\` VARCHAR(191) NOT NULL,
+      \`phone\` VARCHAR(32),
+      \`name\` VARCHAR(255),
+      \`lastSeenAt\` DATETIME NOT NULL,
+      PRIMARY KEY (\`jid\`),
+      KEY \`phone\` (\`phone\`)
+    ) DEFAULT CHARSET=utf8mb4
+  `)
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS \`UsageLog\` (
+      \`id\` BIGINT NOT NULL AUTO_INCREMENT,
+      \`ts\` DATETIME NOT NULL,
+      \`command\` VARCHAR(100) NOT NULL,
+      \`chatJid\` VARCHAR(191),
+      \`sender\` VARCHAR(191),
+      \`isGroup\` TINYINT(1) NOT NULL DEFAULT 0,
+      PRIMARY KEY (\`id\`),
+      KEY \`ts\` (\`ts\`),
+      KEY \`command_ts\` (\`command\`, \`ts\`),
+      KEY \`sender\` (\`sender\`)
+    )
+  `)
+
   // Idempotent column migrations for tables created before a column existed.
   // Uses information_schema so it works on both MySQL and MariaDB (no ADD COLUMN IF NOT EXISTS).
   await ensureColumn('Ads', 'sentCount', 'INT(11) NOT NULL DEFAULT 0')
@@ -141,7 +219,8 @@ export const getSetting = async (key: string): Promise<string | null> => {
 
 export const setSetting = async (key: string, value: string): Promise<void> => {
   await db.insert(settings)
-    .values({ key, value })
+    .values({ key,
+      value })
     .onDuplicateKeyUpdate({ set: { value } })
 }
 
@@ -225,8 +304,13 @@ export const unban = async (user: string) => {
   await db.delete(banned).where(eq(banned.user, user))
 }
 
-export const isUserBanned = async (user: string) => {
-  const result = await db.select({ count: sql`COUNT(0)` }).from(banned).where(eq(banned.user, user))
+// Aceita vários identificadores do mesmo usuário: o ban pode ter sido gravado como @lid,
+// como <telefone>@s.whatsapp.net ou só com o telefone.
+export const isUserBanned = async (user: string | string[]) => {
+  const ids = (Array.isArray(user) ? user : [user]).filter(Boolean)
+  if (ids.length == 0) return false
+  const result = await db.select({ count: sql`COUNT(0)` }).from(banned)
+    .where(sql`${banned.user} IN (${sql.join(ids.map(id => sql`${id}`), sql`, `)})`)
   // @ts-ignore
   return Number(result[0].count) > 0
 }

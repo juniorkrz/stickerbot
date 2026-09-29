@@ -20,6 +20,7 @@ import { bot } from '../config'
 import { getCache } from '../handlers/cache'
 import { addCount } from '../handlers/db'
 import { getLogger } from '../handlers/logger'
+import { recordUsage } from '../panel/usage'
 import { colors } from './colors'
 import { getProjectLocalVersion, getRandomFile } from './misc'
 
@@ -285,7 +286,10 @@ export const logAction = (
 
   logger.info(`Sending ${colors.blue}${action}${colors.reset} @ ${identifier}`)
 
-  if (addToStatistics) addCount(action)
+  if (addToStatistics) {
+    addCount(action)
+    recordUsage(action, jid, message.key.participant || jid, message.pushName)
+  }
 }
 
 export const extractCaptionsFromBodyOrCaption = async (source: string) => {

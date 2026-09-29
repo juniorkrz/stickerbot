@@ -4,7 +4,7 @@ import { normalizeText } from 'normalize-text'
 import path from 'path'
 
 import { getClient } from '../bot'
-import { CommandActions } from '../types/Command'
+import { CommandActions, StickerBotCommand } from '../types/Command'
 import { logAction } from '../utils/baileysHelper'
 import { hasValidPrefix } from '../utils/misc'
 import { handleSenderParticipation } from './community'
@@ -17,16 +17,60 @@ const commandsDir = path.join(__dirname, '../commands')
 const extension = __filename.endsWith('.js') ? '.js' : '.ts'
 
 // Dynamically load exported commands from each file in the 'commands' folder
+// allCommands keeps every command (even disabled ones) so the panel can enable them at runtime;
+// actions only holds the enabled ones and is what the bot matches against.
 export const actions: CommandActions = {}
+export const allCommands: CommandActions = {}
+
+// Fields of a command that the panel can override (persisted in the Settings table as cmd.<NAME>)
+export const editableCommandFields = [
+  'aliases', 'desc', 'example', 'needsPrefix', 'inMaintenance', 'runInPrivate', 'runInGroups',
+  'onlyInBotGroup', 'onlyBotAdmin', 'onlyAdmin', 'onlyVip', 'botMustBeAdmin', 'interval', 'skipAds', 'disabled'
+] as const
+export type EditableCommandField = typeof editableCommandFields[number]
+export type CommandOverride = Partial<Pick<StickerBotCommand, EditableCommandField>>
+
+// Defaults as written in the code, to allow resetting an override
+const commandDefaults: { [name: string]: CommandOverride } = {}
 
 fs.readdirSync(commandsDir).forEach(file => {
   if (file.endsWith(extension)) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const commandModule = require(path.join(commandsDir, file))
-    if (commandModule.command.disabled) return
-    actions[commandModule.command.name.toUpperCase()] = commandModule.command
+    const command: StickerBotCommand = commandModule.command
+    const key = command.name.toUpperCase()
+    allCommands[key] = command
+    const defaults: CommandOverride = {}
+    for (const field of editableCommandFields) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (defaults as any)[field] = Array.isArray(command[field]) ? [...(command[field] as string[])] : command[field]
+    }
+    defaults.disabled = !!command.disabled
+    commandDefaults[key] = defaults
   }
 })
+
+// Rebuilds the enabled commands map, keeping the same object reference
+const rebuildActions = () => {
+  for (const key of Object.keys(actions)) delete actions[key]
+  for (const [key, command] of Object.entries(allCommands)) {
+    if (!command.disabled) actions[key] = command
+  }
+}
+rebuildActions()
+
+export const getCommandDefaults = (name: string): CommandOverride | undefined => commandDefaults[name.toUpperCase()]
+
+// Applies an override on top of the code defaults (undefined override = back to defaults)
+export const applyCommandOverride = (name: string, override: CommandOverride | undefined) => {
+  const key = name.toUpperCase()
+  const command = allCommands[key]
+  if (!command) return
+  const merged = { ...commandDefaults[key],
+    ...(override || {}) }
+  Object.assign(command, merged)
+  rebuildActions()
+}
 
 export const getActions = () => {
   return actions

@@ -1,5 +1,4 @@
 import { Boom } from '@hapi/boom'
-import crypto from 'crypto'
 import makeWASocket, {
   delay,
   DisconnectReason,
@@ -10,14 +9,13 @@ import makeWASocket, {
   WACallEvent,
   WACallUpdateType
 } from '@whiskeysockets/baileys'
+import crypto from 'crypto'
 import express from 'express'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import moment from 'moment'
 import Pino from 'pino'
 import { imageSync } from 'qr-image'
 import qrcode from 'qrcode-terminal'
-
-import { makeInMemoryStore } from './utils/store'
 
 import { baileys, bot } from './config'
 import { loadAdsConfig } from './handlers/ads'
@@ -31,11 +29,11 @@ import {
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { handleEyesReply } from './handlers/viewOnce'
+import { attachMessageStore, loadPanelSettings, mountPanel, setConnectionState } from './panel'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
-  isJidAdminOfGroup,
   checkBotAdminStatus,
   deleteMessage,
   extractCaptionsFromBodyOrCaption,
@@ -49,6 +47,7 @@ import {
   getStickerMessageFromContent,
   getVideoMessageFromContent,
   groupFetchAllParticipatingJids,
+  isJidAdminOfGroup,
   isMentioned,
   logAction,
   sendLogToAdmins,
@@ -63,14 +62,16 @@ import {
   getProjectHomepage,
   getProjectLocalVersion
 } from './utils/misc'
+import { makeInMemoryStore } from './utils/store'
 
 // get the logger
 const logger = getLogger()
 
 // create express webserver
 const app = express()
-app.use(express.json()) // for parsing application/json
-app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+app.use(express.json({ limit: '80mb' })) // for parsing application/json (the panel uploads media as base64)
+app.use(express.urlencoded({ extended: true,
+  limit: '1mb' })) // for parsing application/x-www-form-urlencoded
 
 // directories to be created
 const directories = {
@@ -158,10 +159,14 @@ const connectToWhatsApp = async () => {
 
   // will listen from this client
   store.bind(client.ev)
+  // conversation history for the admin panel
+  attachMessageStore(client.ev)
+  setConnectionState('connecting')
 
   client.ev.on('connection.update', (state) => {
     if (state.qr) {
       qr = state.qr
+      setConnectionState('connecting', qr)
       if (baileys.useQrCode) {
         qrcode.generate(qr, { small: true })
       }
@@ -171,6 +176,7 @@ const connectToWhatsApp = async () => {
   client.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
+      setConnectionState('close')
       logger.warn(`${colors.green}[WA]${colors.yellow} Lost connection`)
       const isLogout =
         (lastDisconnect?.error as Boom)?.output?.statusCode !==
@@ -180,6 +186,7 @@ const connectToWhatsApp = async () => {
         connectToWhatsApp()
       }
     } else if (connection === 'open') {
+      setConnectionState('open')
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
       if (!dev) await setupBot()
       logger.info(`${bot.name} is ${colors.green}ready${colors.reset}!`)
@@ -249,6 +256,9 @@ const connectToWhatsApp = async () => {
       // Get the sender phone
       const phone = await getPhoneFromJid(sender)
 
+      // Muted groups (set in the panel): the bot ignores everything from them
+      if (isGroup && bot.mutedGroups.includes(jid)) continue
+
       // Response only to bot master
       if (dev && (bot.admins.length > 0 && phone !== bot.admins[0])) {
         logger.info(`[MASTER ONLY]: Skipping message from ${phone}`)
@@ -262,9 +272,10 @@ const connectToWhatsApp = async () => {
       // Is the Bot an admin of the group?
       const amAdmin = await amAdminOfGroup(group)
       // Is sender banned?
-      const isBanned = phone
-        ? await isUserBanned(phone)
-        : false
+      // (bans may be stored as @lid, as <phone>@s.whatsapp.net or just the phone)
+      const isBanned = await isUserBanned(
+        phone ? [sender, phone, `${phone}@s.whatsapp.net`] : [sender]
+      )
       // Is sender VIP?
       const isVip = await senderIsVip(sender)
 
@@ -546,6 +557,7 @@ const stickerBot = async () => {
   await checkForUpdates()
 
   await initializeDB()
+  await loadPanelSettings()
   await loadAdsConfig()
   await initializeEmojiMix()
 
@@ -597,6 +609,8 @@ const stickerBot = async () => {
     logger.info(`${colors.green}[CALLS]${colors.reset} Refuse calls ${colors.red}disabled${colors.reset}, ` +
       'the bot does not reject calls.')
   }
+
+  mountPanel(app)
 
   const port = 3000
   app.listen(port, () => logger.info(`${colors.blue}[WS]${colors.reset} ` +
