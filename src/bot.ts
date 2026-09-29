@@ -508,7 +508,10 @@ app.post('/api/mercadopago-webhook', async (req, res) => {
     // Assinatura: se veio e está errada, descarta. Se não veio (IPN), segue: o pagamento é sempre
     // conferido direto na API do Mercado Pago, então um aviso falso não consegue liberar VIP.
     const xSignature = req.headers['x-signature'] as string | undefined
-    if (bot.mpWebhookSecret && xSignature) {
+    // O IPN antigo (?id=&topic=payment) chega junto com o webhook novo, mas a assinatura dele não segue o
+    // template oficial (só vale para ?data.id=&type=): não dá para validar, então só o webhook novo é conferido.
+    const legacyIpn = !!req.query.topic && !req.query['data.id']
+    if (bot.mpWebhookSecret && xSignature && !legacyIpn) {
       let ts = ''
       let v1 = ''
       for (const part of xSignature.split(',')) {
