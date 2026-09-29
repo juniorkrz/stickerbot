@@ -47,14 +47,17 @@ const run = (cmd: string, args: string[], timeoutMs = 90_000) => new Promise<voi
 
 // Tentativas da mais bonita para a mais leve; para na primeira que couber no limite
 const ATTEMPTS = [
-  { quality: 75, fps: 15, size: 512 },
-  { quality: 60, fps: 15, size: 512 },
+  { quality: 65, fps: 15, size: 512 },
   { quality: 50, fps: 12, size: 512 },
   { quality: 40, fps: 10, size: 448 },
   { quality: 30, fps: 10, size: 384 },
   { quality: 25, fps: 8, size: 320 },
   { quality: 15, fps: 6, size: 256 }
 ]
+
+// Muito acima do limite? pula tentativas intermediárias (cada uma custa alguns segundos)
+const nextAttempt = (current: number, size: number) =>
+  current + (size > MAX_ANIMATED_BYTES * 2.5 ? 3 : size > MAX_ANIMATED_BYTES * 1.6 ? 2 : 1)
 
 // Vídeo / GIF -> WebP animado 512x512 (conteúdo centralizado, fundo transparente) com ffmpeg
 const encodeWithFfmpeg = async (input: Buffer): Promise<Buffer> => {
@@ -63,7 +66,8 @@ const encodeWithFfmpeg = async (input: Buffer): Promise<Buffer> => {
   await fs.promises.writeFile(inFile, input)
   let best: Buffer | undefined
   try {
-    for (const a of ATTEMPTS) {
+    for (let i = 0; i < ATTEMPTS.length;) {
+      const a = ATTEMPTS[i]
       const outFile = `${base}-${a.quality}-${a.fps}-${a.size}.webp`
       const filter = `fps=${a.fps},scale=${a.size}:${a.size}:force_original_aspect_ratio=decrease:flags=lanczos,` +
         `format=rgba,pad=${SIZE}:${SIZE}:(ow-iw)/2:(oh-ih)/2:color=0x00000000`
@@ -76,7 +80,7 @@ const encodeWithFfmpeg = async (input: Buffer): Promise<Buffer> => {
         '-c:v', 'libwebp',
         '-lossless', '0',
         '-q:v', String(a.quality),
-        '-compression_level', '6',
+        '-compression_level', '4',
         '-preset', 'picture',
         '-loop', '0',
         '-vsync', '0',
@@ -86,6 +90,8 @@ const encodeWithFfmpeg = async (input: Buffer): Promise<Buffer> => {
       await fs.promises.unlink(outFile).catch(() => undefined)
       if (!best || out.length < best.length) best = out
       if (out.length <= MAX_ANIMATED_BYTES) return out
+      // nunca pula a última (mais leve) tentativa
+      i = Math.min(nextAttempt(i, out.length), Math.max(i + 1, ATTEMPTS.length - 1))
     }
   } finally {
     await fs.promises.unlink(inFile).catch(() => undefined)
