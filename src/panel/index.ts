@@ -37,7 +37,14 @@ export const mountPanel = (app: Express) => {
   if (!panel.enabled) return
 
   // Cabeçalhos de segurança de todo o painel (página e API)
-  app.use('/painel', (_req, res, next) => {
+  app.use('/painel', (req, res, next) => {
+    // pela internet (túnel da Cloudflare) o painel só funciona em HTTPS
+    const viaCloudflare = !!req.headers['cf-ray']
+    const proto = String(req.headers['x-forwarded-proto'] || '')
+    if (viaCloudflare && proto && proto !== 'https') {
+      return res.redirect(301, `https://${req.headers.host}${req.originalUrl}`)
+    }
+    if (proto === 'https') res.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
     res.set({
       'Content-Security-Policy': [
         "default-src 'self'",
