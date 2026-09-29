@@ -221,6 +221,10 @@ export const parseContent = (message: proto.IMessage | null | undefined): Parsed
     return { type: 'text',
       text: content.listResponseMessage?.title || '',
       meta }
+  case 'interactiveMessage':
+    return { type: 'text', text: content.interactiveMessage?.body?.text || '', meta }
+  case 'interactiveResponseMessage':
+    return { type: 'text', text: content.interactiveResponseMessage?.body?.text || '', meta }
   case 'eventMessage':
     return { type: 'text',
       text: `📅 ${content.eventMessage?.name || 'Evento'}`,

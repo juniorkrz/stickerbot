@@ -14,12 +14,12 @@ import { Router } from 'express'
 import fs from 'fs'
 import path from 'path'
 import Pino from 'pino'
-import Sticker from 'wa-sticker-formatter'
 
 import { getClient } from '../../bot'
 import { bot, panel, stickerMeta } from '../../config'
 import { panelChats, panelContacts, panelMessages, vips } from '../../db/schema'
 import { db, isUserBanned, pool } from '../../handlers/db'
+import { buildStickerMessage } from '../../handlers/stickerEncoder'
 import { getCachedGroupFetchAllParticipating, getFullCachedGroupMetadata, getPhoneFromJid } from '../../utils/baileysHelper'
 import { adminName } from '../auth'
 import { broadcast } from '../events'
@@ -370,9 +370,7 @@ chatsRouter.post('/:jid/media', h(async (req, res) => {
     mimetype: mimetype || 'audio/ogg; codecs=opus',
     ptt: true }; break
   case 'sticker': {
-    const sticker = new Sticker(buffer, { author: stickerMeta.author,
-      pack: stickerMeta.pack })
-    content = await sticker.toMessage()
+    content = await buildStickerMessage(buffer, { author: stickerMeta.author, pack: stickerMeta.pack })
     break
   }
   case 'document':

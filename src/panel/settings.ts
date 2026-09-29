@@ -186,7 +186,7 @@ export const configFields: ConfigField[] = [
     label: 'Access token do Mercado Pago',
     section: S.vip,
     type: 'secret',
-    restart: true,
+    help: 'Mercado Pago > Suas integrações > Credenciais de produção (começa com APP_USR-). Usado pelo !doar.',
     ...prop(bot, 'mpAccessToken')
   },
   {
@@ -195,6 +195,11 @@ export const configFields: ConfigField[] = [
     section: S.vip,
     type: 'secret',
     ...prop(bot, 'mpWebhookSecret')
+  },
+  {
+    key: 'bot.mpNotificationUrl', label: 'URL pública do webhook', section: S.vip, type: 'string',
+    ...prop(bot, 'mpNotificationUrl'),
+    help: 'Opcional. Endereço público que aponta para /api/mercadopago-webhook do bot. Sem ele, o bot confere os PIX pendentes a cada minuto.'
   },
 
   // Comunidade

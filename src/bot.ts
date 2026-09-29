@@ -11,7 +11,6 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys'
 import crypto from 'crypto'
 import express from 'express'
-import { MercadoPagoConfig, Payment } from 'mercadopago'
 import moment from 'moment'
 import Pino from 'pino'
 import { imageSync } from 'qr-image'
@@ -29,6 +28,7 @@ import {
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { handleEyesReply } from './handlers/viewOnce'
+import { initVipPayments, processPayment } from './handlers/vipPayments'
 import { attachMessageStore, loadPanelSettings, mountPanel, setConnectionState } from './panel'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
@@ -482,73 +482,39 @@ app.post('/api/webhook', (req, res) => {
   })
 })
 
-const mpConfig = new MercadoPagoConfig({ accessToken: bot.mpAccessToken })
-const mpPayment = new Payment(mpConfig)
-
 app.post('/api/mercadopago-webhook', async (req, res) => {
+  // Responde rápido (o MP exige 2xx) e processa em seguida
+  res.status(200).send('ok')
   try {
-    // If the secret is set, we must verify the signature
-    if (bot.mpWebhookSecret) {
-      const xSignature = req.headers['x-signature'] as string
-      const xRequestId = req.headers['x-request-id'] as string
+    // Webhooks novos mandam o id na query (data.id) e no corpo ({ type, data: { id } }); IPN antigo usa ?topic=&id=
+    const topic = String(req.query.type || req.query.topic || req.body?.type || req.body?.topic || '')
+    const id = String(req.query['data.id'] || req.body?.data?.id || req.query.id || '')
+    if (!topic.startsWith('payment') || !id) return
 
-      if (!xSignature) {
-        logger.warn('[VIP] MP Webhook received without x-signature header')
-        return res.status(401).send('Unauthorized')
-      }
-
-      // Extract ts and v1 from x-signature: "ts=...,v1=..."
-      const parts = xSignature.split(',')
+    // Assinatura: se veio e está errada, descarta. Se não veio (IPN), segue: o pagamento é sempre
+    // conferido direto na API do Mercado Pago, então um aviso falso não consegue liberar VIP.
+    const xSignature = req.headers['x-signature'] as string | undefined
+    if (bot.mpWebhookSecret && xSignature) {
       let ts = ''
       let v1 = ''
-      for (const part of parts) {
-        const [key, value] = part.split('=')
+      for (const part of xSignature.split(',')) {
+        const [key, value] = part.split('=').map(v => v.trim())
         if (key === 'ts') ts = value
         if (key === 'v1') v1 = value
       }
-
-      const id = req.query['data.id'] || req.query.id
-      // manifest: id:[id];request-id:[request-id];ts:[ts];
-      const manifest = `id:${id};request-id:${xRequestId};ts:${ts};`
-
-      const hmac = crypto.createHmac('sha256', bot.mpWebhookSecret)
-      hmac.update(manifest)
-      const digest = hmac.digest('hex')
-
+      const manifest = `id:${id.toLowerCase()};request-id:${req.headers['x-request-id'] || ''};ts:${ts};`
+      const digest = crypto.createHmac('sha256', bot.mpWebhookSecret).update(manifest).digest('hex')
       if (digest !== v1) {
-        logger.error(`[VIP] MP Webhook signature mismatch for ID ${id}!`)
-        return res.status(401).send('Unauthorized')
+        logger.error(`[VIP] Assinatura inválida no webhook do MP (pagamento ${id})`)
+        return
       }
     }
 
-    const topic = req.query.topic || req.query.type
-    const id = req.query['data.id'] || req.query.id
-
-    if (topic === 'payment' && id) {
-      const paymentInfo = await mpPayment.get({ id: id as string })
-      if (paymentInfo.status === 'approved') {
-        const amount = paymentInfo.transaction_amount || 0
-        const jid = paymentInfo.external_reference
-
-        if (jid && amount > 0 && bot.vipMonthlyPrice > 0) {
-          const months = amount / bot.vipMonthlyPrice
-          await addVip(jid, months)
-
-          const client = getClient()
-          await client.sendMessage(jid, {
-            text: `🎉 *Pagamento Aprovado!*\n\nRecebemos sua doação de R$ ${amount.toFixed(2)}.\nForam adicionados *${months.toFixed(1)}* meses ao seu status VIP! Obrigado pelo apoio 💜`
-          })
-          
-          logger.info(`[VIP] Processed MP payment of R$ ${amount.toFixed(2)} for ${jid} (${months.toFixed(1)} months added)`)
-        }
-      }
-    }
+    const result = await processPayment(id)
+    logger.info(`[VIP] Webhook do MP: pagamento ${id} -> ${result}`)
   } catch (error) {
     logger.error(`Error processing MP Webhook: ${error}`)
   }
-  
-  // MP requires a 2xx response quickly
-  res.status(200).send('ok')
 })
 
 const stickerBot = async () => {
@@ -557,6 +523,7 @@ const stickerBot = async () => {
   await checkForUpdates()
 
   await initializeDB()
+  await initVipPayments()
   await loadPanelSettings()
   await loadAdsConfig()
   await initializeEmojiMix()

@@ -65,6 +65,8 @@ export const bot = {
   ) || [],// TODO - Get from community?
   mpAccessToken: process.env.MERCADOPAGO_ACCESS_TOKEN?.replace(/"/g, '') || '',
   mpWebhookSecret: process.env.MERCADOPAGO_WEBHOOK_SECRET?.replace(/"/g, '') || '',
+  // URL pública do webhook (ex.: https://bot.seudominio.com/api/mercadopago-webhook). Vazio = só a checagem periódica
+  mpNotificationUrl: process.env.MERCADOPAGO_NOTIFICATION_URL || '',
   vipMonthlyPrice: parseFloat(process.env.VIP_MONTHLY_PRICE?.replace(/"/g, '') || '10.00'),
   dbHost: process.env.DB_HOST || 'localhost',
   dbUser: process.env.DB_USER || 'root',
