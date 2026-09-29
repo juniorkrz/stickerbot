@@ -397,7 +397,12 @@ const connectToWhatsApp = async () => {
         // get mimetype
         const mimetype = documentMessage.mimetype
         // get the file extension
-        const fileExtension = getExtensionFromMimetype(mimetype!)
+        // some apps send files as application/octet-stream: fall back to the file name extension
+        const nameExtension = documentMessage.fileName?.split('.').pop()?.toLowerCase()
+        const fileExtension = getExtensionFromMimetype(mimetype!) ||
+          (nameExtension && ['png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'webm'].includes(nameExtension)
+            ? nameExtension
+            : undefined)
 
         if (fileExtension) {
           const commandName = 'Doc as Sticker'
