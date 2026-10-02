@@ -1,13 +1,10 @@
-import { extractMessageContent, GroupMetadata } from '@whiskeysockets/baileys'
+import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
+import { getQuotedFromContext, relayViewOnce } from '../handlers/viewOnce'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
-import {
-  getQuotedMessage,
-  sendMessage,
-  viewOnceMessageRelay
-} from '../utils/baileysHelper'
+import { react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
 import { capitalize, spintax } from '../utils/misc'
 
@@ -24,7 +21,7 @@ export const command: StickerBotCommand = {
   desc: 'Mostra a imagem/vídeo/áudio mais uma vez.',
   example: undefined,
   needsPrefix: true,
-  inMaintenance: true,
+  inMaintenance: false,
   runInPrivate: true,
   runInGroups: true,
   onlyInBotGroup: false,
@@ -49,29 +46,11 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
-    // get quoted message
-    const quotedMsg = getQuotedMessage(message)
+    // get quoted message (key + content carried by the quote, if any)
+    const quotedMsg = getQuotedFromContext(message)
 
-    // get message content
-    const content = extractMessageContent(quotedMsg?.message)
-
-    // if you can't find the content, send an error message
-    if (!quotedMsg || !content) return await sendMessage(
-      {
-        text: spintax(
-          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não foi possível encontrar o conteúdo da mensagem,' +
-          ' {você|vc} deve citar uma mensagem de *visualização única*!'
-        )
-      },
-      message
-    )
-
-    // If media type is not allowed, send an error message
-    if (
-      !content?.imageMessage?.viewOnce &&
-      !content?.videoMessage?.viewOnce &&
-      !content?.audioMessage?.viewOnce
-    ) return await sendMessage(
+    // if there is no quote, send an error message
+    if (!quotedMsg) return await sendMessage(
       {
         text: spintax(
           `⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, {para|pra} {utilizar|usar} o comando *${alias}* ` +
@@ -81,14 +60,19 @@ export const command: StickerBotCommand = {
       message
     )
 
-    // send message
-    const result = await viewOnceMessageRelay(quotedMsg, content, jid)
+    await react(message, '⏳')
+
+    // resolve (quote, store or bot's phone), download and send
+    const result = await relayViewOnce(quotedMsg, jid).catch(() => false)
+
+    await react(message, result ? '✅' : '❌')
 
     // if something wrong, return an error message
     if (!result) return await sendMessage(
       {
         text: spintax(
-          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, algo deu errado ao enviar a mensagem.'
+          '⚠ {Ei|Ops|Opa|Desculpe|Foi mal}, não {consegui|foi possível} {recuperar|obter} essa mensagem. ' +
+          '{Verifique se|Confira se} {você|vc} respondeu a uma imagem/vídeo/áudio de *visualização única*.'
         )
       },
       message
