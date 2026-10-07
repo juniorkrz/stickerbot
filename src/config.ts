@@ -76,6 +76,8 @@ export const bot = {
   adsSystem: JSON.parse(process.env.SB_ADS_SYSTEM || 'false') as boolean,
   adsEvery: parseInt(process.env.SB_ADS_EVERY || '10'),
   adsChatCooldown: parseInt(process.env.SB_ADS_CHAT_COOLDOWN || '1800'),
+  // Horários (BRT) de auto-restart diário, separados por vírgula (ex.: '02:00' ou '02:00,14:00'). Vazio = desativado.
+  restartTimes: process.env.SB_RESTART_TIMES ?? '02:00',
   // Grupos silenciados: o bot ignora tudo que chega deles (configurável pelo painel)
   mutedGroups: process.env.SB_MUTED_GROUPS?.replaceAll(' ', '').split(';').filter(Boolean) || [] as string[]
 }

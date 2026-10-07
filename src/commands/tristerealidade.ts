@@ -1,9 +1,10 @@
 import { GroupMetadata, GroupParticipant, jidNormalizedUser, WAMessage } from '@whiskeysockets/baileys'
 import path from 'path'
 
-import { getClient, getStore } from '../bot'
+import { getClient } from '../bot'
 import { getLogger } from '../handlers/logger'
 import { generateSadReality, sadRealitySlots } from '../handlers/sadReality'
+import { getContactNames } from '../panel/messageStore'
 import { StickerBotCommand } from '../types/Command'
 import { getMentionedJids, getPhoneFromJid, react, sendMessage } from '../utils/baileysHelper'
 import { checkCommand } from '../utils/commandValidator'
@@ -121,12 +122,8 @@ export const command: StickerBotCommand = {
     }
 
     try {
-      // Nome = último pushName visto do membro nas mensagens recentes deste grupo
-      const names: Record<string, string> = {}
-      for (const m of getStore().messages[jid]?.array || []) {
-        const author = m.key.participant
-        if (author && m.pushName) names[jidNormalizedUser(author)] = m.pushName
-      }
+      const names = await getContactNames(chosen.flatMap(c => idsOf(c.participant)))
+        .catch(() => ({}) as Record<string, string>)
       const senderIds = [sender, message.key.participant, message.key.participantAlt]
         .filter((id): id is string => !!id)
         .map(id => jidNormalizedUser(id))

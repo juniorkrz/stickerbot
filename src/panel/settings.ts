@@ -96,6 +96,14 @@ export const configFields: ConfigField[] = [
     section: S.general,
     type: 'string',
     ...prop(bot, 'donationLink') },
+  {
+    key: 'bot.restartTimes',
+    label: 'Reinício automático diário',
+    section: S.general,
+    type: 'string',
+    ...prop(bot, 'restartTimes'),
+    help: 'Horários (BRT) separados por vírgula, ex.: 02:00,14:00. Vazio desativa.'
+  },
 
   // Figurinhas
   { key: 'sticker.author',

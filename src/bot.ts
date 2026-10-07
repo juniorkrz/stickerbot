@@ -32,6 +32,7 @@ import { initVipPayments, processPayment } from './handlers/vipPayments'
 import { attachMessageStore, loadPanelSettings, mountPanel, setConnectionState } from './panel'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
+import { scheduleAutoRestart } from './utils/autoRestart'
 import {
   amAdminOfGroup,
   checkBotAdminStatus,
@@ -555,6 +556,8 @@ const stickerBot = async () => {
   await initializeEmojiMix()
 
   connectToWhatsApp()
+
+  scheduleAutoRestart()
 
   const totalCommandsLoaded = getTotalCommandsLoaded()
   if (totalCommandsLoaded == 0) {
