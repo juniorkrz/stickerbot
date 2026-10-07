@@ -25,12 +25,12 @@ import { handleSenderParticipation } from './handlers/community'
 import { addVip, getAllBannedUsers, getVips, initializeDB, isUserBanned, senderIsVip } from './handlers/db'
 import { initializeEmojiMix } from './handlers/emojiMix'
 import { getLogger } from './handlers/logger'
-import { handleReactionMessage } from './handlers/reaction'
 import { handleLimitedSender } from './handlers/senderUsage'
 import {
   makeSticker
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
+import { handleEyesReply } from './handlers/viewOnce'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
@@ -289,11 +289,11 @@ const connectToWhatsApp = async () => {
         continue
       }
 
-      // Handle reaction message
-      if (message.message.reactionMessage) {
-        await handleReactionMessage(message, jid, group, sender, isBotAdmin, isVip)
-        continue
-      }
+      // Reactions are not processed
+      if (message.message.reactionMessage) continue
+
+      // Hidden command: reply 👀 to a view once message to receive it privately
+      if (await handleEyesReply(message, jid, group, sender, isBotAdmin, isVip)) continue
 
       // Handle simple text message
       // Body of message is different whether it's individual or group
