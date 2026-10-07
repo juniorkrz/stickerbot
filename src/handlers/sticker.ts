@@ -1,6 +1,5 @@
 import { downloadMediaMessage,WAMessage } from '@whiskeysockets/baileys'
 import { MakeStickerOptions } from 'types/Sticker'
-import Sticker from 'wa-sticker-formatter'
 
 import { externalEndpoints, stickerMeta } from '../config'
 import { getMediaMessage, react, sendMessage } from '../utils/baileysHelper'
@@ -11,6 +10,7 @@ import { deleteUploadedFile, uploadFile } from './fileUploader'
 import { getLogger } from './logger'
 import { getCustomMemeUrl } from './memegen'
 import { removeBackground } from './rembgApi'
+import { buildStickerMessage } from './stickerEncoder'
 
 const logger = getLogger()
 
@@ -107,8 +107,8 @@ export const makeSticker = async (
 
   try {
     // create and send sticker
-    const sticker = new Sticker(data, meta)
-    const result = await sendMessage(await sticker.toMessage(), message)
+    // encoder próprio: garante figurinha animada abaixo do limite de ~500 KB do WhatsApp
+    const result = await sendMessage(await buildStickerMessage(data, meta), message)
 
     // delete the upload if necessary
     if (uploadedFilename) await deleteUploadedFile(uploadedFilename)
@@ -123,6 +123,7 @@ export const makeSticker = async (
     return result
   }
   catch (error) {
+    logger.error(`Error creating sticker: ${error}`)
     // if something went wrong, react error
     await react(message, emojis.error)
     return

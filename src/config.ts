@@ -65,6 +65,8 @@ export const bot = {
   ) || [],// TODO - Get from community?
   mpAccessToken: process.env.MERCADOPAGO_ACCESS_TOKEN?.replace(/"/g, '') || '',
   mpWebhookSecret: process.env.MERCADOPAGO_WEBHOOK_SECRET?.replace(/"/g, '') || '',
+  // URL pública do webhook (ex.: https://bot.seudominio.com/api/mercadopago-webhook). Vazio = só a checagem periódica
+  mpNotificationUrl: process.env.MERCADOPAGO_NOTIFICATION_URL || '',
   vipMonthlyPrice: parseFloat(process.env.VIP_MONTHLY_PRICE?.replace(/"/g, '') || '10.00'),
   dbHost: process.env.DB_HOST || 'localhost',
   dbUser: process.env.DB_USER || 'root',
@@ -73,7 +75,26 @@ export const bot = {
   dbPort: parseInt(process.env.DB_PORT || '3306'),
   adsSystem: JSON.parse(process.env.SB_ADS_SYSTEM || 'false') as boolean,
   adsEvery: parseInt(process.env.SB_ADS_EVERY || '10'),
-  adsChatCooldown: parseInt(process.env.SB_ADS_CHAT_COOLDOWN || '1800')
+  adsChatCooldown: parseInt(process.env.SB_ADS_CHAT_COOLDOWN || '1800'),
+  // Grupos silenciados: o bot ignora tudo que chega deles (configurável pelo painel)
+  mutedGroups: process.env.SB_MUTED_GROUPS?.replaceAll(' ', '').split(';').filter(Boolean) || [] as string[]
+}
+
+// Painel de administração (/painel)
+export const panel = {
+  enabled: JSON.parse(process.env.SB_PANEL || 'true') as boolean,
+  // dias que as mensagens ficam guardadas no histórico das conversas
+  retentionDays: parseInt(process.env.SB_PANEL_RETENTION_DAYS || '15'),
+  // guardar também as mensagens dos grupos (senão só conversas privadas)
+  storeGroupMessages: JSON.parse(process.env.SB_PANEL_STORE_GROUPS || 'true') as boolean,
+  // assinar as mensagens enviadas pelo painel com o nome do admin
+  signature: JSON.parse(process.env.SB_PANEL_SIGNATURE || 'false') as boolean,
+  // validade do login, em dias
+  sessionDays: parseInt(process.env.SB_PANEL_SESSION_DAYS || '7'),
+  // dias que o log de uso (estatísticas) fica guardado
+  usageRetentionDays: parseInt(process.env.SB_PANEL_USAGE_RETENTION_DAYS || '180'),
+  // nomes de exibição dos admins no painel { telefone: nome }
+  adminNames: {} as Record<string, string>
 }
 
 // External APIs

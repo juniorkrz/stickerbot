@@ -1,5 +1,4 @@
 import { Boom } from '@hapi/boom'
-import crypto from 'crypto'
 import makeWASocket, {
   delay,
   DisconnectReason,
@@ -10,14 +9,12 @@ import makeWASocket, {
   WACallEvent,
   WACallUpdateType
 } from '@whiskeysockets/baileys'
+import crypto from 'crypto'
 import express from 'express'
-import { MercadoPagoConfig, Payment } from 'mercadopago'
 import moment from 'moment'
 import Pino from 'pino'
 import { imageSync } from 'qr-image'
 import qrcode from 'qrcode-terminal'
-
-import { makeInMemoryStore } from './utils/store'
 
 import { baileys, bot } from './config'
 import { loadAdsConfig } from './handlers/ads'
@@ -31,11 +28,12 @@ import {
 } from './handlers/sticker'
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { handleEyesReply } from './handlers/viewOnce'
+import { initVipPayments, processPayment } from './handlers/vipPayments'
+import { attachMessageStore, loadPanelSettings, mountPanel, setConnectionState } from './panel'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import {
   amAdminOfGroup,
-  isJidAdminOfGroup,
   checkBotAdminStatus,
   deleteMessage,
   extractCaptionsFromBodyOrCaption,
@@ -49,6 +47,7 @@ import {
   getStickerMessageFromContent,
   getVideoMessageFromContent,
   groupFetchAllParticipatingJids,
+  isJidAdminOfGroup,
   isMentioned,
   logAction,
   sendLogToAdmins,
@@ -63,14 +62,25 @@ import {
   getProjectHomepage,
   getProjectLocalVersion
 } from './utils/misc'
+import { makeInMemoryStore } from './utils/store'
 
 // get the logger
 const logger = getLogger()
 
 // create express webserver
 const app = express()
-app.use(express.json()) // for parsing application/json
-app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
+app.use(express.json({ limit: '80mb' })) // for parsing application/json (the panel uploads media as base64)
+app.use(express.urlencoded({ extended: true,
+  limit: '1mb' })) // for parsing application/x-www-form-urlencoded
+
+// Requests coming through Cloudflare (public tunnel) may only reach the panel and the Mercado Pago webhook.
+// /qr, /code and /api/* would let anyone pair a device with the bot or list its groups.
+app.use((req, res, next) => {
+  const viaCloudflare = !!req.headers['cf-ray'] || !!req.headers['cf-connecting-ip']
+  if (!viaCloudflare) return next()
+  if (req.path === '/painel' || req.path.startsWith('/painel/') || req.path === '/api/mercadopago-webhook') return next()
+  res.status(404).send('Not found')
+})
 
 // directories to be created
 const directories = {
@@ -158,10 +168,14 @@ const connectToWhatsApp = async () => {
 
   // will listen from this client
   store.bind(client.ev)
+  // conversation history for the admin panel
+  attachMessageStore(client.ev)
+  setConnectionState('connecting')
 
   client.ev.on('connection.update', (state) => {
     if (state.qr) {
       qr = state.qr
+      setConnectionState('connecting', qr)
       if (baileys.useQrCode) {
         qrcode.generate(qr, { small: true })
       }
@@ -171,6 +185,7 @@ const connectToWhatsApp = async () => {
   client.ev.on('connection.update', async (update) => {
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
+      setConnectionState('close')
       logger.warn(`${colors.green}[WA]${colors.yellow} Lost connection`)
       const isLogout =
         (lastDisconnect?.error as Boom)?.output?.statusCode !==
@@ -180,6 +195,7 @@ const connectToWhatsApp = async () => {
         connectToWhatsApp()
       }
     } else if (connection === 'open') {
+      setConnectionState('open')
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
       if (!dev) await setupBot()
       logger.info(`${bot.name} is ${colors.green}ready${colors.reset}!`)
@@ -249,6 +265,9 @@ const connectToWhatsApp = async () => {
       // Get the sender phone
       const phone = await getPhoneFromJid(sender)
 
+      // Muted groups (set in the panel): the bot ignores everything from them
+      if (isGroup && bot.mutedGroups.includes(jid)) continue
+
       // Response only to bot master
       if (dev && (bot.admins.length > 0 && phone !== bot.admins[0])) {
         logger.info(`[MASTER ONLY]: Skipping message from ${phone}`)
@@ -262,9 +281,10 @@ const connectToWhatsApp = async () => {
       // Is the Bot an admin of the group?
       const amAdmin = await amAdminOfGroup(group)
       // Is sender banned?
-      const isBanned = phone
-        ? await isUserBanned(phone)
-        : false
+      // (bans may be stored as @lid, as <phone>@s.whatsapp.net or just the phone)
+      const isBanned = await isUserBanned(
+        phone ? [sender, phone, `${phone}@s.whatsapp.net`] : [sender]
+      )
       // Is sender VIP?
       const isVip = await senderIsVip(sender)
 
@@ -386,7 +406,12 @@ const connectToWhatsApp = async () => {
         // get mimetype
         const mimetype = documentMessage.mimetype
         // get the file extension
-        const fileExtension = getExtensionFromMimetype(mimetype!)
+        // some apps send files as application/octet-stream: fall back to the file name extension
+        const nameExtension = documentMessage.fileName?.split('.').pop()?.toLowerCase()
+        const fileExtension = getExtensionFromMimetype(mimetype!) ||
+          (nameExtension && ['png', 'jpg', 'jpeg', 'gif', 'webp', 'mp4', 'mov', 'webm'].includes(nameExtension)
+            ? nameExtension
+            : undefined)
 
         if (fileExtension) {
           const commandName = 'Doc as Sticker'
@@ -471,73 +496,51 @@ app.post('/api/webhook', (req, res) => {
   })
 })
 
-const mpConfig = new MercadoPagoConfig({ accessToken: bot.mpAccessToken })
-const mpPayment = new Payment(mpConfig)
-
 app.post('/api/mercadopago-webhook', async (req, res) => {
+  // Responde rápido (o MP exige 2xx) e processa em seguida
+  res.status(200).send('ok')
   try {
-    // If the secret is set, we must verify the signature
-    if (bot.mpWebhookSecret) {
-      const xSignature = req.headers['x-signature'] as string
-      const xRequestId = req.headers['x-request-id'] as string
+    // Webhooks novos mandam o id na query (data.id) e no corpo ({ type, data: { id } }); IPN antigo usa ?topic=&id=
+    const topic = String(req.query.type || req.query.topic || req.body?.type || req.body?.topic || '')
+    const id = String(req.query['data.id'] || req.body?.data?.id || req.query.id || '')
+    if (!topic.startsWith('payment') || !id) return
 
-      if (!xSignature) {
-        logger.warn('[VIP] MP Webhook received without x-signature header')
-        return res.status(401).send('Unauthorized')
-      }
-
-      // Extract ts and v1 from x-signature: "ts=...,v1=..."
-      const parts = xSignature.split(',')
+    // Assinatura: se veio e está errada, descarta. Se não veio (IPN), segue: o pagamento é sempre
+    // conferido direto na API do Mercado Pago, então um aviso falso não consegue liberar VIP.
+    const xSignature = req.headers['x-signature'] as string | undefined
+    // O IPN antigo (?id=&topic=payment) chega junto com o webhook novo, mas a assinatura dele não segue o
+    // template oficial (só vale para ?data.id=&type=): não dá para validar, então só o webhook novo é conferido.
+    const legacyIpn = !!req.query.topic && !req.query['data.id']
+    if (bot.mpWebhookSecret && xSignature && !legacyIpn) {
       let ts = ''
       let v1 = ''
-      for (const part of parts) {
-        const [key, value] = part.split('=')
+      for (const part of xSignature.split(',')) {
+        const [key, value] = part.split('=').map(v => v.trim())
         if (key === 'ts') ts = value
         if (key === 'v1') v1 = value
       }
-
-      const id = req.query['data.id'] || req.query.id
-      // manifest: id:[id];request-id:[request-id];ts:[ts];
-      const manifest = `id:${id};request-id:${xRequestId};ts:${ts};`
-
-      const hmac = crypto.createHmac('sha256', bot.mpWebhookSecret)
-      hmac.update(manifest)
-      const digest = hmac.digest('hex')
-
-      if (digest !== v1) {
-        logger.error(`[VIP] MP Webhook signature mismatch for ID ${id}!`)
-        return res.status(401).send('Unauthorized')
+      // Template oficial: id:[data.id da URL];request-id:[x-request-id];ts:[ts];
+      // Cada parte só entra se existir (o aviso no formato antigo, ?id=&topic=, não tem data.id na URL)
+      const dataIdQuery = req.query['data.id'] ? String(req.query['data.id']) : ''
+      const requestId = req.headers['x-request-id'] ? String(req.headers['x-request-id']) : ''
+      const manifest = (dataIdQuery ? `id:${/^[a-z0-9]+$/i.test(dataIdQuery) ? dataIdQuery.toLowerCase() : dataIdQuery};` : '') +
+        (requestId ? `request-id:${requestId};` : '') +
+        `ts:${ts};`
+      const digest = crypto.createHmac('sha256', bot.mpWebhookSecret).update(manifest).digest('hex')
+      const valid = v1.length === digest.length && crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(v1))
+      if (!valid) {
+        logger.error(`[VIP] Assinatura inválida no webhook do MP (pagamento ${id}) — ` +
+          `query: ${Object.keys(req.query).join(',') || '-'}, data.id na URL: ${dataIdQuery ? 'sim' : 'não'}, ` +
+          `x-request-id: ${requestId ? 'sim' : 'não'}, ts: ${ts || '-'}`)
+        return
       }
     }
 
-    const topic = req.query.topic || req.query.type
-    const id = req.query['data.id'] || req.query.id
-
-    if (topic === 'payment' && id) {
-      const paymentInfo = await mpPayment.get({ id: id as string })
-      if (paymentInfo.status === 'approved') {
-        const amount = paymentInfo.transaction_amount || 0
-        const jid = paymentInfo.external_reference
-
-        if (jid && amount > 0 && bot.vipMonthlyPrice > 0) {
-          const months = amount / bot.vipMonthlyPrice
-          await addVip(jid, months)
-
-          const client = getClient()
-          await client.sendMessage(jid, {
-            text: `🎉 *Pagamento Aprovado!*\n\nRecebemos sua doação de R$ ${amount.toFixed(2)}.\nForam adicionados *${months.toFixed(1)}* meses ao seu status VIP! Obrigado pelo apoio 💜`
-          })
-          
-          logger.info(`[VIP] Processed MP payment of R$ ${amount.toFixed(2)} for ${jid} (${months.toFixed(1)} months added)`)
-        }
-      }
-    }
+    const result = await processPayment(id)
+    logger.info(`[VIP] Webhook do MP: pagamento ${id} -> ${result}`)
   } catch (error) {
     logger.error(`Error processing MP Webhook: ${error}`)
   }
-  
-  // MP requires a 2xx response quickly
-  res.status(200).send('ok')
 })
 
 const stickerBot = async () => {
@@ -546,6 +549,8 @@ const stickerBot = async () => {
   await checkForUpdates()
 
   await initializeDB()
+  await initVipPayments()
+  await loadPanelSettings()
   await loadAdsConfig()
   await initializeEmojiMix()
 
@@ -597,6 +602,8 @@ const stickerBot = async () => {
     logger.info(`${colors.green}[CALLS]${colors.reset} Refuse calls ${colors.red}disabled${colors.reset}, ` +
       'the bot does not reject calls.')
   }
+
+  mountPanel(app)
 
   const port = 3000
   app.listen(port, () => logger.info(`${colors.blue}[WS]${colors.reset} ` +

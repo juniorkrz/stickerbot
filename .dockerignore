@@ -6,3 +6,5 @@
 node_modules
 dist
 npm-debug.log
+panel/node_modules
+panel/dist

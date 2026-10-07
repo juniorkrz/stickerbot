@@ -2,7 +2,7 @@ import { GroupMetadata } from '@whiskeysockets/baileys'
 import path from 'path'
 
 import { bot } from '../config'
-import { getClient } from '../bot'
+import { isMercadoPagoConfigured } from '../handlers/vipPayments'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { sendMessage } from '../utils/baileysHelper'
@@ -54,50 +54,16 @@ export const command: StickerBotCommand = {
       `{Utilize|Use} a chave pix: ${bot.donationLink}|🤖 *{Colabore com qualquer valor! 💜|` +
       `Envie o que seu 💜 mandar!}*\n\nChave Pix: ${bot.donationLink}} (e-mail)\n\n ` +
       '⚠ *Importante:* para ser adicionado aos VIPs manualmente, envie seu DDD + número na descrição do pix.\n\n' +
-      `💡 *Dica:* Você também pode usar o comando *${chosenPrefix}doar* para gerar um PIX e ter seu VIP liberado automaticamente!\n\n` +
+      (isMercadoPagoConfigured()
+        ? `💡 *Dica:* Você também pode usar o comando *${chosenPrefix}doar* para gerar um PIX e ter seu VIP liberado automaticamente!\n\n`
+        : '') +
       `_Valores a partir de R$${bot.vipMonthlyPrice.toFixed(2).replace('.', ',')} serão adicionados aos VIPs por *30 dias*._\n\n` +
       `_Confira os benefícios VIPs digitando o comando *${chosenPrefix}vantagens*._`
 
-    const client = getClient()
-    const interactiveMessage = {
-      interactiveMessage: {
-        body: { text: spintax(response) },
-        footer: { text: `${bot.name} VIP System` },
-        nativeFlowMessage: {
-          buttons: [
-            {
-              name: 'cta_copy',
-              buttonParamsJson: JSON.stringify({
-                display_text: 'Copiar Chave PIX (E-mail)',
-                copy_code: bot.donationLink
-              })
-            }
-          ]
-        }
-      }
-    }
-
-    await client.relayMessage(jid, interactiveMessage, {
-      messageId: message.key.id + 'PIX',
-      additionalNodes: [
-        {
-          tag: 'biz',
-          attrs: {},
-          content: [
-            {
-              tag: 'interactive',
-              attrs: { type: 'native_flow', v: '1' },
-              content: [
-                {
-                  tag: 'native_flow',
-                  attrs: { v: '9', name: 'mixed' }
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    })
+    // Texto simples (sem botão): mensagens interativas não chegam de forma confiável em contas comuns do WhatsApp
+    await sendMessage({ text: spintax(response) }, message)
+    // chave sozinha numa mensagem, fácil de copiar segurando
+    await sendMessage({ text: bot.donationLink }, message, false)
     return undefined
   }
 }

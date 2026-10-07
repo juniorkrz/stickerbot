@@ -1,14 +1,13 @@
 import path from 'path'
-import { GroupMetadata, prepareWAMessageMedia, proto } from '@whiskeysockets/baileys'
-import { MercadoPagoConfig, Payment } from 'mercadopago'
-import { getClient } from '../bot'
+import { GroupMetadata, jidEncode } from '@whiskeysockets/baileys'
 
 import { bot } from '../config'
 import { StickerBotCommand } from '../types/Command'
 import { WAMessageExtended } from '../types/Message'
 import { checkCommand } from '../utils/commandValidator'
 import { getLogger } from '../handlers/logger'
-import { sendMessage, react } from '../utils/baileysHelper'
+import { createVipPix, isMercadoPagoConfigured } from '../handlers/vipPayments'
+import { getPhoneFromJid, react, sendMessage } from '../utils/baileysHelper'
 import { capitalize, spintax, getRandomItemFromArray } from '../utils/misc'
 import { emojis } from '../utils/emojis'
 
@@ -50,126 +49,59 @@ export const command: StickerBotCommand = {
     const check = await checkCommand(jid, message, alias, group, isBotAdmin, isVip, isGroupAdmin, amAdmin, command)
     if (!check) return
 
+    if (!isMercadoPagoConfigured()) {
+      logger.warn('[VIP] !doar usado, mas o access token do Mercado Pago não está configurado')
+      return await sendMessage({
+        text: '⚠ O PIX automático está indisponível no momento. Use o comando *!pix* para doar pela chave.'
+      }, message)
+    }
+
     try {
-      const params = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(`^${alias}\\s*`, 'i'), '').trim()
-      const args = params.split(' ')
+      const params = body.slice(command.needsPrefix ? 1 : 0).replace(new RegExp(`^${alias}\s*`, 'i'), '').trim()
+      const args = params.split(/\s+/).filter(Boolean)
 
       if (args.length < 4) {
         await react(message, getRandomItemFromArray(emojis.confused))
         return await sendMessage({
-          text: spintax('⚠ {Ei|Ops|Opa}, você precisa informar o valor, email, nome e sobrenome.\n\n*Exemplo:* `!donate 15 email@teste.com João Silva`')
+          text: spintax('⚠ {Ei|Ops|Opa}, você precisa informar o valor, e-mail, nome e sobrenome.\n\n' +
+            `*Exemplo:* \`!${alias} ${bot.vipMonthlyPrice.toFixed(0)} email@exemplo.com João Silva\``)
         }, message)
       }
 
-      // Parse params
-      const valueStr = args[0].replace(',', '.')
-      const amount = parseFloat(valueStr)
-      if (isNaN(amount) || amount <= 0) {
-        return await sendMessage({ text: '⚠ O valor informado é inválido.' }, message)
+      const amount = parseFloat(args[0].replace('R$', '').replace(',', '.'))
+      if (isNaN(amount) || amount < 1) {
+        return await sendMessage({ text: '⚠ O valor informado é inválido (mínimo R$ 1,00).' }, message)
       }
 
       const email = args[1]
-      const firstName = args[2]
-      const lastName = args.slice(3).join(' ')
-
-      if (!email.includes('@')) {
-        return await sendMessage({ text: '⚠ O email informado é inválido.' }, message)
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return await sendMessage({ text: '⚠ O e-mail informado é inválido.' }, message)
       }
 
       await react(message, getRandomItemFromArray(emojis.wait))
 
-      const mpConfig = new MercadoPagoConfig({ accessToken: bot.mpAccessToken })
-      const mpPayment = new Payment(mpConfig)
+      // VIP vai para o número (estável); se não der para descobrir, usa o id do remetente
+      const phone = await getPhoneFromJid(sender)
+      const vipJid = phone ? jidEncode(phone, 's.whatsapp.net') : sender
+      const pix = await createVipPix(vipJid, amount, { email, firstName: args[2], lastName: args.slice(3).join(' ') })
 
-      const paymentResponse = await mpPayment.create({
-        body: {
-          transaction_amount: amount,
-          description: `StickerBot VIP Donation - ${sender}`,
-          payment_method_id: 'pix',
-          payer: {
-            email: email,
-            first_name: firstName,
-            last_name: lastName
-          },
-          external_reference: sender // We use the sender JID as external_reference to identify who paid
-        }
-      })
+      const months = amount / bot.vipMonthlyPrice
+      const durationText = months >= 1
+        ? `Isso adicionará *${months.toFixed(1).replace('.', ',')}* ${months < 2 ? 'mês' : 'meses'} de VIP à sua conta!`
+        : 'Isso adicionará uma fração de mês de VIP à sua conta!'
 
-      const qrCodeBase64 = paymentResponse.point_of_interaction?.transaction_data?.qr_code_base64
-      const qrCodeText = paymentResponse.point_of_interaction?.transaction_data?.qr_code
-
-      if (!qrCodeBase64 || !qrCodeText) {
-        throw new Error('QR Code data missing from MP response.')
-      }
-
-      const projectedMonths = amount / bot.vipMonthlyPrice
-      let durationText = ''
-      if (projectedMonths >= 1) {
-        durationText = `Isso adicionará *${projectedMonths.toFixed(1)}* meses de VIP à sua conta!`
-      } else {
-        durationText = `Isso adicionará uma fração de mês de VIP à sua conta!`
-      }
-
-      // Send the interactive message with Copy Button
-      const client = getClient()
-      const img = await prepareWAMessageMedia(
-        { image: Buffer.from(qrCodeBase64, 'base64') },
-        { upload: client.waUploadToServer }
-      )
-
-      const interactiveMessage = {
-        interactiveMessage: {
-          header: { 
-            hasMediaAttachment: true, 
-            imageMessage: img.imageMessage,
-            title: 'StickerBot VIP',
-            subtitle: 'Pagamento via PIX'
-          },
-          body: { 
-            text: `💜 *StickerBot VIP - Doação*\n\n` +
-              `*Valor:* R$ ${amount.toFixed(2)}\n\n` +
-              `Leia o QR Code acima no app do seu banco ou utilize o botão copiar abaixo.\n\n` +
-              `${durationText}\n\n` +
-              `O bot confirmará automaticamente quando o pagamento for aprovado!` 
-          },
-          footer: { text: `${bot.name} VIP System` },
-          nativeFlowMessage: {
-            buttons: [
-              {
-                name: 'cta_copy',
-                buttonParamsJson: JSON.stringify({
-                  display_text: 'Copiar Chave PIX',
-                  copy_code: qrCodeText
-                })
-              }
-            ]
-          }
-        }
-      }
-
-      await client.relayMessage(jid, interactiveMessage, {
-        messageId: message.key.id + 'MP',
-        additionalNodes: [
-          {
-            tag: 'biz',
-            attrs: {},
-            content: [
-              {
-                tag: 'interactive',
-                attrs: { type: 'native_flow', v: '1' },
-                content: [
-                  {
-                    tag: 'native_flow',
-                    attrs: { v: '9', name: 'mixed' }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      })
-      return undefined
-
+      // Sem botões: o WhatsApp não entrega mensagens interativas de forma confiável para contas comuns.
+      // QR na imagem + código "copia e cola" sozinho numa mensagem (fácil de copiar segurando).
+      await sendMessage({
+        image: Buffer.from(pix.qrCodeBase64, 'base64'),
+        caption: `💜 *${bot.name} VIP - Doação*\n\n` +
+          `*Valor:* R$ ${amount.toFixed(2).replace('.', ',')}\n` +
+          `${durationText}\n\n` +
+          'Leia o QR Code no app do seu banco ou copie o código *PIX copia e cola* da próxima mensagem.\n\n' +
+          '✅ O VIP é liberado automaticamente assim que o pagamento for aprovado (normalmente em até 1 minuto).'
+      }, message)
+      await react(message, getRandomItemFromArray(emojis.success))
+      return await sendMessage({ text: pix.qrCode }, message, false)
     } catch (error) {
       logger.error(`Error in ${commandName}: ${error}`)
       await react(message, emojis.error)
