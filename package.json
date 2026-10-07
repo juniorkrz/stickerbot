@@ -34,6 +34,7 @@
   "homepage": "https://github.com/juniorkrz/stickerbot#readme",
   "dependencies": {
     "@hapi/boom": "^10.0.1",
+    "@napi-rs/canvas": "^1.0.10",
     "@vitalets/google-translate-api": "^9.2.0",
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "compare-versions": "^6.1.1",
