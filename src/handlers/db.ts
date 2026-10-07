@@ -240,11 +240,15 @@ export const getVips = async (getPermanent: boolean = true) => {
   }))
 }
 
-export const senderIsVip = async (sender: string): Promise<boolean> => {
+export const senderIsVip = async (sender: string, phone?: string): Promise<boolean> => {
   try {
+    // Sender may arrive as @lid while VIPs are stored as <phone>@s.whatsapp.net
+    const jids = [sender]
+    if (phone) jids.push(`${phone}@s.whatsapp.net`)
+
     const result = await db.select({ expires: vips.expires })
       .from(vips)
-      .where(sql`${vips.jid} = ${sender} AND (${vips.expires} >= CURRENT_TIMESTAMP OR ${vips.permanent} = 1)`)
+      .where(sql`${vips.jid} IN (${sql.join(jids.map(j => sql`${j}`), sql`, `)}) AND (${vips.expires} >= CURRENT_TIMESTAMP OR ${vips.permanent} = 1)`)
     
     return result.length > 0
   } catch (error) {

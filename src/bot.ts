@@ -286,7 +286,7 @@ const connectToWhatsApp = async () => {
         phone ? [sender, phone, `${phone}@s.whatsapp.net`] : [sender]
       )
       // Is sender VIP?
-      const isVip = await senderIsVip(sender)
+      const isVip = await senderIsVip(sender, phone)
 
       // Message local timestamp
       message.messageLocalTimestamp = Date.now()
