@@ -1,5 +1,4 @@
 import { WAMessage } from '@whiskeysockets/baileys'
-import Sticker from 'wa-sticker-formatter'
 
 import { stickerMeta } from '../config'
 import { react, sendMessage } from '../utils/baileysHelper'
@@ -7,6 +6,7 @@ import { emojis } from '../utils/emojis'
 import { spintax } from '../utils/misc'
 import { renderThemedTtp, TtpTheme } from './legacyMemes'
 import { getLogger } from './logger'
+import { buildStickerMessage } from './stickerEncoder'
 
 const logger = getLogger()
 
@@ -38,7 +38,7 @@ export const sendThemedTtp = async (message: WAMessage, alias: string, text: str
 
   try {
     const image = await renderThemedTtp(text, theme)
-    return await sendMessage(await new Sticker(image, stickerMeta).toMessage(), message)
+    return await sendMessage(await buildStickerMessage(image, stickerMeta), message)
   } catch (error) {
     logger.error(`Error creating themed ttp: ${error}`)
     return await react(message, emojis.error)
