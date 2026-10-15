@@ -7,7 +7,7 @@ export interface PanelUser {
 export type ConnectionStatus = 'connecting' | 'open' | 'close'
 
 export interface SystemStatus {
-  connection: { status: ConnectionStatus, since: number, hasQr: boolean }
+  connection: { status: ConnectionStatus, since: number, hasQr: boolean, hasPairingCode: boolean, reason?: string }
   me: { id: string, name: string, phone: string } | null
   bot: { name: string, version: string, commands: number }
   startedAt: number

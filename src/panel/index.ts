@@ -24,7 +24,7 @@ import { statsRouter } from './routes/stats'
 import { systemRouter } from './routes/system'
 import { h } from './routes/util'
 
-export { setConnectionState } from './events'
+export { clearConnectionAuth, setConnectionState, setPairingCode } from './events'
 export { attachMessageStore } from './messageStore'
 export { loadPanelSettings } from './settings'
 

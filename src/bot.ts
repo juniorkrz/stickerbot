@@ -11,6 +11,7 @@ import makeWASocket, {
 } from '@whiskeysockets/baileys'
 import crypto from 'crypto'
 import express from 'express'
+import fs from 'fs'
 import moment from 'moment'
 import Pino from 'pino'
 import { imageSync } from 'qr-image'
@@ -29,7 +30,14 @@ import {
 import { getTotalCommandsLoaded, handleText } from './handlers/text'
 import { handleEyesReply } from './handlers/viewOnce'
 import { initVipPayments, processPayment } from './handlers/vipPayments'
-import { attachMessageStore, loadPanelSettings, mountPanel, setConnectionState } from './panel'
+import {
+  attachMessageStore,
+  clearConnectionAuth,
+  loadPanelSettings,
+  mountPanel,
+  setConnectionState,
+  setPairingCode
+} from './panel'
 import { WAMessageExtended } from './types/Message'
 import { drawHeader } from './utils/art'
 import { scheduleAutoRestart } from './utils/autoRestart'
@@ -150,51 +158,108 @@ export const botStartedAt = (): moment.Moment => {
   return startedAt
 }
 
-const connectToWhatsApp = async () => {
-  const { state, saveCreds } = await useMultiFileAuthState(directories.creds)
-  const { version, isLatest } = await fetchLatestBaileysVersion()
+// phone that receives a pairing code instead of a QR code (SB_PHONE_NUMBER with SB_USE_QR_CODE=false, or the panel)
+let pairingPhone: string | undefined = !baileys.useQrCode && baileys.phoneNumber
+  ? baileys.phoneNumber.replaceAll(/[^0-9]/g, '')
+  : undefined
+// bumped on every session reset; events from older sockets are ignored
+let socketGeneration = 0
 
-  client = makeWASocket({
+// moves the credentials away so the next connection starts a new session (QR code / pairing code)
+const discardCredentials = async () => {
+  const backup = `${directories.creds}.old`
+  await fs.promises.rm(backup, { recursive: true,
+    force: true })
+  await fs.promises.rename(directories.creds, backup).catch(() => undefined)
+  await createDirectoryIfNotExists(directories.creds)
+  qr = undefined
+  pairingCode = undefined
+}
+
+// panel: disconnects the current device, discards the session and starts a new one
+export const resetWhatsAppSession = async (mode: 'qr' | 'code', phone?: string) => {
+  pairingPhone = mode === 'code' ? phone : undefined
+  socketGeneration++
+  const old = client
+  if (old) {
+    if (old.user) await old.logout().catch(() => undefined)
+    else old.end(undefined)
+  }
+  await discardCredentials()
+  clearConnectionAuth()
+  const how = mode === 'code' ? `pairing code for ${phone}` : 'QR code'
+  logger.warn(`${colors.green}[WA]${colors.yellow} Session reset (${how})`)
+  await connectToWhatsApp()
+}
+
+const connectToWhatsApp = async () => {
+  const generation = socketGeneration
+  const isCurrent = () => generation === socketGeneration
+  const { state, saveCreds } = await useMultiFileAuthState(directories.creds)
+  const { version } = await fetchLatestBaileysVersion()
+  if (!isCurrent()) return
+
+  const sock = makeWASocket({
     version,
     auth: state,
     /* eslint-disable-next-line  @typescript-eslint/no-explicit-any */
     logger: Pino({ level: 'silent' }) as any
   })
-
-  if (!baileys.useQrCode && !client.authState.creds.registered && baileys.phoneNumber) {
-    await delay(2000)
-    pairingCode = await client.requestPairingCode(baileys.phoneNumber.replaceAll(/[^0-9]/g, ''))
-    logger.info(`Pairing code: ${pairingCode}`)
-  }
+  client = sock
+  let pairingRequested = false
+  let loggedOut = false
 
   // will listen from this client
-  store.bind(client.ev)
+  store.bind(sock.ev)
   // conversation history for the admin panel
-  attachMessageStore(client.ev)
+  attachMessageStore(sock.ev)
   setConnectionState('connecting')
 
-  client.ev.on('connection.update', (state) => {
-    if (state.qr) {
-      qr = state.qr
-      setConnectionState('connecting', qr)
-      if (baileys.useQrCode) {
-        qrcode.generate(qr, { small: true })
-      }
-    }
+  sock.ev.on('creds.update', async () => {
+    // a logged out / replaced session must not recreate the discarded files
+    if (isCurrent() && !loggedOut) await saveCreds()
   })
-  client.ev.on('creds.update', saveCreds)
-  client.ev.on('connection.update', async (update) => {
+
+  sock.ev.on('connection.update', async (update) => {
+    if (!isCurrent() || !update.qr) return
+    qr = update.qr
+    if (pairingPhone && !sock.authState.creds.registered) {
+      if (pairingRequested) return
+      pairingRequested = true
+      try {
+        pairingCode = await sock.requestPairingCode(pairingPhone)
+        logger.info(`${colors.green}[WA]${colors.reset} Pairing code for ${pairingPhone}: ${pairingCode}`)
+        setPairingCode(pairingCode)
+      } catch (error) {
+        pairingRequested = false
+        logger.error(`${colors.green}[WA]${colors.reset} Error requesting pairing code: ${error}`)
+      }
+      return
+    }
+    setConnectionState('connecting', qr)
+    if (baileys.useQrCode) qrcode.generate(qr, { small: true })
+  })
+
+  sock.ev.on('connection.update', async (update) => {
+    if (!isCurrent()) return
     const { connection, lastDisconnect } = update
     if (connection === 'close') {
-      setConnectionState('close')
-      logger.warn(`${colors.green}[WA]${colors.yellow} Lost connection`)
-      const isLogout =
-        (lastDisconnect?.error as Boom)?.output?.statusCode !==
-        DisconnectReason.loggedOut
-      if (isLogout) {
-        logger.info(`${colors.green}[WA]${colors.reset} Reconnecting...`)
-        connectToWhatsApp()
+      const error = lastDisconnect?.error as Boom | undefined
+      const statusCode = error?.output?.statusCode
+      const reason = `${statusCode ?? '?'}: ${error?.message ?? 'unknown'}`
+      logger.warn(`${colors.green}[WA]${colors.yellow} Lost connection (${reason})`)
+      if (statusCode === DisconnectReason.loggedOut) {
+        // the phone removed this device: the credentials are dead, start over so a new QR / code shows up
+        loggedOut = true
+        logger.warn(`${colors.green}[WA]${colors.yellow} Logged out by WhatsApp, discarding the session`)
+        await discardCredentials()
+        clearConnectionAuth('O WhatsApp desconectou o aparelho. Conecte de novo pelo QR Code ou pelo código.')
       }
+      setConnectionState('close')
+      if (!isCurrent()) return
+      logger.info(`${colors.green}[WA]${colors.reset} Reconnecting...`)
+      await delay(statusCode === DisconnectReason.restartRequired ? 0 : 3000)
+      if (isCurrent()) connectToWhatsApp()
     } else if (connection === 'open') {
       setConnectionState('open')
       logger.info(`${colors.green}[WA]${colors.reset} Opened connection`)
@@ -206,10 +271,10 @@ const connectToWhatsApp = async () => {
     }
   })
 
-  /* client.ev.on('group-participants.update', async (event) => {}) */
+  /* sock.ev.on('group-participants.update', async (event) => {}) */
 
   // Refuse calls
-  client.ev.on('call', async (call: WACallEvent[]) => {
+  sock.ev.on('call', async (call: WACallEvent[]) => {
     if (bot.refuseCalls) {
       const callFrom: string = call[0].chatId
       const callStatus: WACallUpdateType = call[0].status
@@ -223,7 +288,7 @@ const connectToWhatsApp = async () => {
   })
 
   // Receive and process messages
-  client.ev.on('messages.upsert', async (event) => {
+  sock.ev.on('messages.upsert', async (event) => {
     // Skip messages received while offline, if specified
     if (
       inWarmup &&

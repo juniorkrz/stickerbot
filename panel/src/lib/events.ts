@@ -12,7 +12,13 @@ let source: EventSource | undefined
 const EVENT_TYPES = ['message', 'message-update', 'chat', 'connection']
 
 // estado: o stream está conectado? e o WhatsApp?
-let state = { stream: false, whatsapp: 'connecting' as ConnectionStatus, hasQr: false }
+let state = {
+  stream: false,
+  whatsapp: 'connecting' as ConnectionStatus,
+  hasQr: false,
+  hasPairingCode: false,
+  reason: undefined as string | undefined
+}
 const stateListeners = new Set<() => void>()
 const setState = (patch: Partial<typeof state>) => {
   state = { ...state, ...patch }
@@ -33,8 +39,8 @@ export const startEvents = () => {
         return
       }
       if (type === 'connection') {
-        const c = data as { status: ConnectionStatus, hasQr: boolean }
-        setState({ whatsapp: c.status, hasQr: c.hasQr })
+        const c = data as { status: ConnectionStatus, hasQr: boolean, hasPairingCode: boolean, reason?: string }
+        setState({ whatsapp: c.status, hasQr: c.hasQr, hasPairingCode: !!c.hasPairingCode, reason: c.reason })
       }
       handlers.get(type)?.forEach(h => h(data))
     })

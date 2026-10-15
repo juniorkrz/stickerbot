@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { LogOut, Monitor, Pause, Play, RotateCw, Smartphone, Trash2 } from 'lucide-react'
+import { KeyRound, LogOut, Monitor, Pause, Play, QrCode, RefreshCcw, RotateCw, Smartphone, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { Badge, Button, Card, Loading, Page, PageHeader, SearchInput, Tabs, useUi } from '../components/ui'
+import { Badge, Button, Card, Field, Input, Loading, Modal, Page, PageHeader, SearchInput, Spinner, Tabs, useUi } from '../components/ui'
 import { API_BASE, del, get, post } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { useLiveState } from '../lib/events'
@@ -133,11 +133,67 @@ const Sessions = () => {
   )
 }
 
+type PairMode = 'qr' | 'code'
+
+// Renovar a sessão do WhatsApp: desconecta o aparelho atual, apaga a sessão e gera QR Code ou código de pareamento
+const RenewSession = ({ open, onClose, defaultPhone }: { open: boolean, onClose: () => void, defaultPhone?: string }) => {
+  const { toast } = useUi()
+  const [mode, setMode] = useState<PairMode>('qr')
+  const [phone, setPhone] = useState(defaultPhone ?? '')
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    if (open && defaultPhone) setPhone(p => p || defaultPhone)
+  }, [open, defaultPhone])
+
+  const submit = async () => {
+    setBusy(true)
+    await post('/system/session/reset', { mode, phone }).then(() => {
+      toast(mode === 'code' ? 'Sessão renovada. Gerando o código...' : 'Sessão renovada. Gerando o QR Code...', 'info')
+      onClose()
+    }, e => toast(e.message, 'error'))
+    setBusy(false)
+  }
+
+  return (
+    <Modal open={open} onClose={onClose} title="Renovar sessão do WhatsApp" size="sm"
+      footer={<>
+        <Button variant="ghost" onClick={onClose}>Cancelar</Button>
+        <Button variant="danger" loading={busy} icon={<RefreshCcw className="size-4" />}
+          disabled={mode === 'code' && phone.replace(/\D/g, '').length < 10} onClick={submit}>Renovar</Button>
+      </>}>
+      <div className="space-y-4">
+        <p className="text-sm text-text-2">
+          Desconecta o aparelho atual (se ainda estiver conectado), apaga a sessão salva e começa uma nova.
+          O bot fica offline até você conectar de novo.
+        </p>
+        <Tabs<PairMode> value={mode} onChange={setMode} items={[
+          { value: 'qr', label: <span className="flex items-center gap-1.5"><QrCode className="size-4" /> QR Code</span> },
+          { value: 'code', label: <span className="flex items-center gap-1.5"><KeyRound className="size-4" /> Código</span> }
+        ]} />
+        {mode === 'code' && (
+          <Field label="Número do WhatsApp do bot" help="Com DDI e DDD, só números. Ex.: 5581999999999">
+            <Input inputMode="numeric" value={phone} onChange={e => setPhone(e.target.value)} placeholder="5581999999999" />
+          </Field>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
+const PairingCode = ({ refreshKey }: { refreshKey: number }) => {
+  const code = useQuery({ queryKey: ['pairing-code', refreshKey], queryFn: () => get<{ code: string }>('/system/pairing-code'),
+    retry: false })
+  if (!code.data) return <Spinner className="mx-auto" />
+  const c = code.data.code
+  return <div className="font-mono text-3xl font-semibold tracking-[0.2em] select-all">{c.slice(0, 4)}-{c.slice(4)}</div>
+}
+
 export default function SystemPage() {
   const { user } = useAuth()
   const { toast, confirm } = useUi()
   const live = useLiveState()
   const [qrKey, setQrKey] = useState(0)
+  const [renewOpen, setRenewOpen] = useState(false)
   const status = useQuery({ queryKey: ['system-status'], queryFn: () => get<SystemStatus>('/system/status'), refetchInterval: 10_000 })
 
   useEffect(() => {
@@ -166,12 +222,31 @@ export default function SystemPage() {
               <span className="text-sm text-text-3">desde {formatDateTime(s.connection.since)}</span>
             </div>
             {s.me && <div className="mt-2 text-sm text-text-2">{s.me.name} · {formatPhone(s.me.phone)}</div>}
-            {live.whatsapp !== 'open' && live.hasQr && (
+            {live.whatsapp !== 'open' && live.reason && <p className="mt-2 text-sm text-warning">{live.reason}</p>}
+            {live.whatsapp !== 'open' && user?.isOwner && (live.hasPairingCode ? (
+              <div className="mt-4 text-center">
+                <PairingCode refreshKey={qrKey} />
+                <p className="mt-2 text-xs text-text-3">
+                  No celular do bot: WhatsApp › Aparelhos conectados › Conectar aparelho › Conectar com número de telefone
+                </p>
+              </div>
+            ) : live.hasQr ? (
               <div className="mt-4 text-center">
                 <img key={qrKey} src={`${API_BASE}/system/qr?k=${qrKey}`} alt="QR Code" className="mx-auto w-56 rounded-lg bg-white p-2" />
                 <p className="mt-2 text-xs text-text-3">No celular do bot: WhatsApp › Aparelhos conectados › Conectar aparelho</p>
               </div>
+            ) : (
+              <div className="mt-4 flex items-center justify-center gap-2 text-sm text-text-3">
+                <Spinner className="size-4" /> Aguardando o WhatsApp...
+              </div>
+            ))}
+            {user?.isOwner && (
+              <Button size="sm" variant="outline" className="mt-4 w-full" icon={<RefreshCcw className="size-4" />}
+                onClick={() => setRenewOpen(true)}>
+                Renovar sessão
+              </Button>
             )}
+            <RenewSession open={renewOpen} onClose={() => setRenewOpen(false)} defaultPhone={s.me?.phone} />
           </Card>
           <Card title="Bot">
             <dl className="space-y-2 text-sm">
